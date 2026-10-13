@@ -8,7 +8,8 @@ import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:material_ui/material_ui.dart';
 
-const appName = 'FlClash';
+const appName = 'Flasho';
+const appInstallationName = 'FlClash';
 const appHelperService = 'FlClashHelperService';
 const coreManifestName = 'manifest.json';
 const coreName = 'clash.meta';

@@ -45,6 +45,13 @@ part 'scripts.dart';
 class Database extends _$Database {
   Database([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
+  List<String> _initialRules = const [];
+
+  Future<void> initializeNewInstallationRules(List<String> initialRules) async {
+    _initialRules = List.unmodifiable(initialRules);
+    await customSelect('SELECT 1').get();
+  }
+
   @override
   int get schemaVersion => 10;
 
@@ -58,6 +65,20 @@ class Database extends _$Database {
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
+      onCreate: (m) => transaction(() async {
+        await m.createAll();
+        if (_initialRules.isEmpty) {
+          return;
+        }
+        final rules = _initialRules.map(Rule.parse).toList();
+        await batch((b) {
+          rulesDao.mergeWithBatch(
+            b,
+            rules,
+            rules.map((rule) => ProfileRuleLink(ruleId: rule.id)),
+          );
+        });
+      }),
       onUpgrade: (m, from, to) async {
         if (from < 2) {
           await m.createTable(proxyGroups);

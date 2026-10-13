@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="assets/images/icon.png" alt="FlClash" width="88">
+<img src="assets/images/icon.png" alt="Flasho" width="88">
 
-# FlClash
+# Flasho
 
-A multi-platform proxy client based on ClashMeta. Simple to use, open source and ad-free.
+A multi-platform proxy client based on FlClash and ClashMeta. Simple to use, open source and ad-free.
 
 **English** · [简体中文](README_zh_CN.md)
 

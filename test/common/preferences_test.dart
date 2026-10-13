@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:fl_clash/common/boot_record.dart';
@@ -26,6 +27,40 @@ void main() {
   setUp(() async {
     store = await SharedPreferences.getInstance();
     await store.clear();
+  });
+
+  group('new installation', () {
+    test('an available empty store is a new installation', () async {
+      expect(await preferences.isNewInstallation, isTrue);
+    });
+
+    test('a stored zero version is an existing installation', () async {
+      await preferences.setVersion(0);
+
+      expect(await preferences.isNewInstallation, isFalse);
+    });
+
+    test('a malformed saved config is not a new installation', () async {
+      await store.setString(configKey, 'invalid-json');
+
+      expect(await preferences.isNewInstallation, isFalse);
+    });
+
+    test('a legacy Clash config is not a new installation', () async {
+      await store.setString(clashConfigKey, '{}');
+
+      expect(await preferences.isNewInstallation, isFalse);
+    });
+
+    test('an unavailable store does not enable defaults', () async {
+      final previous = preferences.sharedPreferencesCompleter;
+      preferences.sharedPreferencesCompleter = Completer()..complete(null);
+      try {
+        expect(await preferences.isNewInstallation, isFalse);
+      } finally {
+        preferences.sharedPreferencesCompleter = previous;
+      }
+    });
   });
 
   group('version', () {

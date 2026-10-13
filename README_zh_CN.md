@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="assets/images/icon.png" alt="FlClash" width="88">
+<img src="assets/images/icon.png" alt="Flasho" width="88">
 
-# FlClash
+# Flasho
 
-基于 ClashMeta 的多平台代理客户端，简单易用，开源无广告。
+基于 FlClash 和 ClashMeta 的多平台代理客户端，简单易用，开源无广告。
 
 [English](README.md) · **简体中文**
 
