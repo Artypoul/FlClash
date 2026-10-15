@@ -1,9 +1,9 @@
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/connection/requests.dart';
-import 'package:fl_clash/views/dashboard/widgets/requests.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/database.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/connection/requests.dart';
+import 'package:flashco/views/dashboard/widgets/requests.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

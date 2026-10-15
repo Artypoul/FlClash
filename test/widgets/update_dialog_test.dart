@@ -1,7 +1,7 @@
-import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/state.dart';
+import 'package:flashco/providers/action.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/config.dart';
+import 'package:flashco/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,12 +20,12 @@ const _payload =
     '"Override scripts"}]}]}]}';
 
 const _bulletsOnly =
-    '<!-- flclash:changelog:begin -->\n'
+    '<!-- flashco:changelog:begin -->\n'
     '- Override scripts\n'
-    '<!-- flclash:changelog:end -->\n';
+    '<!-- flashco:changelog:end -->\n';
 
 String _bodyWith(String payload) =>
-    '$_bulletsOnly\n<!-- flclash:changelog:json\n$payload\n-->\n';
+    '$_bulletsOnly\n<!-- flashco:changelog:json\n$payload\n-->\n';
 
 Map<String, dynamic> release(String? body) => <String, dynamic>{
   'tag_name': 'v0.8.96',
@@ -67,7 +67,7 @@ void main() {
   setUpAll(() {
     globalState.packageInfo = PackageInfo(
       appName: 'Flashco',
-      packageName: 'com.follow.clash',
+      packageName: 'com.follow.flashco',
       version: _runningVersion,
       buildNumber: '1',
     );

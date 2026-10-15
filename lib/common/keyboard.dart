@@ -1,4 +1,4 @@
-import 'package:fl_clash/enum/enum.dart';
+import 'package:flashco/enum/enum.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 

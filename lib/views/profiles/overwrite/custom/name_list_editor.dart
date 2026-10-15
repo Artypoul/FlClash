@@ -1,10 +1,10 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/features/overwrite/overwrite.dart';
-import 'package:fl_clash/models/models.dart' hide FileInfo;
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/features/overwrite/overwrite.dart';
+import 'package:flashco/models/models.dart' hide FileInfo;
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/providers/providers.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

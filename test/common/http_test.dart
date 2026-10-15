@@ -1,11 +1,11 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/common/http.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
+import 'package:flashco/common/constant.dart';
+import 'package:flashco/common/http.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/config.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 

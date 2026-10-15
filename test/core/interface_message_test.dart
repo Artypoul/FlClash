@@ -1,8 +1,8 @@
-import 'package:fl_clash/core/desktop/model.dart';
-import 'package:fl_clash/core/interface.dart';
-import 'package:fl_clash/core/method.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:flashco/core/desktop/model.dart';
+import 'package:flashco/core/interface.dart';
+import 'package:flashco/core/method.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
 import 'package:test/test.dart';
 
 class _SilentCore extends CoreHandlerInterface {

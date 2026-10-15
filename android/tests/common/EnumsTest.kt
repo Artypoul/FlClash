@@ -1,4 +1,4 @@
-package com.follow.clash.common
+package com.follow.flashco.common
 
 import com.google.gson.Gson
 import org.junit.Assert.assertEquals

@@ -1,11 +1,11 @@
 script_template: inno_setup.iss
-app_id: 728B3532-C74B-4870-9068-BE70FE12A3E6
-app_name: FlClash
-publisher: chen08209
-publisher_url: https://github.com/chen08209/FlClash
+app_id: 2E1E050C-79CA-52FB-82C4-52FDC3F5D780
+app_name: Flashco
+publisher: Artypoul
+publisher_url: https://github.com/Artypoul/Flashco
 display_name: Flashco
-executable_name: FlClash.exe
-output_base_file_name: FlClash.exe
+executable_name: Flashco.exe
+output_base_file_name: Flashco.exe
 # Resolved against the project root: flutter_distributor turns this into an
 # absolute path via Directory.current.
 setup_icon_file: windows\runner\resources\app_icon.ico

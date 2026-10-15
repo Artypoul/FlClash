@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/tray.dart';
-import 'package:fl_clash/common/window.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/state.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/common/tray.dart';
+import 'package:flashco/common/window.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/providers/action.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tray/tray.dart';

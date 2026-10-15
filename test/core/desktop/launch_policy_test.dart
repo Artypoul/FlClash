@@ -1,8 +1,8 @@
 import 'dart:io';
 
-import 'package:fl_clash/core/desktop/helper_client.dart';
-import 'package:fl_clash/core/desktop/launch_policy.dart';
-import 'package:fl_clash/core/desktop/model.dart';
+import 'package:flashco/core/desktop/helper_client.dart';
+import 'package:flashco/core/desktop/launch_policy.dart';
+import 'package:flashco/core/desktop/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -38,7 +38,7 @@ void main() {
   });
 
   test('reads the OS error from a direct launch failure', () {
-    const error = ProcessException('FlClashCore.exe', [], 'refused', 225);
+    const error = ProcessException('FlashcoCore.exe', [], 'refused', 225);
 
     expect(launchOsError(error), 225);
     expect(isPolicyBlockedLaunch(error), isTrue);
@@ -49,7 +49,7 @@ void main() {
       code: 'start_failed',
       phase: DesktopCorePhase.starting,
       revision: 1,
-      cause: ProcessException('FlClashCore.exe', [], 'refused', 577),
+      cause: ProcessException('FlashcoCore.exe', [], 'refused', 577),
     );
 
     expect(launchOsError(failure), 577);
@@ -59,7 +59,7 @@ void main() {
   test('a missing file or a plain crash is not a policy block', () {
     expect(
       isPolicyBlockedLaunch(
-        const ProcessException('FlClashCore.exe', [], 'not found', 2),
+        const ProcessException('FlashcoCore.exe', [], 'not found', 2),
       ),
       isFalse,
     );

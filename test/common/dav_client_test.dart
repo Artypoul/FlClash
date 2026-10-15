@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/dav_client.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/common/dav_client.dart';
+import 'package:flashco/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
@@ -275,8 +275,8 @@ void main() {
       await buildClient().upload(archive.path);
 
       expect(server.requests.map((item) => item.method), ['MKCOL', 'PUT']);
-      expect(server.requests.last.path, '/FlClash/backup.zip');
-      expect(server.files['/FlClash/backup.zip'], archive.readAsBytesSync());
+      expect(server.requests.last.path, '/Flashco/backup.zip');
+      expect(server.files['/Flashco/backup.zip'], archive.readAsBytesSync());
     });
 
     test('a base path prefixes every request', () async {
@@ -296,7 +296,7 @@ void main() {
 
     test('download writes the remote archive to the given path', () async {
       final payload = List<int>.generate(64, (index) => index);
-      server.files['/FlClash/backup.zip'] = payload;
+      server.files['/Flashco/backup.zip'] = payload;
       final target = join(root.path, 'download.zip');
 
       await buildClient().download(target);

@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:fl_clash/widgets/drag_back.dart';
-import 'package:fl_clash/widgets/keyboard_inset_hold.dart';
+import 'package:flashco/widgets/drag_back.dart';
+import 'package:flashco/widgets/keyboard_inset_hold.dart';
 
 typedef CloseContainerActionCallback<S> = void Function({S? returnValue});
 typedef OpenContainerBuilder<S> =

@@ -133,7 +133,7 @@
     if (!release) return [];
     return buildsFor(platform, arch)
       .map((build) => {
-        const name = `FlClash-${release.version}-${build.id}`;
+        const name = `Flashco-${release.version}-${build.id}`;
         const asset = release.assets ? release.assets.get(name) : null;
         if (release.assets && !asset) return null;
         return {
@@ -402,7 +402,7 @@
             'tipIntentTitle',
             'tipIntent',
             commandBlock(
-              ['com.follow.clash.action.START', 'com.follow.clash.action.STOP', 'com.follow.clash.action.TOGGLE'].join(
+              ['com.follow.flashco.action.START', 'com.follow.flashco.action.STOP', 'com.follow.flashco.action.TOGGLE'].join(
                 '\n',
               ),
             ),
@@ -752,7 +752,7 @@
       syncShot();
       field?.refresh();
       try {
-        localStorage.setItem('flclash.theme', next);
+        localStorage.setItem('flashco.theme', next);
       } catch {}
     };
     if (!document.startViewTransition || reducedMotion.matches) {
@@ -771,7 +771,7 @@
 
   function rememberLang(lang) {
     try {
-      localStorage.setItem('flclash.lang', lang);
+      localStorage.setItem('flashco.lang', lang);
     } catch {}
   }
 

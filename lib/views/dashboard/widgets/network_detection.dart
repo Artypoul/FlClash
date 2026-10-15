@@ -1,14 +1,14 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/service_probe.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/features/features.dart';
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/providers/outbound_ip.dart';
-import 'package:fl_clash/providers/routed_probe.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/dashboard/probe_start_hold.dart';
-import 'package:fl_clash/views/dashboard/widget_metrics.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/common/service_probe.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/features/features.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/providers/outbound_ip.dart';
+import 'package:flashco/providers/routed_probe.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/dashboard/probe_start_hold.dart';
+import 'package:flashco/views/dashboard/widget_metrics.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

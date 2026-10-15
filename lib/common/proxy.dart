@@ -1,5 +1,5 @@
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/common/system.dart';
+import 'package:flashco/common/constant.dart';
+import 'package:flashco/common/system.dart';
 import 'package:proxy/proxy.dart';
 
 final proxy = system.isDesktop && !safeModeBuild ? Proxy() : null;

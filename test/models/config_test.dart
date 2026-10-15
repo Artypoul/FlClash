@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:test/test.dart';
 
@@ -20,9 +20,9 @@ T roundTrip<T>(
 void main() {
   group('TUN upgrade compatibility', () {
     test('keeps the existing device name when settings omit it', () {
-      expect(const Tun().device, 'FlClash');
-      expect(Tun.fromJson({}).device, 'FlClash');
-      expect(Tun.safeFormJson(null).device, 'FlClash');
+      expect(const Tun().device, 'Flashco');
+      expect(Tun.fromJson({}).device, 'Flashco');
+      expect(Tun.safeFormJson(null).device, 'Flashco');
     });
 
     test('preserves saved and custom device names', () {

@@ -1,6 +1,6 @@
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/views/dashboard/widgets/widgets.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/views/dashboard/widgets/widgets.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 extension DashboardWidgetView on DashboardWidget {

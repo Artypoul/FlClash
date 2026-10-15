@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/core.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/core.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:yaml/yaml.dart';
 

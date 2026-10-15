@@ -3,20 +3,20 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:fl_clash/common/request.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/features/overwrite/overwrite.dart';
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/pages/editor.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/about.dart';
-import 'package:fl_clash/views/config/scripts.dart';
-import 'package:fl_clash/views/profiles/overwrite/standard.dart';
-import 'package:fl_clash/views/proxies/setting.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/common/request.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/features/overwrite/overwrite.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/l10n/l10n.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/pages/editor.dart';
+import 'package:flashco/providers/providers.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/about.dart';
+import 'package:flashco/views/config/scripts.dart';
+import 'package:flashco/views/profiles/overwrite/standard.dart';
+import 'package:flashco/views/proxies/setting.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -132,7 +132,7 @@ void main() {
     // populates.
     globalState.packageInfo = PackageInfo(
       appName: 'Flashco',
-      packageName: 'com.follow.clash',
+      packageName: 'com.follow.flashco',
       version: '0.0.0',
       buildNumber: '1',
     );

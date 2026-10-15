@@ -1,12 +1,12 @@
 import 'dart:async';
 
 import 'package:code_forge/code_forge.dart';
-import 'package:fl_clash/common/navigator.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/pages/editor.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/widgets/popup.dart';
+import 'package:flashco/common/navigator.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/pages/editor.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/widgets/popup.dart';
 import 'package:flutter/gestures.dart' show kSecondaryButton;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

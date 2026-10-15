@@ -2,9 +2,9 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
-import 'package:fl_clash/common/default_rules.dart';
-import 'package:fl_clash/database/database.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:flashco/common/default_rules.dart';
+import 'package:flashco/database/database.dart';
+import 'package:flashco/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqlite3/sqlite3.dart' as sqlite;
 

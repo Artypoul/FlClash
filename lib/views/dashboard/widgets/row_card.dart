@@ -1,9 +1,9 @@
 import 'dart:math';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/dashboard/widget_metrics.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/dashboard/widget_metrics.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 
 const _rowGap = 8.0;

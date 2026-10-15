@@ -1,12 +1,12 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/manager/status_manager.dart';
-import 'package:fl_clash/models/state.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/widgets/inherited.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
-import 'package:fl_clash/widgets/sheet.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/l10n/l10n.dart';
+import 'package:flashco/manager/status_manager.dart';
+import 'package:flashco/models/state.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/widgets/inherited.dart';
+import 'package:flashco/widgets/scaffold.dart';
+import 'package:flashco/widgets/sheet.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

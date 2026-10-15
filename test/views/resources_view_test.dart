@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/resources.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/resources.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,7 +25,7 @@ void main() {
   final cacheDirectory = AppPath.cacheDirectory;
 
   setUpAll(() async {
-    home = Directory.systemTemp.createTempSync('flclash-resources-');
+    home = Directory.systemTemp.createTempSync('flashco-resources-');
     AppPath.supportDirectory = () async => home;
     AppPath.temporaryDirectory = () async => home;
     AppPath.cacheDirectory = () async => home;

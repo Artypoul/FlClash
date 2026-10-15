@@ -1,9 +1,9 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/widgets/fade_box.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/widgets/fade_box.dart';
 import 'package:material_new_shapes/material_new_shapes.dart';
 import 'package:material_ui/material_ui.dart';
 

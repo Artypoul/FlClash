@@ -1,9 +1,9 @@
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/proxies/list.dart';
-import 'package:fl_clash/widgets/widgets.dart' hide ListHeader;
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/providers.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/proxies/list.dart';
+import 'package:flashco/widgets/widgets.dart' hide ListHeader;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

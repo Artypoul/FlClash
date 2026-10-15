@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/app_localizations.dart';
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/pages/scan.dart';
-import 'package:fl_clash/widgets/activate_box.dart';
-import 'package:fl_clash/widgets/null_status.dart';
+import 'package:flashco/common/app_localizations.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/pages/scan.dart';
+import 'package:flashco/widgets/activate_box.dart';
+import 'package:flashco/widgets/null_status.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

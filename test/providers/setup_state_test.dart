@@ -1,10 +1,10 @@
 import 'package:drift/native.dart';
-import 'package:fl_clash/common/feature.dart';
-import 'package:fl_clash/database/database.dart' as db;
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/providers/state.dart';
+import 'package:flashco/common/feature.dart';
+import 'package:flashco/database/database.dart' as db;
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/database.dart';
+import 'package:flashco/providers/state.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

@@ -11,7 +11,7 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Flashco">
   <meta property="og:description" content="A multi-platform proxy client based on Clash Meta (mihomo). Simple to use, open source and ad-free.">
-  <meta property="og:image" content="https://chen08209.github.io/FlClash/preview.png">
+  <meta property="og:image" content="https://artypoul.github.io/Flashco/preview.png">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.png">
@@ -22,9 +22,9 @@
       var page = root.dataset.pageLang;
       var lang = null;
       try {
-        var theme = localStorage.getItem('flclash.theme');
+        var theme = localStorage.getItem('flashco.theme');
         if (theme === 'light' || theme === 'dark') root.dataset.theme = theme;
-        lang = localStorage.getItem('flclash.lang');
+        lang = localStorage.getItem('flashco.lang');
       } catch (e) {}
       if (page === 'zh') return;
       if (lang !== 'zh' && lang !== 'en') {
@@ -62,7 +62,7 @@
         <a href="#changelog" data-i18n="navChangelog">Changelog</a>
       </nav>
       <div class="nav-tools" data-ink>
-        <a class="tool gh" href="https://github.com/chen08209/FlClash" id="gh-link" aria-label="Upstream GitHub">
+        <a class="tool gh" href="https://github.com/Artypoul/Flashco" id="gh-link" aria-label="Flashco GitHub">
           <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path fill="currentColor" d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-1.96c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.58.23 2.75.11 3.04.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.68.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
           <span id="stars" class="stars" hidden></span>
         </a>
@@ -132,10 +132,10 @@
           <p class="kicker" aria-hidden="true"><span class="cap"></span>01</p>
           <h2 id="download-title" data-i18n="dlTitle">Upstream downloads</h2>
           <p class="section-sub" id="dl-meta"></p>
-          <p class="rail-text" data-i18n="dlLead">These links provide upstream FlClash builds. Build Flashco from its source checkout.</p>
+          <p class="rail-text" data-i18n="dlLead">Download Flashco releases, or build Flashco from its source checkout when no release is available.</p>
           <p class="rail-links">
-            <a id="sums-link" href="https://github.com/chen08209/FlClash/releases/latest">SHA256SUMS</a>
-            <a href="https://github.com/chen08209/FlClash/releases" data-i18n="dlAll">All upstream releases on GitHub</a>
+            <a id="sums-link" href="https://github.com/Artypoul/Flashco/releases/latest">SHA256SUMS</a>
+            <a href="https://github.com/Artypoul/Flashco/releases" data-i18n="dlAll">All releases on GitHub</a>
           </p>
         </div>
         <div class="dl">
@@ -195,12 +195,12 @@
       </svg>
       <div>
         <p class="foot-name">Flashco</p>
-        <p class="foot-text"><span data-i18n="footLicense">Free and open source under GPL-3.0.</span> <span data-i18n="footUpdated">Download and community links point to upstream FlClash.</span></p>
+        <p class="foot-text"><span data-i18n="footLicense">Free and open source under GPL-3.0.</span> <span data-i18n="footUpdated">Downloads use Flashco releases. Community links refer to upstream FlClash.</span></p>
       </div>
     </div>
     <nav class="foot-links" aria-label="Links">
-      <a href="https://github.com/chen08209/FlClash">Upstream GitHub</a>
-      <a href="https://github.com/chen08209/FlClash/releases" data-i18n="footReleases">Upstream releases</a>
+      <a href="https://github.com/Artypoul/Flashco">Flashco GitHub</a>
+      <a href="https://github.com/Artypoul/Flashco/releases" data-i18n="footReleases">Releases</a>
       <a href="https://t.me/FlClash" data-i18n="footTelegram">Upstream Telegram</a>
     </nav>
   </footer>

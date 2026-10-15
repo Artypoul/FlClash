@@ -1,15 +1,15 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/permission.dart';
-import 'package:fl_clash/common/system_dns.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/animated_visibility.dart';
-import 'package:fl_clash/widgets/icon.dart';
-import 'package:fl_clash/widgets/sidebar.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/common/permission.dart';
+import 'package:flashco/common/system_dns.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/providers.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/widgets/animated_visibility.dart';
+import 'package:flashco/widgets/icon.dart';
+import 'package:flashco/widgets/sidebar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

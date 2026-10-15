@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/common/preferences.dart';
-import 'package:fl_clash/common/print.dart';
-import 'package:fl_clash/common/system.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:flashco/common/constant.dart';
+import 'package:flashco/common/preferences.dart';
+import 'package:flashco/common/print.dart';
+import 'package:flashco/common/system.dart';
+import 'package:flashco/enum/enum.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 
 class SystemDnsRecord {

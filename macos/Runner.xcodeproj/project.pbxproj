@@ -29,7 +29,7 @@
 		33CC11132044BFA00003C045 /* MainFlutterWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33CC11122044BFA00003C045 /* MainFlutterWindow.swift */; };
 		78A318202AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage in Frameworks */ = {isa = PBXBuildFile; productRef = 78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */; };
 		F5131FDD2EF0F1A500A1748D /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = F5131FDC2EF0F1A500A1748D /* LaunchAtLogin */; };
-		F51BB7CB2EF0267400E05D67 /* FlClashCore in Copy Core */ = {isa = PBXBuildFile; fileRef = F51BB7CA2EF0267400E05D67 /* FlClashCore */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		F51BB7CB2EF0267400E05D67 /* FlashcoCore in Copy Core */ = {isa = PBXBuildFile; fileRef = F51BB7CA2EF0267400E05D67 /* FlashcoCore */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,7 +66,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 6;
 			files = (
-				F51BB7CB2EF0267400E05D67 /* FlClashCore in Copy Core */,
+				F51BB7CB2EF0267400E05D67 /* FlashcoCore in Copy Core */,
 			);
 			name = "Copy Core";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -78,7 +78,7 @@
 		331C80D7294CF71000263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		333000ED22D3DE5D00554162 /* Warnings.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Warnings.xcconfig; sourceTree = "<group>"; };
 		335BBD1A22A9A15E00E9071D /* GeneratedPluginRegistrant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratedPluginRegistrant.swift; sourceTree = "<group>"; };
-		33CC10ED2044A3C60003C045 /* FlClash.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FlClash.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		33CC10ED2044A3C60003C045 /* Flashco.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Flashco.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		33CC10F02044A3C60003C045 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		33CC10F22044A3C60003C045 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Assets.xcassets; path = Runner/Assets.xcassets; sourceTree = "<group>"; };
 		33CC10F52044A3C60003C045 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
@@ -93,7 +93,7 @@
 		78E0A7A72DC9AD7400C4905E /* FlutterGeneratedPluginSwiftPackage */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = FlutterGeneratedPluginSwiftPackage; path = ephemeral/Packages/FlutterGeneratedPluginSwiftPackage; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
-		F51BB7CA2EF0267400E05D67 /* FlClashCore */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlClashCore; sourceTree = BUILT_PRODUCTS_DIR; };
+		F51BB7CA2EF0267400E05D67 /* FlashcoCore */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.executable"; path = FlashcoCore; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,7 +138,7 @@
 		33CC10E42044A3C60003C045 = {
 			isa = PBXGroup;
 			children = (
-				F51BB7CA2EF0267400E05D67 /* FlClashCore */,
+				F51BB7CA2EF0267400E05D67 /* FlashcoCore */,
 				33FAB671232836740065AC1E /* Runner */,
 				33CEB47122A05771004F2AC0 /* Flutter */,
 				331C80D6294CF71000263BE5 /* RunnerTests */,
@@ -149,7 +149,7 @@
 		33CC10EE2044A3C60003C045 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				33CC10ED2044A3C60003C045 /* FlClash.app */,
+				33CC10ED2044A3C60003C045 /* Flashco.app */,
 				331C80D5294CF71000263BE5 /* RunnerTests.xctest */,
 			);
 			name = Products;
@@ -234,7 +234,7 @@
 				78A3181F2AECB46A00862997 /* FlutterGeneratedPluginSwiftPackage */,
 			);
 			productName = Runner;
-			productReference = 33CC10ED2044A3C60003C045 /* FlClash.app */;
+			productReference = 33CC10ED2044A3C60003C045 /* Flashco.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -364,11 +364,11 @@
 			outputFileListPaths = (
 			);
 			outputPaths = (
-				"$(BUILT_PRODUCTS_DIR)/FlClashCore",
+				"$(BUILT_PRODUCTS_DIR)/FlashcoCore",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "core=\"$SRCROOT/../libclash/macos/FlClashCore\"\nif [ ! -f \"$core\" ]; then\n  echo \"error: $core is missing; the setup build hook produced no Core\"\n  exit 1\nfi\nslices=\"$(lipo -archs \"$core\")\"\nfor arch in $ARCHS; do\n  case \" $slices \" in\n    *\" $arch \"*) ;;\n    *) echo \"error: $core has no $arch slice (has: $slices)\"; exit 1 ;;\n  esac\ndone\nif ! cmp -s \"$core\" \"$BUILT_PRODUCTS_DIR/FlClashCore\"; then\n  cp -f \"$core\" \"$BUILT_PRODUCTS_DIR/FlClashCore\"\nfi\n";
+			shellScript = "core=\"$SRCROOT/../libclash/macos/FlashcoCore\"\nif [ ! -f \"$core\" ]; then\n  echo \"error: $core is missing; the setup build hook produced no Core\"\n  exit 1\nfi\nslices=\"$(lipo -archs \"$core\")\"\nfor arch in $ARCHS; do\n  case \" $slices \" in\n    *\" $arch \"*) ;;\n    *) echo \"error: $core has no $arch slice (has: $slices)\"; exit 1 ;;\n  esac\ndone\nif ! cmp -s \"$core\" \"$BUILT_PRODUCTS_DIR/FlashcoCore\"; then\n  cp -f \"$core\" \"$BUILT_PRODUCTS_DIR/FlashcoCore\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -426,10 +426,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flClash.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flashco.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/fl_clash.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/fl_clash";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flashco.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Flashco";
 			};
 			name = Debug;
 		};
@@ -440,10 +440,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flClash.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flashco.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/fl_clash.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/fl_clash";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flashco.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Flashco";
 			};
 			name = Release;
 		};
@@ -454,10 +454,10 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flClash.RunnerTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flashco.RunnerTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/fl_clash.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/fl_clash";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Flashco.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Flashco";
 			};
 			name = Profile;
 		};
@@ -521,7 +521,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = FlClash;
+				INFOPLIST_KEY_CFBundleDisplayName = Flashco;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -655,13 +655,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = FlClash;
+				INFOPLIST_KEY_CFBundleDisplayName = Flashco;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.follow.clash.debug;
+				PRODUCT_BUNDLE_IDENTIFIER = com.follow.flashco.debug;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -678,7 +678,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = FlClash;
+				INFOPLIST_KEY_CFBundleDisplayName = Flashco;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",

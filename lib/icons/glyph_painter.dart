@@ -1,6 +1,6 @@
 import 'dart:ui' show lerpDouble;
 
-import 'package:fl_clash/icons/glyph.dart';
+import 'package:flashco/icons/glyph.dart';
 import 'package:material_ui/material_ui.dart';
 
 const _grid = Rect.fromLTWH(0, 0, Glyph.size, Glyph.size);

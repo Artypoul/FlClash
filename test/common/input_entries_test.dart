@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/input_entries.dart';
+import 'package:flashco/common/input_entries.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

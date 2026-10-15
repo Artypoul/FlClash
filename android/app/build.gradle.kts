@@ -1,12 +1,31 @@
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
     id("com.android.application")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services")
-    id("com.google.firebase.crashlytics")
+    id("com.google.gms.google-services") apply false
+    id("com.google.firebase.crashlytics") apply false
+}
+
+val firebaseConfigFile = file("google-services.json")
+val firebasePackages = if (firebaseConfigFile.isFile) {
+    val config = JsonSlurper().parse(firebaseConfigFile) as? Map<*, *>
+    (config?.get("client") as? List<*>)?.mapNotNull { client ->
+        val info = (client as? Map<*, *>)?.get("client_info") as? Map<*, *>
+        val androidInfo = info?.get("android_client_info") as? Map<*, *>
+        androidInfo?.get("package_name") as? String
+    }?.toSet().orEmpty()
+} else {
+    emptySet()
+}
+val hasFirebaseConfig = setOf("com.follow.flashco", "com.follow.flashco.dev")
+    .all { it in firebasePackages }
+if (hasFirebaseConfig) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 val localProperties = Properties().apply {
@@ -26,7 +45,7 @@ val hasReleaseSigning = releaseStoreFile.exists() &&
     releaseKeyPassword != null
 
 android {
-    namespace = "com.follow.clash"
+    namespace = "com.follow.flashco"
     compileSdk = libs.versions.compileSdk.get().toInt()
     ndkVersion = libs.versions.ndkVersion.get()
 
@@ -36,7 +55,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.follow.clash"
+        applicationId = "com.follow.flashco"
         minSdk = flutter.minSdkVersion
         targetSdk = libs.versions.targetSdk.get().toInt()
         versionCode = flutter.versionCode
@@ -81,8 +100,10 @@ android {
                 "proguard-rules.pro",
             )
 
-            configure<CrashlyticsExtension> {
-                nativeSymbolUploadEnabled = hasReleaseSigning
+            if (hasFirebaseConfig) {
+                configure<CrashlyticsExtension> {
+                    nativeSymbolUploadEnabled = hasReleaseSigning
+                }
             }
         }
     }
@@ -104,7 +125,7 @@ flutter {
 }
 
 // The Crashlytics plugin finalizes R8 with the mapping upload but leaves the native symbol upload to the caller.
-if (hasReleaseSigning) {
+if (hasReleaseSigning && hasFirebaseConfig) {
     tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }.configureEach {
         finalizedBy("uploadCrashlyticsSymbolFileRelease")
     }

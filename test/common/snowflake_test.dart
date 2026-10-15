@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/snowflake.dart';
+import 'package:flashco/common/snowflake.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/paged_sheet.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
-import 'package:fl_clash/widgets/sheet.dart';
-import 'package:fl_clash/widgets/sheet_header.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/widgets/paged_sheet.dart';
+import 'package:flashco/widgets/scaffold.dart';
+import 'package:flashco/widgets/sheet.dart';
+import 'package:flashco/widgets/sheet_header.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

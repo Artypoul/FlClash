@@ -1,14 +1,14 @@
 import 'dart:math';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/config/dns.dart';
-import 'package:fl_clash/views/config/network.dart';
-import 'package:fl_clash/views/config/ntp.dart';
-import 'package:fl_clash/views/dashboard/widget_metrics.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/providers/providers.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/config/dns.dart';
+import 'package:flashco/views/config/network.dart';
+import 'package:flashco/views/config/ntp.dart';
+import 'package:flashco/views/dashboard/widget_metrics.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

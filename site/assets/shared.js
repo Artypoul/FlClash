@@ -1,7 +1,7 @@
 globalThis.FlashcoSite = (() => {
   'use strict';
 
-  const REPO = 'https://github.com/chen08209/FlClash';
+  const REPO = 'https://github.com/Artypoul/Flashco';
   const FIRST_PAGE = 6;
   const MAX_STAGGER = 16;
   const TYPE_BY_TITLE = {
@@ -46,8 +46,8 @@ globalThis.FlashcoSite = (() => {
       fact4: 'Licensed under GPL-3.0, with no ads.',
       dlTitle: 'Upstream downloads',
       dlMeta: (v, d) => `Upstream version ${v} · Released ${d}`,
-      dlLead: 'These links provide upstream FlClash builds. Build Flashco from its source checkout.',
-      dlAll: 'All upstream releases on GitHub',
+      dlLead: 'Download Flashco releases, or build Flashco from its source checkout when no release is available.',
+      dlAll: 'All releases on GitHub',
       dlError: 'Upstream release details could not be loaded. Use upstream GitHub Releases.',
       platformLabel: 'Platform',
       archLabel: 'Architecture',
@@ -100,8 +100,8 @@ globalThis.FlashcoSite = (() => {
       typePerf: 'Performance',
       typeRevert: 'Reverts',
       footLicense: 'Free and open source under GPL-3.0.',
-      footUpdated: 'Download and community links point to upstream FlClash.',
-      footReleases: 'Upstream releases',
+      footUpdated: 'Downloads use Flashco releases. Community links refer to upstream FlClash.',
+      footReleases: 'Releases',
       footTelegram: 'Upstream Telegram',
       stars: (n) => `${n} stars on upstream GitHub`,
     },
@@ -135,7 +135,7 @@ globalThis.FlashcoSite = (() => {
       fact4: '以 GPL-3.0 协议开源，没有广告。',
       dlTitle: '上游下载',
       dlMeta: (v, d) => `上游版本 ${v} · ${d}发布`,
-      dlLead: '以下链接提供上游 FlClash 安装包。请从 Flashco 源码仓库构建 Flashco。',
+      dlLead: '下载 Flashco 发布版本；若尚无发布版本，请从当前源码仓库构建。',
       dlAll: '在 GitHub 查看上游全部版本',
       dlError: '未能读取上游版本信息，请前往上游 GitHub Releases 下载。',
       platformLabel: '平台',
@@ -188,7 +188,7 @@ globalThis.FlashcoSite = (() => {
       typePerf: '性能',
       typeRevert: '回退',
       footLicense: '以 GPL-3.0 协议免费开源。',
-      footUpdated: '下载和社区链接指向上游 FlClash。',
+      footUpdated: '下载链接指向 Flashco，社区链接属于上游 FlClash。',
       footReleases: '上游发布页',
       footTelegram: '上游 Telegram',
       stars: (n) => `上游 GitHub 上有 ${n} 个星标`,

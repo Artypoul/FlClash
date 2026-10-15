@@ -1,7 +1,7 @@
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 

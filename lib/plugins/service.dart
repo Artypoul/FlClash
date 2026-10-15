@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/event.dart';
-import 'package:fl_clash/core/method.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/core/event.dart';
+import 'package:flashco/core/method.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 

@@ -4,8 +4,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 extension PackageInfoExtension on PackageInfo {
   String get ua => [
-    'FlClash/v$version',
-    'clash-verge',
+    'mihomo Flashco/v$version',
     'Platform/${Platform.operatingSystem}',
   ].join(' ');
 }
@@ -37,8 +36,8 @@ int compareVersions(String version1, String version2) {
   return build1.compareTo(build2);
 }
 
-const releaseNotesBeginMarker = '<!-- flclash:changelog:begin -->';
-const releaseNotesEndMarker = '<!-- flclash:changelog:end -->';
+const releaseNotesBeginMarker = '<!-- flashco:changelog:begin -->';
+const releaseNotesEndMarker = '<!-- flashco:changelog:end -->';
 
 List<String> parseReleaseBody(String? body) {
   if (body == null) return [];

@@ -4,10 +4,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:yaml/yaml.dart';
 
 void main() {
-  test('Flashco packaging retains existing installation identities', () {
+  test('Flashco packaging uses an independent installation identity', () {
     final distribution =
         loadYaml(File('distribute_options.yaml').readAsStringSync()) as YamlMap;
-    expect(distribution['app_name'], 'FlClash');
+    expect(distribution['app_name'], 'Flashco');
     expect(
       distribution['artifact_name'],
       startsWith('Flashco-{{build_name}}-{{platform}}'),
@@ -24,11 +24,11 @@ void main() {
       expect(config['display_name'], 'Flashco');
       expect(config['generic_name'], 'Flashco');
       if (format != 'appimage') {
-        expect(config['package_name'], 'FlClash');
+        expect(config['package_name'], 'Flashco');
       }
       expect(
         config['supported_mime_type'],
-        contains('x-scheme-handler/flclash'),
+        contains('x-scheme-handler/flashco'),
       );
     }
 
@@ -38,9 +38,9 @@ void main() {
             )
             as YamlMap;
     expect(windows['display_name'], 'Flashco');
-    expect(windows['app_name'], 'FlClash');
-    expect(windows['app_id'], '728B3532-C74B-4870-9068-BE70FE12A3E6');
-    expect(windows['executable_name'], 'FlClash.exe');
+    expect(windows['app_name'], 'Flashco');
+    expect(windows['app_id'], '2E1E050C-79CA-52FB-82C4-52FDC3F5D780');
+    expect(windows['executable_name'], 'Flashco.exe');
     final locales = (windows['locales'] as YamlList).cast<YamlMap>();
     expect(
       locales.map((locale) => locale['lang']),
@@ -52,27 +52,14 @@ void main() {
     );
   });
 
-  test('Windows upgrades remove only the obsolete branding shortcuts', () {
+  test('Flashco installation leaves other clients shortcuts intact', () {
     final script = File(
       'windows/packaging/exe/inno_setup.iss',
     ).readAsStringSync();
-    final section = RegExp(
-      r'\[InstallDelete\]\r?\n([\s\S]*?)(?=\r?\n\[|$)',
-    ).firstMatch(script);
-    expect(section, isNotNull);
-    final entries = section!
-        .group(1)!
-        .split('\n')
-        .map((line) => line.trim())
-        .where((line) => line.isNotEmpty);
-    expect(
-      entries,
-      unorderedEquals([
-        for (final folder in ['autoprograms', 'autodesktop'])
-          for (final name in ['FlClash', 'Flasho'])
-            'Type: files; Name: "{$folder}\\\\$name.lnk"',
-      ]),
-    );
+    expect(script, isNot(contains('[InstallDelete]')));
+    expect(script, isNot(contains('FlClash.lnk')));
+    expect(script, isNot(contains('Flasho.lnk')));
+    expect(script, isNot(contains('FlClashHelperService')));
   });
 
   group('Linux packaging teardown', () {
@@ -91,7 +78,7 @@ void main() {
         expect(scripts.first, contains('exit 0'));
         expect(
           scripts,
-          contains('rm -f /etc/systemd/system/flclash-helper.service'),
+          contains('rm -f /etc/systemd/system/flashco-helper.service'),
         );
         expect(
           scripts.any((script) => script.contains('systemctl daemon-reload')),

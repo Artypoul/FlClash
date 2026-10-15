@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/widgets/sheet.dart';
-import 'package:fl_clash/widgets/sheet_navigator.dart';
-import 'package:fl_clash/widgets/side_sheet.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/widgets/sheet.dart';
+import 'package:flashco/widgets/sheet_navigator.dart';
+import 'package:flashco/widgets/side_sheet.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

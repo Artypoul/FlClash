@@ -3,25 +3,25 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
 import 'package:material_ui/material_ui.dart';
 
 const appName = 'Flashco';
-const appInstallationName = 'FlClash';
-const defaultTunDeviceName = 'FlClash';
-const appHelperService = 'FlClashHelperService';
+const appInstallationName = 'Flashco';
+const defaultTunDeviceName = 'Flashco';
+const appHelperService = 'FlashcoHelperService';
 const coreManifestName = 'manifest.json';
 const coreName = 'clash.meta';
 const browserUa =
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36';
-const packageName = 'com.follow.clash';
-final unixSocketPath = '/tmp/FlClashSocket_${Random().nextInt(10000)}.sock';
-final windowsPipeName = '\\\\.\\pipe\\FlClashCore_${_randomPipeId()}';
-const helperPort = 47890;
-const helperSocketPath = '/run/flclash/helper.sock';
-const helperProtocolVersionHeader = 'x-flclash-helper-protocol';
+const packageName = 'com.follow.flashco';
+final unixSocketPath = '/tmp/FlashcoSocket_${Random().nextInt(10000)}.sock';
+final windowsPipeName = '\\\\.\\pipe\\FlashcoCore_${_randomPipeId()}';
+const helperPort = 47891;
+const helperSocketPath = '/run/flashco/helper.sock';
+const helperProtocolVersionHeader = 'x-flashco-helper-protocol';
 const helperProtocolVersion = '6';
 const maxTextScale = 1.4;
 const minTextScale = 0.8;
@@ -120,7 +120,7 @@ const systemDnsRecordKey = 'system_dns_record';
 const bootRecordKey = 'boot_record';
 const defaultSystemDnsFallback = '223.5.5.5';
 const double dialogCommonWidth = 300;
-const repository = 'chen08209/FlClash';
+const repository = 'Artypoul/Flashco';
 const maxMobileWidth = 600;
 const maxLaptopWidth = 840;
 const defaultTestUrl = 'https://www.gstatic.com/generate_204';

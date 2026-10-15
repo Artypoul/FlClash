@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/core/method.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/plugins/service.dart';
+import 'package:flashco/common/constant.dart';
+import 'package:flashco/core/method.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/plugins/service.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 

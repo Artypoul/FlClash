@@ -4,18 +4,20 @@
 
 # Flashco
 
+Based on [FlClash](https://github.com/chen08209/FlClash), under GPL-3.0.
+
 基于 FlClash 和 ClashMeta 的多平台代理客户端，简单易用，开源无广告。
 
 [English](README.md) · **简体中文**
 
-上游 FlClash 资源：
+项目与上游资源：
 
-[![Upstream release](https://img.shields.io/github/v/release/chen08209/FlClash?style=flat-square&label=release)](https://github.com/chen08209/FlClash/releases/latest)
-[![Upstream downloads](https://img.shields.io/github/downloads/chen08209/FlClash/total?style=flat-square&logo=github)](https://github.com/chen08209/FlClash/releases)
-[![License](https://img.shields.io/github/license/chen08209/FlClash?style=flat-square)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/Artypoul/Flashco?style=flat-square&label=release)](https://github.com/Artypoul/Flashco/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Artypoul/Flashco/total?style=flat-square&logo=github)](https://github.com/Artypoul/Flashco/releases)
+[![License](https://img.shields.io/github/license/Artypoul/Flashco?style=flat-square)](LICENSE)
 [![Upstream Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/FlClash)
 
-[上游网站](https://chen08209.github.io/FlClash/zh) · [下载](#下载) · [更新日志](CHANGELOG.md) · [从源码构建](#从源码构建)
+[上游网站](https://artypoul.github.io/Flashco/zh) · [下载](#下载) · [更新日志](CHANGELOG.md) · [从源码构建](#从源码构建)
 
 </div>
 
@@ -39,10 +41,10 @@
 
 ## 下载
 
-以下链接提供的是上游 FlClash 安装包，不是 Flashco 安装包。请按照下方说明从当前仓库构建 Flashco。
+以下链接指向 Flashco 发布版本。若尚无发布版本，请按照下方说明从当前仓库构建。
 
-从上游 [GitHub Releases](https://github.com/chen08209/FlClash/releases/latest) 获取最新版本，或打开
-[上游网站](https://chen08209.github.io/FlClash/zh#download)，它会自动为你的设备选好安装包。
+从上游 [GitHub Releases](https://github.com/Artypoul/Flashco/releases/latest) 获取最新版本，或打开
+[上游网站](https://artypoul.github.io/Flashco/zh#download)，它会自动为你的设备选好安装包。
 
 | 平台 | 安装包 | 说明 |
 | --- | --- | --- |
@@ -52,8 +54,8 @@
 | Linux | `.deb`、`.rpm` 和 AppImage，分 x64 与 ARM64 | 托盘依赖见下方说明。 |
 
 <p>
-  <a href="https://chen08209.github.io/FlClash-fdroid-repo/repo?fingerprint=789D6D32668712EF7672F9E58DEEB15FBD6DCEEC5AE7A4371EA72F2AAE8A12FD"><img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" height="56"></a>
-  <a href="https://github.com/chen08209/FlClash/releases/latest"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" height="56"></a>
+  <a href="https://artypoul.github.io/Flashco-fdroid-repo/repo?fingerprint=789D6D32668712EF7672F9E58DEEB15FBD6DCEEC5AE7A4371EA72F2AAE8A12FD"><img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" height="56"></a>
+  <a href="https://github.com/Artypoul/Flashco/releases/latest"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" height="56"></a>
 </p>
 
 **Homebrew（上游 FlClash）**
@@ -74,9 +76,9 @@ sudo dnf install libayatana-appindicator-gtk3     # Fedora
 
 ## 使用
 
-Flashco 保留现有应用 ID、设置路径、可执行文件名和 URL 协议，以确保升级后安装和数据保持兼容。
+Flashco 使用独立的应用 ID、设置路径、可执行文件名和 flashco URL 协议，可与 FlClash 分开安装；请通过导出和导入迁移配置。
 
-**通过链接导入配置。** 打开下面格式的链接，即可把订阅导入 Flashco。`clashmeta://` 和 `flclash://` 开头的链接同样可用。
+**通过链接导入配置。** 打开下面格式的链接，即可把订阅导入 Flashco。`clashmeta://` 和 `flashco://` 开头的链接同样可用。
 
 ```text
 clash://install-config?url=<经过 URL 编码的订阅链接>
@@ -85,15 +87,15 @@ clash://install-config?url=<经过 URL 编码的订阅链接>
 **Android 自动化。** Tasker、MacroDroid 等应用可以用下面的 Action 启动 Activity，从而启动、停止或切换代理：
 
 ```text
-com.follow.clash.action.START
-com.follow.clash.action.STOP
-com.follow.clash.action.TOGGLE
+com.follow.flashco.action.START
+com.follow.flashco.action.STOP
+com.follow.flashco.action.TOGGLE
 ```
 
 在电脑上也可以通过 adb 触发：
 
 ```bash
-adb shell am start -a com.follow.clash.action.TOGGLE
+adb shell am start -a com.follow.flashco.action.TOGGLE
 ```
 
 ## 从源码构建
@@ -123,12 +125,12 @@ dart setup.dart android   # 或 windows、macos、linux
 ## 支持
 
 以下社区链接和 Star 历史属于上游 FlClash。上游问题讨论和更新通知请关注 [上游 Telegram 频道](https://t.me/FlClash)，
-Bug 与功能建议请提交到 [上游 GitHub Issues](https://github.com/chen08209/FlClash/issues)。
+Bug 与功能建议请提交到 [上游 GitHub Issues](https://github.com/Artypoul/Flashco/issues)。
 
-<a href="https://star-history.com/#chen08209/FlClash&Date">
+<a href="https://star-history.com/#Artypoul/Flashco&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date&theme=dark">
-    <img alt="Upstream star history" src="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date" width="640">
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Artypoul/Flashco&type=Date&theme=dark">
+    <img alt="Star history" src="https://api.star-history.com/svg?repos=Artypoul/Flashco&type=Date" width="640">
   </picture>
 </a>
 

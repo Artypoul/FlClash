@@ -1,7 +1,7 @@
-import 'package:fl_clash/common/network_error.dart';
-import 'package:fl_clash/core/desktop/launch_policy.dart';
-import 'package:fl_clash/core/method.dart';
-import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flashco/common/network_error.dart';
+import 'package:flashco/core/desktop/launch_policy.dart';
+import 'package:flashco/core/method.dart';
+import 'package:flashco/l10n/l10n.dart';
 
 import 'dart:ui';
 

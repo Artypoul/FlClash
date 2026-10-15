@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:fl_clash/common/app_localizations.dart';
-import 'package:fl_clash/common/network_error.dart';
-import 'package:fl_clash/common/webdav.dart';
-import 'package:fl_clash/core/desktop/helper_client.dart';
-import 'package:fl_clash/core/desktop/launch_policy.dart';
-import 'package:fl_clash/core/desktop/model.dart';
-import 'package:fl_clash/core/method.dart';
-import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flashco/common/app_localizations.dart';
+import 'package:flashco/common/network_error.dart';
+import 'package:flashco/common/webdav.dart';
+import 'package:flashco/core/desktop/helper_client.dart';
+import 'package:flashco/core/desktop/launch_policy.dart';
+import 'package:flashco/core/desktop/model.dart';
+import 'package:flashco/core/method.dart';
+import 'package:flashco/l10n/l10n.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 

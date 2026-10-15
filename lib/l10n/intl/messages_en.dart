@@ -24,7 +24,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "${count} to add, ${skipped} skipped as existing";
 
   static String m1(code) =>
-      "Windows refused to run FlClashCore.exe (error ${code}). An app control policy such as Smart App Control or AppLocker blocks unsigned programs; allow Flashco in that policy or turn it off, then try again.";
+      "Windows refused to run FlashcoCore.exe (error ${code}). An app control policy such as Smart App Control or AppLocker blocks unsigned programs; allow Flashco in that policy or turn it off, then try again.";
 
   static String m2(name) =>
       "The app failed to finish launching twice in a row. To break the loop, the profile ${name} has been deselected and automatic setup was skipped. You can select it again at any time.";
@@ -400,7 +400,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "core": MessageLookupByLibrary.simpleMessage("Core"),
     "coreBlockedByPolicyTip": m1,
     "coreBlockedBySmartAppControlTip": MessageLookupByLibrary.simpleMessage(
-      "Windows Smart App Control blocked FlClashCore.exe because it is not signed. Open Windows Security → App & browser control → Smart App Control settings, choose Off, then start Flashco again. Smart App Control cannot be turned back on without reinstalling Windows.",
+      "Windows Smart App Control blocked FlashcoCore.exe because it is not signed. Open Windows Security → App & browser control → Smart App Control settings, choose Off, then start Flashco again. Smart App Control cannot be turned back on without reinstalling Windows.",
     ),
     "coreStatus": MessageLookupByLibrary.simpleMessage("Core status"),
     "country": MessageLookupByLibrary.simpleMessage("Region"),

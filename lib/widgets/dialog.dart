@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/common/shape.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/common/shape.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

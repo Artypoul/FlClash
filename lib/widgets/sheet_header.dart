@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/common.dart';
+import 'package:flashco/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';

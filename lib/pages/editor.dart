@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/features/editor/editor.dart';
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/features/editor/editor.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/config.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
@@ -31,7 +31,7 @@ import 'package:re_highlight/styles/atom-one-dark.dart';
 import 'package:re_highlight/styles/atom-one-light.dart';
 import 'package:rust_api/rust_api.dart' show isRustLibInitialized;
 
-export 'package:fl_clash/features/editor/editor.dart' show EditorSchema;
+export 'package:flashco/features/editor/editor.dart' show EditorSchema;
 
 void _requireRustLib() {
   if (!isRustLibInitialized) {

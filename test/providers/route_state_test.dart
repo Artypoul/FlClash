@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/core/interface.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/core.dart';
-import 'package:fl_clash/providers/route_state.dart';
-import 'package:fl_clash/providers/state.dart';
+import 'package:flashco/core/controller.dart';
+import 'package:flashco/core/interface.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/core.dart';
+import 'package:flashco/providers/route_state.dart';
+import 'package:flashco/providers/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:riverpod/riverpod.dart';

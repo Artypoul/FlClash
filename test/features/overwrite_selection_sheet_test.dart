@@ -1,7 +1,7 @@
-import 'package:fl_clash/features/overwrite/overwrite.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/features/overwrite/overwrite.dart';
+import 'package:flashco/l10n/l10n.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 
