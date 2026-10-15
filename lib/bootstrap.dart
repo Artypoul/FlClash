@@ -8,7 +8,6 @@ import 'package:flashco/common/common.dart';
 import 'package:flashco/common/default_rules.dart';
 import 'package:flashco/common/launch.dart';
 import 'package:flashco/common/migration.dart';
-import 'package:flashco/common/permission.dart';
 import 'package:flashco/common/tray.dart';
 import 'package:flashco/common/window.dart';
 import 'package:flashco/database/database.dart';
@@ -75,6 +74,16 @@ class Bootstrap {
     );
   }
 
+  /// Runs before migration and the database: a copy started from another
+  /// install path gets past the platform's single-instance hand-off.
+  Future<void> _claimDataDirectory() async {
+    if (!system.isDesktop || await singleInstanceLock.acquire()) {
+      return;
+    }
+    commonPrint.log('another instance owns the data directory, exiting');
+    exit(0);
+  }
+
   Future<TonalPalette?> _getSystemPrimaryPalette() async {
     final raw = await DynamicColorPlugin.channel.invokeMethod<List<dynamic>>(
       DynamicColorPlugin.methodName,
@@ -91,6 +100,7 @@ class Bootstrap {
     int version,
     DynamicColorSeeds dynamicColor,
   ) async {
+    await _claimDataDirectory();
     globalState.packageInfo = await PackageInfo.fromPlatform();
     if (await preferences.isNewInstallation) {
       await database.initializeNewInstallationRules(russianServiceDirectRules);
@@ -102,6 +112,11 @@ class Bootstrap {
     );
     if (_bootDecision.recovery == BootRecovery.clearProfile) {
       config = config.copyWith(currentProfileId: null);
+      await preferences.saveConfig(config);
+    }
+    final patchClashConfig = config.patchClashConfig.ensureControllerSecret();
+    if (patchClashConfig != config.patchClashConfig) {
+      config = config.copyWith(patchClashConfig: patchClashConfig);
       await preferences.saveConfig(config);
     }
     final appState = AppState(
@@ -128,7 +143,7 @@ class Bootstrap {
           accentColor: dynamicColor.accentColor,
         );
     final profiles = await database.profilesDao.query().get();
-    container.read(profilesProvider.notifier).setAndReorder(profiles);
+    container.read(profilesProvider.notifier).reorder(profiles);
     await AppLocalizations.load(
       getLocaleForString(config.appSettingProps.locale) ??
           WidgetsBinding.instance.platformDispatcher.locale,
@@ -165,7 +180,9 @@ class Bootstrap {
       unawaited(window?.hide());
     }
     await _handleFailedPreference();
-    await _handlerDisclaimer();
+    if (!await _handlerDisclaimer()) {
+      return;
+    }
     await _showCrashRecoveryTip();
     await _showCrashlyticsTip();
     await _container.read(coreActionProvider.notifier).startCore();
@@ -173,8 +190,9 @@ class Bootstrap {
       await _container.read(setupActionProvider.notifier).initStatus();
     }
     _container.read(initProvider.notifier).value = true;
+    unawaited(_container.read(resourcesActionProvider.notifier).autoUpdate());
     await bootGuard.markRunning();
-    permissions.check(_container.read);
+    unawaited(_container.read(locationPermissionsProvider.notifier).refresh());
   }
 
   Future<void> _showCrashRecoveryTip() async {
@@ -240,19 +258,27 @@ class Bootstrap {
         .update((state) => state.copyWith(crashlyticsTip: true));
   }
 
-  Future<void> _handlerDisclaimer() async {
-    if (_container.read(
-      appSettingProvider.select((state) => state.disclaimerAccepted),
-    )) {
-      return;
+  /// Android's exit only finishes the activity, so Dart keeps running after
+  /// [SystemAction.handleExit] returns and must not go on to start the app.
+  Future<bool> _handlerDisclaimer() async {
+    final acceptedVersion = _container.read(
+      appSettingProvider.select((state) => state.acceptedDisclaimerVersion),
+    );
+    if (acceptedVersion >= disclaimerVersion) {
+      return true;
     }
     final isDisclaimerAccepted = await requestDisclaimerConsent();
     if (!isDisclaimerAccepted) {
       await _container.read(systemActionProvider.notifier).handleExit();
+      return false;
     }
     _container
         .read(appSettingProvider.notifier)
-        .update((state) => state.copyWith(disclaimerAccepted: true));
+        .update(
+          (state) =>
+              state.copyWith(acceptedDisclaimerVersion: disclaimerVersion),
+        );
+    return true;
   }
 }
 

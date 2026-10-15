@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flashco/common/app_data.dart';
 import 'package:flashco/common/boot_guard.dart';
 import 'package:flashco/common/common.dart';
 import 'package:flashco/common/system_dns.dart';
@@ -14,6 +16,7 @@ import 'package:flashco/providers/actions/system_exit.dart';
 import 'package:flashco/providers/providers.dart';
 import 'package:flashco/state.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path/path.dart' show basename, join;
@@ -31,6 +34,8 @@ part 'actions/proxies.dart';
 part 'actions/profiles.dart';
 part 'actions/scripts.dart';
 part 'actions/clash_providers.dart';
+part 'actions/icon_sets.dart';
 part 'actions/geo_resource.dart';
+part 'actions/resources.dart';
 part 'actions/updating.dart';
 part 'generated/action.g.dart';

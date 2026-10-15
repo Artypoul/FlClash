@@ -1,6 +1,7 @@
 import 'package:flashco/common/common.dart';
 import 'package:flashco/common/theme.dart';
 import 'package:flashco/l10n/l10n.dart';
+import 'package:flashco/manager/status_manager.dart';
 import 'package:flashco/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +12,7 @@ class TestApp extends StatelessWidget {
   final bool includeNavigatorKey;
   final bool setTheme;
   final bool wrapInProviderScope;
+  final bool withStatusManager;
   final List<Override> overrides;
   final Widget Function(Widget child) homeBuilder;
   final Locale? locale;
@@ -21,6 +23,7 @@ class TestApp extends StatelessWidget {
     this.includeNavigatorKey = true,
     this.setTheme = true,
     this.wrapInProviderScope = false,
+    this.withStatusManager = false,
     this.overrides = const [],
     this.homeBuilder = _identity,
     this.locale,
@@ -43,7 +46,7 @@ class TestApp extends StatelessWidget {
         if (setTheme) {
           globalState.theme = CommonTheme.of(context, 1);
         }
-        return child!;
+        return withStatusManager ? StatusManager(child: child!) : child!;
       },
       home: homeBuilder(child),
     );

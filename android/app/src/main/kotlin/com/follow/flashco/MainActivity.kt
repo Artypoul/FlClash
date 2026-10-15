@@ -1,6 +1,7 @@
 package com.follow.flashco
 
 import com.follow.flashco.plugins.AppPlugin
+import com.follow.flashco.plugins.BatteryPlugin
 import com.follow.flashco.plugins.ServicePlugin
 import com.follow.flashco.plugins.TilePlugin
 import io.flutter.embedding.android.FlutterActivity
@@ -10,6 +11,7 @@ class MainActivity : FlutterActivity() {
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         flutterEngine.plugins.add(AppPlugin())
+        flutterEngine.plugins.add(BatteryPlugin())
         flutterEngine.plugins.add(ServicePlugin())
         flutterEngine.plugins.add(TilePlugin())
         ServiceState.attachFlutterEngine(flutterEngine)

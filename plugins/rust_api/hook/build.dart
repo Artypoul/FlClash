@@ -40,7 +40,11 @@ Map<String, String> _bindgenEnvironment(BuildInput input) {
         File(
           '$configuredPath${Platform.pathSeparator}libclang.dll',
         ).existsSync()) {
-      return {'LIBCLANG_PATH': configuredPath};
+      return {
+        'LIBCLANG_PATH': configuredPath,
+        // The standalone DLL cannot locate the NDK's builtin headers itself.
+        'CLANG_PATH': File.fromUri(llvmRoot.uri.resolve('bin/clang.exe')).path,
+      };
     }
   }
   throw StateError(

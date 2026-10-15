@@ -21,10 +21,10 @@ void main() {
   setUpAll(() {
     titleViewSource = _resolveSource(
       'macos/tray/Sources/tray/TrayTitleView.swift',
-    ).readAsStringSync();
+    ).readAsStringSync().replaceAll('\r\n', '\n');
     statusItemSource = _resolveSource(
       'macos/tray/Sources/tray/TrayStatusItem.swift',
-    ).readAsStringSync();
+    ).readAsStringSync().replaceAll('\r\n', '\n');
   });
 
   test('macOS tray title is self-drawn instead of using NSTextField', () {

@@ -1,3 +1,5 @@
+import 'package:flashco/common/constant.dart';
+import 'package:flashco/common/exception.dart';
 import 'package:flashco/common/network_error.dart';
 import 'package:flashco/core/desktop/launch_policy.dart';
 import 'package:flashco/core/method.dart';
@@ -25,9 +27,23 @@ String userFacingErrorMessage(Object error, AppLocalizations appLocalizations) {
   return networkErrorMessage(error, appLocalizations) ??
       coreLaunchBlockedMessage(error, appLocalizations) ??
       switch (error) {
+        AgeSecretKeyRequiredException() =>
+          appLocalizations.ageSecretKeyRequiredTip,
+        CoreMethodException(code: 'rule_set_empty') =>
+          appLocalizations.ruleSetEmptyTip,
+        CoreMethodException(code: 'rule_set_mixed') =>
+          appLocalizations.ruleSetMixedTip,
+        CoreMethodException(code: 'rule_set_invalid') =>
+          appLocalizations.ruleSetInvalidTip,
         CoreMethodException(:final message) => message,
         _ => error.toString(),
       };
+}
+
+String delayFailureText(int delay, AppLocalizations appLocalizations) {
+  return delay == delayTimedOutValue
+      ? appLocalizations.timeout
+      : appLocalizations.delayFailed;
 }
 
 Locale? getLocaleForString(String? localString) {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flashco/common/common.dart';
 import 'package:flashco/core/core.dart';
 import 'package:flashco/enum/enum.dart';
@@ -74,6 +76,12 @@ class _AndroidContainerState extends ConsumerState<AndroidManager>
   void onServiceEvent(CoreEvent event) {
     coreEventManager.sendEvent(event);
     super.onServiceEvent(event);
+  }
+
+  @override
+  void onServiceStopped() {
+    unawaited(ref.read(setupActionProvider.notifier).setRunning(false));
+    super.onServiceStopped();
   }
 
   @override

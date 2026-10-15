@@ -1,4 +1,4 @@
-import 'package:flashco/features/overwrite/rule_preset.dart';
+import 'package:flashco/features/form/rule_preset.dart';
 import 'package:flashco/l10n/l10n.dart';
 import 'package:flashco/models/clash_config.dart';
 import 'package:flashco/providers/app.dart';

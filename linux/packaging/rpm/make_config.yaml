@@ -47,3 +47,5 @@ generic_name: Flashco
 group: Applications/Internet
 
 startup_notify: true
+
+startup_wm_class: com.follow.flashco

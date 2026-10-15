@@ -99,6 +99,38 @@ Future<ProviderContainer> _pumpHome(
   return container;
 }
 
+Future<void> _pumpDockWithStart(WidgetTester tester, {int? runTime}) async {
+  await tester.pumpWidget(
+    TestApp(
+      includeNavigatorKey: false,
+      overrides: [
+        profilesProvider.overrideWithValue([
+          const Profile(id: 1, autoUpdateDuration: Duration.zero),
+        ]),
+        runTimeProvider.overrideWithBuild((_, _) => runTime),
+        suspendProvider.overrideWithValue(false),
+      ],
+      child: Scaffold(
+        body: Center(
+          child: NavigationDock(
+            destinations: const [
+              NavigationDockDestination(
+                glyph: AppGlyphs.dashboard,
+                label: 'Home',
+              ),
+              NavigationDockDestination(glyph: AppGlyphs.tools, label: 'Tools'),
+            ],
+            selectedIndex: 0,
+            onSelected: (_) {},
+            trailing: const StartButton(),
+          ),
+        ),
+      ),
+    ),
+  );
+  await tester.pump(const Duration(seconds: 1));
+}
+
 // A press only paints, so its swell shows in the paint transform.
 Rect _painted(WidgetTester tester, RenderObject box, Rect resting) {
   Matrix4? transform;
@@ -124,19 +156,13 @@ void main() {
     addTearDown(() => navigationPort = null);
   });
 
-  testWidgets('the start button holds the end of the dock on the dashboard', (
-    tester,
-  ) async {
+  testWidgets('the home dock leaves launch to the main screen', (tester) async {
     final container = await _pumpHome(tester);
 
     final bar = tester.getRect(find.byType(FloatingNavigationBar));
-    final button = tester.getRect(find.byType(FloatingActionButton));
-    expect(find.byType(StartButton), findsOneWidget);
-    expect(button.width, button.height);
-    expect(button.height, bar.height);
-    expect(button.center.dy, bar.center.dy);
-    expect(button.left - bar.right, 8);
-    expect((bar.left + button.right) / 2, _mobileSize.width / 2);
+    expect(find.byType(StartButton), findsNothing);
+    expect(find.byType(FloatingActionButton), findsNothing);
+    expect(bar.center.dx, _mobileSize.width / 2);
 
     await tester.drag(
       find.byType(FloatingNavigationBar),
@@ -234,7 +260,7 @@ void main() {
   testWidgets(
     'the docked start button swells and follows a drag like the lens',
     (tester) async {
-      await _pumpHome(tester);
+      await _pumpDockWithStart(tester);
       final press = find.ancestor(
         of: find.byType(FloatingActionButton),
         matching: find.byType(ElasticPress),
@@ -428,18 +454,13 @@ void main() {
   testWidgets(
     'the docked start button stays an icon-only circle while it runs',
     (tester) async {
-      await _pumpHome(
+      await _pumpDockWithStart(
         tester,
-        settle: false,
-        overrides: [
-          runTimeProvider.overrideWithBuild(
-            (_, _) => const Duration(
-              hours: 2,
-              minutes: 13,
-              seconds: 8,
-            ).inMilliseconds,
-          ),
-        ],
+        runTime: const Duration(
+          hours: 2,
+          minutes: 13,
+          seconds: 8,
+        ).inMilliseconds,
       );
 
       final bar = tester.getRect(find.byType(FloatingNavigationBar));
