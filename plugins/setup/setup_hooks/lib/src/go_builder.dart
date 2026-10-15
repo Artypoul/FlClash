@@ -39,7 +39,9 @@ class GoBuilder {
     if (toolchain == null) {
       throw BuildException('Android target $target needs an NDK toolchain');
     }
-    final cc = toolchain.clangFor(target);
+    final cc = Platform.isWindows
+        ? p.join(toolchain.clangDirectory, 'clang.exe')
+        : toolchain.clangFor(target);
     if (!File(cc).existsSync()) {
       throw BuildException(
         'NDK compiler not found: $cc (API ${toolchain.apiLevel} from the '
@@ -114,9 +116,12 @@ class GoBuilder {
   Map<String, String> _buildEnvironment(Target target) {
     final env = <String, String>{'GOOS': target.goos, 'GOARCH': target.goarch};
     if (target.isLib) {
+      final cc = _resolveCc(target);
       env
         ..['CGO_ENABLED'] = '1'
-        ..['CC'] = _resolveCc(target)
+        ..['CC'] = Platform.isWindows
+            ? '"$cc" --target=${target.ndkTriple}${androidToolchain!.apiLevel}'
+            : cc
         ..['CFLAGS'] = '-O3 -Werror';
     } else {
       env['CGO_ENABLED'] = '0';
@@ -192,7 +197,11 @@ class GoBuilder {
     inputs.addAll(harnessInputs);
 
     if (target.isLib) {
-      final compilerVersion = runCommand(env['CC']!, ['--version']);
+      final compilerVersion = runCommand(_resolveCc(target), [
+        if (Platform.isWindows)
+          '--target=${target.ndkTriple}${androidToolchain!.apiLevel}',
+        '--version',
+      ]);
       builder.addValue(
         'android_compiler',
         '${(compilerVersion.stdout as String).trim()}\n'

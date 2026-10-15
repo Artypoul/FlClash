@@ -15,6 +15,11 @@ class Preferences {
   Future<bool> get isInit async =>
       await sharedPreferencesCompleter.future != null;
 
+  Future<bool> get isNewInstallation async {
+    final store = await sharedPreferencesCompleter.future;
+    return store != null && store.getKeys().isEmpty;
+  }
+
   Preferences._internal() {
     SharedPreferences.getInstance()
         .then((value) => sharedPreferencesCompleter.complete(value))

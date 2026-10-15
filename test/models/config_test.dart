@@ -18,6 +18,21 @@ T roundTrip<T>(
 }
 
 void main() {
+  group('TUN upgrade compatibility', () {
+    test('keeps the existing device name when settings omit it', () {
+      expect(const Tun().device, 'FlClash');
+      expect(Tun.fromJson({}).device, 'FlClash');
+      expect(Tun.safeFormJson(null).device, 'FlClash');
+    });
+
+    test('preserves saved and custom device names', () {
+      for (final device in ['FlClash', 'Flasho', 'custom-tun']) {
+        final tun = Tun(device: device);
+        expect(roundTrip(tun.toJson, Tun.fromJson).device, device);
+      }
+    });
+  });
+
   group('GeoResource JSON', () {
     test('exposes mihomo raw config keys', () {
       expect(GeoResource.MMDB.configKey, 'mmdb');

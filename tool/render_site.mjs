@@ -18,7 +18,7 @@ const PAGES = [
 const sandbox = {};
 runInNewContext(readFileSync(join(out, 'assets/shared.js'), 'utf8'), sandbox);
 const { REPO, FIRST_PAGE, STRINGS, parseChangelog, changelogMeta, escapeHtml: escape, timelineHtml } =
-  sandbox.FlClashSite;
+  sandbox.FlashcoSite;
 
 const template = readFileSync(join(out, 'index.html'), 'utf8');
 const versions = parseChangelog(readFileSync(join(out, 'CHANGELOG.md'), 'utf8'));
@@ -37,19 +37,17 @@ function structuredData(t, page) {
   return {
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',
-    name: 'FlClash',
+    name: 'Flashco',
     url: siteUrl + page.path,
     description: t.pageDescription,
     inLanguage: page.locale,
     applicationCategory: 'UtilitiesApplication',
     operatingSystem: 'Android, Windows, macOS, Linux',
     image: `${siteUrl}preview.png`,
-    downloadUrl: `${REPO}/releases/latest`,
-    ...(latest ? { softwareVersion: latest.version, dateModified: latest.date || undefined } : {}),
     license: 'https://www.gnu.org/licenses/gpl-3.0.html',
     isAccessibleForFree: true,
     offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
-    sameAs: [REPO],
+    isBasedOn: REPO,
   };
 }
 

@@ -156,7 +156,7 @@ abstract class ProxyGroup with _$ProxyGroup {
 
 extension ProxyGroupExt on ProxyGroup {
   /// Only what `GroupCommonOption` and the per-type option structs read, so the
-  /// generated config carries no FlClash bookkeeping and no null placeholders.
+  /// generated config carries no Flashco bookkeeping and no null placeholders.
   Map<String, dynamic> get definition {
     return {
       'name': name,
@@ -441,7 +441,7 @@ abstract class SnifferConfig with _$SnifferConfig {
 abstract class Tun with _$Tun {
   const factory Tun({
     @Default(false) bool enable,
-    @Default(appName) String device,
+    @Default(defaultTunDeviceName) String device,
     @JsonKey(name: 'auto-route') @Default(false) bool autoRoute,
     @Default(TunStack.mips) TunStack stack,
     @JsonKey(name: 'dns-hijack') @Default(['any:53']) List<String> dnsHijack,

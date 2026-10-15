@@ -4,6 +4,16 @@ import '../setup.dart' as setup;
 
 void main() {
   group('setup.dart', () {
+    test('passes an explicit artifact template to the package command', () {
+      expect(
+        setup.createPackageArtifactArgs(
+          'app_name: FlClash\nartifact_name: Flashco-{{build_name}}.{{ext}}\n',
+        ),
+        ['--artifact-name=Flashco-{{build_name}}.{{ext}}'],
+      );
+      expect(setup.createPackageArtifactArgs('app_name: FlClash\n'), isEmpty);
+    });
+
     test('parses -v as verbose mode', () {
       final results = setup.createSetupArgParser().parse(['android', '-v']);
 

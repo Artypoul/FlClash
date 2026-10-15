@@ -170,6 +170,9 @@ Future<int> _package(
     platform: platform,
     verbose: verbose,
   );
+  final artifactArgs = createPackageArtifactArgs(
+    File(p.join(rootDir, 'distribute_options.yaml')).readAsStringSync(),
+  );
   final descriptionArgs = <String>[];
   if (platform != 'android') {
     descriptionArgs.addAll(['--description', arch]);
@@ -204,6 +207,7 @@ Future<int> _package(
       platform,
       '--targets',
       targets,
+      ...artifactArgs,
       if (androidArch != null)
         '--build-target-platform=${_androidFlutterTarget[androidArch]!}',
       if (flutterBuildArgs.isNotEmpty)
@@ -222,6 +226,12 @@ Future<int> _package(
   });
   final exitCode = await process.exitCode;
   return exitCode;
+}
+
+List<String> createPackageArtifactArgs(String optionsYaml) {
+  final options = loadYaml(optionsYaml) as YamlMap;
+  final artifactName = options['artifact_name'] as String?;
+  return [if (artifactName != null) '--artifact-name=$artifactName'];
 }
 
 String _detectArch() {

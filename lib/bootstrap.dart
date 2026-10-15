@@ -5,6 +5,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:fl_clash/common/boot_guard.dart';
 import 'package:fl_clash/common/boot_record.dart';
 import 'package:fl_clash/common/common.dart';
+import 'package:fl_clash/common/default_rules.dart';
 import 'package:fl_clash/common/launch.dart';
 import 'package:fl_clash/common/migration.dart';
 import 'package:fl_clash/common/permission.dart';
@@ -91,6 +92,9 @@ class Bootstrap {
     DynamicColorSeeds dynamicColor,
   ) async {
     globalState.packageInfo = await PackageInfo.fromPlatform();
+    if (await preferences.isNewInstallation) {
+      await database.initializeNewInstallationRules(russianServiceDirectRules);
+    }
     var config = await migration.run();
     _bootDecision = await bootGuard.evaluate(
       profileId: config.currentProfileId,

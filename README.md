@@ -1,26 +1,28 @@
 <div align="center">
 
-<img src="assets/images/icon.png" alt="FlClash" width="88">
+<img src="assets/images/icon.png" alt="Flashco" width="88">
 
-# FlClash
+# Flashco
 
-A multi-platform proxy client based on ClashMeta. Simple to use, open source and ad-free.
+A multi-platform proxy client based on FlClash and ClashMeta. Simple to use, open source and ad-free.
 
 **English** · [简体中文](README_zh_CN.md)
 
-[![Release](https://img.shields.io/github/v/release/chen08209/FlClash?style=flat-square&label=release)](https://github.com/chen08209/FlClash/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/chen08209/FlClash/total?style=flat-square&logo=github)](https://github.com/chen08209/FlClash/releases)
-[![License](https://img.shields.io/github/license/chen08209/FlClash?style=flat-square)](LICENSE)
-[![Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/FlClash)
+Upstream FlClash resources:
 
-[Website](https://chen08209.github.io/FlClash) · [Download](#download) · [Changelog](CHANGELOG.md) · [Build from source](#build-from-source)
+[![Upstream release](https://img.shields.io/github/v/release/chen08209/FlClash?style=flat-square&label=release)](https://github.com/chen08209/FlClash/releases/latest)
+[![Upstream downloads](https://img.shields.io/github/downloads/chen08209/FlClash/total?style=flat-square&logo=github)](https://github.com/chen08209/FlClash/releases)
+[![License](https://img.shields.io/github/license/chen08209/FlClash?style=flat-square)](LICENSE)
+[![Upstream Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/FlClash)
+
+[Upstream website](https://chen08209.github.io/FlClash) · [Download](#download) · [Changelog](CHANGELOG.md) · [Build from source](#build-from-source)
 
 </div>
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="snapshots/preview-dark.png">
-    <img alt="FlClash dashboard on a MacBook and a phone" src="snapshots/preview.png" width="92%">
+    <img alt="Upstream FlClash interface preview on a MacBook and a phone" src="snapshots/preview.png" width="92%">
   </picture>
 </p>
 
@@ -39,7 +41,9 @@ A multi-platform proxy client based on ClashMeta. Simple to use, open source and
 
 ## Download
 
-Get the latest build from [GitHub Releases](https://github.com/chen08209/FlClash/releases/latest), or open the
+The links below provide upstream FlClash builds, not Flashco builds. Build Flashco from this checkout using the instructions below.
+
+Get the upstream build from [GitHub Releases](https://github.com/chen08209/FlClash/releases/latest), or open the
 [website](https://chen08209.github.io/FlClash#download), which picks the right file for your device.
 
 | Platform | Packages | Notes |
@@ -54,7 +58,7 @@ Get the latest build from [GitHub Releases](https://github.com/chen08209/FlClash
   <a href="https://github.com/chen08209/FlClash/releases/latest"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" height="56"></a>
 </p>
 
-**Homebrew**
+**Homebrew (upstream FlClash)**
 
 ```bash
 brew tap chen08209/tap
@@ -73,7 +77,9 @@ sudo dnf install libayatana-appindicator-gtk3     # Fedora
 
 ## Usage
 
-**Import a profile from a link.** Opening a link in this form imports the subscription into FlClash. The `clashmeta://`
+Flashco keeps the existing application IDs, settings paths, executable names and URL schemes so updates preserve your installation and data.
+
+**Import a profile from a link.** Opening a link in this form imports the subscription into Flashco. The `clashmeta://`
 and `flclash://` schemes work the same way.
 
 ```text
@@ -101,9 +107,10 @@ You need [Flutter](https://docs.flutter.dev/get-started/install) 3.47 (release b
 [Go](https://go.dev/dl/) 1.26 and [Rust](https://rustup.rs/) installed through rustup. Each platform builds on its own
 host, except Android, which builds anywhere.
 
+Run these commands from this Flashco checkout:
+
 ```bash
-git clone --recursive https://github.com/chen08209/FlClash.git
-cd FlClash
+git submodule update --init --recursive
 flutter pub get
 dart setup.dart android   # or windows, macos, linux
 ```
@@ -121,17 +128,17 @@ Run `dart setup.dart --help` for the remaining options, such as `--targets` to b
 
 ## Support
 
-Starring the repository is the easiest way to support the project. Questions and announcements go to the
-[Telegram channel](https://t.me/FlClash); bugs and feature requests go to
-[GitHub Issues](https://github.com/chen08209/FlClash/issues).
+The following community links and star history belong to upstream FlClash. Upstream questions and announcements go to the
+[upstream Telegram channel](https://t.me/FlClash); bugs and feature requests go to
+[upstream GitHub Issues](https://github.com/chen08209/FlClash/issues).
 
 <a href="https://star-history.com/#chen08209/FlClash&Date">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date&theme=dark">
-    <img alt="Star history" src="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date" width="640">
+    <img alt="Upstream star history" src="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date" width="640">
   </picture>
 </a>
 
 ## License
 
-FlClash is released under the [GPL-3.0 license](LICENSE).
+Flashco is released under the [GPL-3.0 license](LICENSE).

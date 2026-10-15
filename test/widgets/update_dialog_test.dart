@@ -66,7 +66,7 @@ Future<void> tapCancel(WidgetTester tester) async {
 void main() {
   setUpAll(() {
     globalState.packageInfo = PackageInfo(
-      appName: 'FlClash',
+      appName: 'Flashco',
       packageName: 'com.follow.clash',
       version: _runningVersion,
       buildNumber: '1',

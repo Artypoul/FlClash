@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:fl_clash/bootstrap.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/providers/app.dart';
@@ -8,7 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod/riverpod.dart';
 
 final _packageInfo = PackageInfo(
-  appName: 'FlClash',
+  appName: 'Flashco',
   packageName: 'com.follow.clash',
   version: '1.2.3',
   buildNumber: '1',
@@ -40,11 +43,45 @@ void main() {
   }
 
   group('user agent', () {
+    test('new branding preserves installation and subscription identity', () {
+      expect(appName, 'Flashco');
+      expect(appInstallationName, 'FlClash');
+      expect(packageName, 'com.follow.clash');
+      expect(_packageInfo.ua, startsWith('FlClash/v1.2.3'));
+    });
+
     test('falls back to the package user agent when none is configured', () {
       setGlobalUa('');
 
       expect(globalState.ua, _packageInfo.ua);
-      expect(globalState.ua, contains('FlClash/v1.2.3'));
+      expect(globalState.ua, startsWith('FlClash/v1.2.3'));
+    });
+
+    test('negotiates Mihomo YAML with subscription response rules', () {
+      final contract =
+          jsonDecode(
+                File(
+                  'test/fixtures/subscription_response_rules.json',
+                ).readAsStringSync(),
+              )
+              as Map<String, dynamic>;
+      final rules = contract['rules'] as List;
+      final mihomoRule =
+          rules.firstWhere((rule) => rule['responseType'] == 'MIHOMO')
+              as Map<String, dynamic>;
+      final condition =
+          (mihomoRule['conditions'] as List).single as Map<String, dynamic>;
+      final matcher = RegExp(
+        condition['value'] as String,
+        caseSensitive: condition['caseSensitive'] as bool,
+      );
+      setGlobalUa('');
+
+      expect(matcher.hasMatch(globalState.ua), isTrue);
+      expect(
+        matcher.hasMatch('Flashco/v1.2.3 clash-verge Platform/windows'),
+        isFalse,
+      );
     });
 
     test('prefers the configured global user agent', () {
