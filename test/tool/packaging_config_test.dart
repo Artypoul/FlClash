@@ -52,6 +52,29 @@ void main() {
     );
   });
 
+  test('Windows upgrades remove only the obsolete branding shortcuts', () {
+    final script = File(
+      'windows/packaging/exe/inno_setup.iss',
+    ).readAsStringSync();
+    final section = RegExp(
+      r'\[InstallDelete\]\r?\n([\s\S]*?)(?=\r?\n\[|$)',
+    ).firstMatch(script);
+    expect(section, isNotNull);
+    final entries = section!
+        .group(1)!
+        .split('\n')
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty);
+    expect(
+      entries,
+      unorderedEquals([
+        for (final folder in ['autoprograms', 'autodesktop'])
+          for (final name in ['FlClash', 'Flasho'])
+            'Type: files; Name: "{$folder}\\\\$name.lnk"',
+      ]),
+    );
+  });
+
   group('Linux packaging teardown', () {
     for (final format in ['deb', 'rpm']) {
       test('$format removes the Helper unit only on a real uninstall', () {

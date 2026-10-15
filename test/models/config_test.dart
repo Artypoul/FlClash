@@ -20,9 +20,9 @@ T roundTrip<T>(
 void main() {
   group('TUN upgrade compatibility', () {
     test('keeps the existing device name when settings omit it', () {
-      expect(const Tun().device, 'Flasho');
-      expect(Tun.fromJson({}).device, 'Flasho');
-      expect(Tun.safeFormJson(null).device, 'Flasho');
+      expect(const Tun().device, 'FlClash');
+      expect(Tun.fromJson({}).device, 'FlClash');
+      expect(Tun.safeFormJson(null).device, 'FlClash');
     });
 
     test('preserves saved and custom device names', () {

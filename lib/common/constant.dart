@@ -10,7 +10,7 @@ import 'package:material_ui/material_ui.dart';
 
 const appName = 'Flashco';
 const appInstallationName = 'FlClash';
-const defaultTunDeviceName = 'Flasho';
+const defaultTunDeviceName = 'FlClash';
 const appHelperService = 'FlClashHelperService';
 const coreManifestName = 'manifest.json';
 const coreName = 'clash.meta';
