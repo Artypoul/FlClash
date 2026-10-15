@@ -1,2 +1,3 @@
-app_name: 'Flasho'
+app_name: 'FlClash'
+artifact_name: 'Flashco-{{build_name}}-{{platform}}{{#description}}-{{description}}{{/description}}{{#is_installer}}-setup{{/is_installer}}{{#ext}}.{{ext}}{{/ext}}'
 output: 'dist/'

@@ -1,4 +1,4 @@
-display_name: Flasho
+display_name: Flashco
 
 icon: ./assets/images/icon.png
 
@@ -8,12 +8,12 @@ supported_mime_type:
   - x-scheme-handler/flclash
 
 keywords:
-  - Flasho
+  - Flashco
   - Clash
   - ClashMeta
   - Proxy
 
-generic_name: Flasho
+generic_name: Flashco
 
 categories:
   - Network

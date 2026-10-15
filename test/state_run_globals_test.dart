@@ -11,7 +11,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod/riverpod.dart';
 
 final _packageInfo = PackageInfo(
-  appName: 'Flasho',
+  appName: 'Flashco',
   packageName: 'com.follow.clash',
   version: '1.2.3',
   buildNumber: '1',
@@ -43,6 +43,13 @@ void main() {
   }
 
   group('user agent', () {
+    test('new branding preserves installation and subscription identity', () {
+      expect(appName, 'Flashco');
+      expect(appInstallationName, 'FlClash');
+      expect(packageName, 'com.follow.clash');
+      expect(_packageInfo.ua, startsWith('FlClash/v1.2.3'));
+    });
+
     test('falls back to the package user agent when none is configured', () {
       setGlobalUa('');
 
@@ -72,7 +79,7 @@ void main() {
 
       expect(matcher.hasMatch(globalState.ua), isTrue);
       expect(
-        matcher.hasMatch('Flasho/v1.2.3 clash-verge Platform/windows'),
+        matcher.hasMatch('Flashco/v1.2.3 clash-verge Platform/windows'),
         isFalse,
       );
     });

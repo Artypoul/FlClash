@@ -33,7 +33,7 @@ object GlobalState : CoroutineScope by CoroutineScope(SupervisorJob() + Dispatch
     }
 
     fun log(text: String) {
-        Log.d("FlClash", text)
+        Log.d("Flashco", text)
     }
 
     fun setCrashlytics(enable: Boolean) {

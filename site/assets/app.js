@@ -5,7 +5,7 @@
   const PLATFORM_NAMES = { android: 'Android', windows: 'Windows', macos: 'macOS', linux: 'Linux' };
   const PAGE = 15;
   const { REPO, FIRST_PAGE, parseChangelog, translate, formatDate, changelogMeta, timelineHtml } =
-    globalThis.FlClashSite;
+    globalThis.FlashcoSite;
   const SITE = new URL('..', document.currentScript.src);
 
   const root = document.documentElement;
@@ -900,7 +900,7 @@
   }
 
   function wireField() {
-    field = globalThis.FlClashField?.mount($('#field'), {
+    field = globalThis.FlashcoField?.mount($('#field'), {
       avoid: () => [
         taglineBox(),
         ...[...document.querySelectorAll('#hero-release, #wordmark, .lede, .cta, #cta-note, #facts')]

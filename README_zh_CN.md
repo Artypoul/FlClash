@@ -1,26 +1,28 @@
 <div align="center">
 
-<img src="assets/images/icon.png" alt="Flasho" width="88">
+<img src="assets/images/icon.png" alt="Flashco" width="88">
 
-# Flasho
+# Flashco
 
 基于 FlClash 和 ClashMeta 的多平台代理客户端，简单易用，开源无广告。
 
 [English](README.md) · **简体中文**
 
-[![Release](https://img.shields.io/github/v/release/chen08209/FlClash?style=flat-square&label=release)](https://github.com/chen08209/FlClash/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/chen08209/FlClash/total?style=flat-square&logo=github)](https://github.com/chen08209/FlClash/releases)
-[![License](https://img.shields.io/github/license/chen08209/FlClash?style=flat-square)](LICENSE)
-[![Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/FlClash)
+上游 FlClash 资源：
 
-[官网](https://chen08209.github.io/FlClash/zh) · [下载](#下载) · [更新日志](CHANGELOG.md) · [从源码构建](#从源码构建)
+[![Upstream release](https://img.shields.io/github/v/release/chen08209/FlClash?style=flat-square&label=release)](https://github.com/chen08209/FlClash/releases/latest)
+[![Upstream downloads](https://img.shields.io/github/downloads/chen08209/FlClash/total?style=flat-square&logo=github)](https://github.com/chen08209/FlClash/releases)
+[![License](https://img.shields.io/github/license/chen08209/FlClash?style=flat-square)](LICENSE)
+[![Upstream Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/FlClash)
+
+[上游网站](https://chen08209.github.io/FlClash/zh) · [下载](#下载) · [更新日志](CHANGELOG.md) · [从源码构建](#从源码构建)
 
 </div>
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="snapshots/preview-dark.png">
-    <img alt="FlClash 在 MacBook 与手机上的仪表盘" src="snapshots/preview.png" width="92%">
+    <img alt="上游 FlClash 在 MacBook 与手机上的界面预览" src="snapshots/preview.png" width="92%">
   </picture>
 </p>
 
@@ -37,8 +39,10 @@
 
 ## 下载
 
-从 [GitHub Releases](https://github.com/chen08209/FlClash/releases/latest) 获取最新版本，或打开
-[官网](https://chen08209.github.io/FlClash/zh#download)，它会自动为你的设备选好安装包。
+以下链接提供的是上游 FlClash 安装包，不是 Flashco 安装包。请按照下方说明从当前仓库构建 Flashco。
+
+从上游 [GitHub Releases](https://github.com/chen08209/FlClash/releases/latest) 获取最新版本，或打开
+[上游网站](https://chen08209.github.io/FlClash/zh#download)，它会自动为你的设备选好安装包。
 
 | 平台 | 安装包 | 说明 |
 | --- | --- | --- |
@@ -52,7 +56,7 @@
   <a href="https://github.com/chen08209/FlClash/releases/latest"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" height="56"></a>
 </p>
 
-**Homebrew**
+**Homebrew（上游 FlClash）**
 
 ```bash
 brew tap chen08209/tap
@@ -70,7 +74,9 @@ sudo dnf install libayatana-appindicator-gtk3     # Fedora
 
 ## 使用
 
-**通过链接导入配置。** 打开下面格式的链接，即可把订阅导入 FlClash。`clashmeta://` 和 `flclash://` 开头的链接同样可用。
+Flashco 保留现有应用 ID、设置路径、可执行文件名和 URL 协议，以确保升级后安装和数据保持兼容。
+
+**通过链接导入配置。** 打开下面格式的链接，即可把订阅导入 Flashco。`clashmeta://` 和 `flclash://` 开头的链接同样可用。
 
 ```text
 clash://install-config?url=<经过 URL 编码的订阅链接>
@@ -95,9 +101,10 @@ adb shell am start -a com.follow.clash.action.TOGGLE
 需要 [Flutter](https://docs.flutter.dev/get-started/install) 3.47（正式版构建使用 3.47.4）、[Go](https://go.dev/dl/) 1.26，
 以及通过 rustup 安装的 [Rust](https://rustup.rs/)。桌面端需要在对应系统上构建，Android 在任意系统上都能构建。
 
+在当前 Flashco 仓库目录中运行：
+
 ```bash
-git clone --recursive https://github.com/chen08209/FlClash.git
-cd FlClash
+git submodule update --init --recursive
 flutter pub get
 dart setup.dart android   # 或 windows、macos、linux
 ```
@@ -115,16 +122,16 @@ dart setup.dart android   # 或 windows、macos、linux
 
 ## 支持
 
-给仓库点一个 Star 是支持项目最简单的方式。问题讨论和更新通知请关注 [Telegram 频道](https://t.me/FlClash)，
-Bug 与功能建议请提交到 [GitHub Issues](https://github.com/chen08209/FlClash/issues)。
+以下社区链接和 Star 历史属于上游 FlClash。上游问题讨论和更新通知请关注 [上游 Telegram 频道](https://t.me/FlClash)，
+Bug 与功能建议请提交到 [上游 GitHub Issues](https://github.com/chen08209/FlClash/issues)。
 
 <a href="https://star-history.com/#chen08209/FlClash&Date">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date&theme=dark">
-    <img alt="Star history" src="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date" width="640">
+    <img alt="Upstream star history" src="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date" width="640">
   </picture>
 </a>
 
 ## 许可证
 
-FlClash 以 [GPL-3.0 协议](LICENSE)发布。
+Flashco 以 [GPL-3.0 协议](LICENSE)发布。

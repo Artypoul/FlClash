@@ -87,7 +87,7 @@ it does not isolate programs already running there, so on Android any app holdin
 the outbound IP (#1934). The opt-in answer is the local authentication setting (`NetworkProps.authentication`), which spans
 four paths that must stay in sync: `_makeRealProfileTask` writes the credentials into `authentication` and force-clears
 `skip-auth-prefixes` so a profile cannot silently exempt loopback; `UpdateParams.authentication` applies the same list
-to a running core; `FlClashHttpOverrides` sends the credentials with the app's own proxied requests; and `sharedState`
+to a running core; `FlashcoHttpOverrides` sends the credentials with the app's own proxied requests; and `sharedState`
 withholds the Android VPN system proxy declaration because `ProxyInfo` cannot carry credentials (TUN still captures that
 traffic). Desktop system proxy is deliberately not gated — dropping it would leak traffic direct, so the setting's
 description tells users to supply credentials manually instead.
@@ -172,7 +172,7 @@ Quick Settings, notification, revoke, and Always-on VPN paths converge on the sa
 - With a Flutter engine attached, `ServiceState.handleStartAction()`/`handleStopAction()` forward through `TilePlugin` to
   `TileManager`, which updates normal Flutter setup state. Without Flutter, native code restores `SharedState` from
   preferences, runs `quickSetup`, checks VPN permission, and submits the native request directly.
-- Android may create an Always-on `VpnService` through `onStartCommand()` without FlClash's bound-service path. The service
+- Android may create an Always-on `VpnService` through `onStartCommand()` without Flashco's bound-service path. The service
   sends the explicit, permission-protected `VPN_START_REQUESTED` broadcast to `ServiceBroadcastReceiver`, which routes it to
   `ServiceState.handleStartAction()` so Core/configuration and the normal binding are restored before TUN is treated as
   ready.
@@ -654,7 +654,7 @@ timeout back into `UpdatingKeys`, and do not widen the disconnect reset to every
 
 ## Safe Mode
 
-`--dart-define=SAFE_MODE=true` builds a FlClash that never changes the host network, so a development build can run
+`--dart-define=SAFE_MODE=true` builds a Flashco that never changes the host network, so a development build can run
 next to an installed one. It is a compile-time constant with two faces: `safeModeBuild` in `lib/common/constant.dart`
 for the process-wide handles that exist before the provider container, and `safeModeProvider` in
 `lib/providers/app.dart` for everything reached through Riverpod, which is also what tests override. Settings are never
@@ -849,8 +849,8 @@ Crashlytics NDK symbolicates a native crash only from libraries that still carry
 - `setup`: build-time harness for Go core artifacts and the Rust helper, driven by a Dart build hook; no runtime Dart API.
 - `proxy`: system proxy configuration.
 - `rust_api`: runtime Flutter Rust Bridge FFI package built through Native Assets. See below.
-- `tray`: system tray for Linux, macOS and Windows. Written for FlClash; replaced the `tray_manager` fork.
-- `window`: desktop window control for Linux, macOS and Windows. Written for FlClash; replaced the
+- `tray`: system tray for Linux, macOS and Windows. Originally written for upstream FlClash; replaced the `tray_manager` fork.
+- `window`: desktop window control for Linux, macOS and Windows. Originally written for upstream FlClash; replaced the
   `window_manager` fork. See below.
 - `wifi_ssid`: Wi-Fi SSID detection.
 - `code_forge`: the text editor behind `EditorPage`, derived from upstream `code_forge`. See below.
@@ -899,7 +899,7 @@ folding, caret, gutter and pointer code sit in `lib/code_forge/code_area/` part 
   the fold, and a caret put there any other way opens it.
 - The controller reaches the mounted editor only through the `CodeForgeView` it attaches, which the editor's state
   implements by forwarding to its renderer.
-- FlClash supplies the suggestion popup, context menu and scrollbar; the package has no built-in versions of them.
+- Flashco supplies the suggestion popup, context menu and scrollbar; the package has no built-in versions of them.
 - Tests live in `test/plugins/code_forge/` at the repository root and need the `rust_api` library.
 - `isMobile` comes from `Platform`, so host tests never reach the touch branches (selection handles, long press,
   magnifier); check those on an Android emulator.
