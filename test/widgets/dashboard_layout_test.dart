@@ -1,9 +1,9 @@
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/dashboard/dashboard.dart';
-import 'package:fl_clash/views/dashboard/widget_metrics.dart';
-import 'package:fl_clash/widgets/super_grid.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/state.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/dashboard/dashboard.dart';
+import 'package:flashco/views/dashboard/widget_metrics.dart';
+import 'package:flashco/widgets/super_grid.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

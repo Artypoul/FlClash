@@ -4,9 +4,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:fl_clash/common/constant.dart';
-import 'package:fl_clash/core/desktop/helper_client.dart';
-import 'package:fl_clash/core/desktop/model.dart';
+import 'package:flashco/common/constant.dart';
+import 'package:flashco/core/desktop/helper_client.dart';
+import 'package:flashco/core/desktop/model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'fakes.dart';
@@ -22,7 +22,7 @@ void main() {
       final adapter = _ResponseAdapter((options) {
         expect(options.path, endsWith('/start'));
         expect(options.data, {
-          'address': r'\\.\pipe\FlClashCore_abc',
+          'address': r'\\.\pipe\FlashcoCore_abc',
           'sessionId': _sessionId,
         });
         return _jsonResponse({'sessionId': _sessionId, 'pid': 6456});
@@ -30,7 +30,7 @@ void main() {
       final client = _client(adapter);
 
       final response = await client.start(
-        address: r'\\.\pipe\FlClashCore_abc',
+        address: r'\\.\pipe\FlashcoCore_abc',
         sessionId: _sessionId,
       );
 
@@ -364,7 +364,7 @@ void main() {
     final adapter = _ResponseAdapter((options) {
       expect(options.queryParameters, {'coreSha256': _coreSha256});
       return ResponseBody.fromString(
-        r'C:\Program Files\FlClash\FlClashHelperService.exe',
+        r'C:\Program Files\Flashco\FlashcoHelperService.exe',
         200,
         headers: {
           helperProtocolVersionHeader: [helperProtocolVersion],
@@ -375,7 +375,7 @@ void main() {
     final client = _client(
       adapter,
       expectedHelperPath: () =>
-          r'C:\Program Files\FlClash\FlClashHelperService.exe',
+          r'C:\Program Files\Flashco\FlashcoHelperService.exe',
     );
 
     expect(await client.readiness(), HelperReadiness.ready);

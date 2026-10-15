@@ -1,4 +1,4 @@
-import 'package:fl_clash/enum/enum.dart';
+import 'package:flashco/enum/enum.dart';
 
 enum InputIssueKind { keyTooLong, valueTooLong, missingValue }
 

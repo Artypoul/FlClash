@@ -1,18 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fl_clash/bootstrap.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/state.dart';
+import 'package:flashco/bootstrap.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/config.dart';
+import 'package:flashco/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod/riverpod.dart';
 
 final _packageInfo = PackageInfo(
   appName: 'Flashco',
-  packageName: 'com.follow.clash',
+  packageName: 'com.follow.flashco',
   version: '1.2.3',
   buildNumber: '1',
 );
@@ -43,18 +43,23 @@ void main() {
   }
 
   group('user agent', () {
-    test('new branding preserves installation and subscription identity', () {
-      expect(appName, 'Flashco');
-      expect(appInstallationName, 'FlClash');
-      expect(packageName, 'com.follow.clash');
-      expect(_packageInfo.ua, startsWith('FlClash/v1.2.3'));
-    });
+    test(
+      'Flashco has its own installation and compatible subscription identity',
+      () {
+        expect(appName, 'Flashco');
+        expect(appInstallationName, 'Flashco');
+        expect(packageName, 'com.follow.flashco');
+        expect(defaultTunDeviceName, 'Flashco');
+        expect(repository, 'Artypoul/Flashco');
+        expect(_packageInfo.ua, startsWith('mihomo Flashco/v1.2.3'));
+      },
+    );
 
     test('falls back to the package user agent when none is configured', () {
       setGlobalUa('');
 
       expect(globalState.ua, _packageInfo.ua);
-      expect(globalState.ua, startsWith('FlClash/v1.2.3'));
+      expect(globalState.ua, startsWith('mihomo Flashco/v1.2.3'));
     });
 
     test('negotiates Mihomo YAML with subscription response rules', () {

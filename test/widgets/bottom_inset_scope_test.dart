@@ -1,5 +1,5 @@
-import 'package:fl_clash/widgets/inherited.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
+import 'package:flashco/widgets/inherited.dart';
+import 'package:flashco/widgets/scaffold.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 

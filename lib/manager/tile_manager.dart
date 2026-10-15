@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:fl_clash/common/app_localizations.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/plugins/app.dart';
-import 'package:fl_clash/plugins/tile.dart';
-import 'package:fl_clash/providers/providers.dart';
+import 'package:flashco/common/app_localizations.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/plugins/app.dart';
+import 'package:flashco/plugins/tile.dart';
+import 'package:flashco/providers/providers.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

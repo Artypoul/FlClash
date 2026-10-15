@@ -1,10 +1,10 @@
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/core/interface.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/database.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/connection/connections.dart';
-import 'package:fl_clash/views/dashboard/widgets/connections.dart';
+import 'package:flashco/core/controller.dart';
+import 'package:flashco/core/interface.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/database.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/connection/connections.dart';
+import 'package:flashco/views/dashboard/widgets/connections.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

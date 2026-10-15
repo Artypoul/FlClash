@@ -9,7 +9,7 @@ import 'package:setup_hooks/src/options.dart';
 import 'package:test/test.dart';
 
 void main() {
-  final ndk = Platform.environment['FLCLASH_TEST_ANDROID_NDK'];
+  final ndk = Platform.environment['FLASHCO_TEST_ANDROID_NDK'];
 
   for (final target in Target.forPlatform('android')) {
     test(
@@ -84,7 +84,7 @@ func main() {}
         expect((await builder.build(target)).rebuilt, isFalse);
       },
       skip: !Platform.isWindows || ndk == null
-          ? 'Requires Windows, Go and FLCLASH_TEST_ANDROID_NDK'
+          ? 'Requires Windows, Go and FLASHCO_TEST_ANDROID_NDK'
           : false,
       timeout: const Timeout(Duration(minutes: 3)),
     );

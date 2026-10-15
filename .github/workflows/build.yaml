@@ -529,7 +529,7 @@ jobs:
             -e "s|VERSION|$version|g" \
             -e "s|ARM_SHA256|$arm_sha|g" \
             -e "s|AMD_SHA256|$amd_sha|g" \
-            ./.github/homebrew_cask_template.rb > ./brew/Casks/flclash.rb
+            ./.github/homebrew_cask_template.rb > ./brew/Casks/flashco.rb
 
       - name: Push to Homebrew tap
         if: ${{ env.IS_STABLE == 'true' }}

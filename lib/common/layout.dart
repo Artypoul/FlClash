@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'dart:ui' show Size;
 
-import 'package:fl_clash/enum/enum.dart';
+import 'package:flashco/enum/enum.dart';
 
 import 'constant.dart';
 import 'num.dart';

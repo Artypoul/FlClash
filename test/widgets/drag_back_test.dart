@@ -1,9 +1,9 @@
-import 'package:fl_clash/common/navigator.dart';
-import 'package:fl_clash/widgets/inherited.dart';
-import 'package:fl_clash/widgets/open_container.dart';
-import 'package:fl_clash/widgets/paged_sheet.dart';
-import 'package:fl_clash/widgets/sheet.dart';
-import 'package:fl_clash/widgets/side_sheet.dart';
+import 'package:flashco/common/navigator.dart';
+import 'package:flashco/widgets/inherited.dart';
+import 'package:flashco/widgets/open_container.dart';
+import 'package:flashco/widgets/paged_sheet.dart';
+import 'package:flashco/widgets/sheet.dart';
+import 'package:flashco/widgets/side_sheet.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

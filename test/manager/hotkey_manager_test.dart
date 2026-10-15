@@ -1,8 +1,8 @@
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/manager/hotkey_manager.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/models/common.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/manager/hotkey_manager.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/config.dart';
+import 'package:flashco/models/common.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';

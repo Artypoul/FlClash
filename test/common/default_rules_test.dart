@@ -1,6 +1,6 @@
-import 'package:fl_clash/common/default_rules.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/clash_config.dart';
+import 'package:flashco/common/default_rules.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/clash_config.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

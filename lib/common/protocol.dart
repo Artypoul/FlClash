@@ -5,7 +5,7 @@ import 'package:win32_registry/win32_registry.dart';
 import 'constant.dart';
 import 'print.dart';
 
-const protocolSchemes = ['clash', 'clashmeta', 'flclash'];
+const protocolSchemes = ['clash', 'clashmeta', 'flashco'];
 
 class ProtocolRegistrationPlan {
   final String scheme;
@@ -41,7 +41,7 @@ class LinuxProtocolRegistrationPlan {
     required this.applicationsDir,
   });
 
-  String get desktopId => 'flclash-url-handler.desktop';
+  String get desktopId => 'flashco-url-handler.desktop';
 
   String get desktopPath => '$applicationsDir/$desktopId';
 

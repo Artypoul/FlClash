@@ -1,4 +1,4 @@
-import 'package:fl_clash/common/exception.dart';
+import 'package:flashco/common/exception.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

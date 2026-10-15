@@ -1,9 +1,9 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/widgets/inherited.dart';
-import 'package:fl_clash/widgets/scaffold.dart';
-import 'package:fl_clash/widgets/scroll.dart';
-import 'package:fl_clash/widgets/sheet.dart';
-import 'package:fl_clash/widgets/sheet_header.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/widgets/inherited.dart';
+import 'package:flashco/widgets/scaffold.dart';
+import 'package:flashco/widgets/scroll.dart';
+import 'package:flashco/widgets/sheet.dart';
+import 'package:flashco/widgets/sheet_header.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';

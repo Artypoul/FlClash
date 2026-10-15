@@ -2,13 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/native.dart';
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/database/database.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/database/database.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/action.dart';
+import 'package:flashco/providers/config.dart';
+import 'package:flashco/l10n/l10n.dart';
 import 'package:flutter/widgets.dart' show Locale;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart';
@@ -31,7 +31,7 @@ void main() {
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({'version': 1});
     await AppLocalizations.load(const Locale('en'));
-    home = Directory.systemTemp.createTempSync('flclash-backup-action-');
+    home = Directory.systemTemp.createTempSync('flashco-backup-action-');
     AppPath.supportDirectory = () async => home;
     AppPath.temporaryDirectory = () async => home;
     AppPath.cacheDirectory = () async => home;
@@ -68,7 +68,7 @@ void main() {
     late Directory kept;
 
     setUp(() {
-      kept = Directory.systemTemp.createTempSync('flclash-backup-kept-');
+      kept = Directory.systemTemp.createTempSync('flashco-backup-kept-');
       addTearDown(() => kept.deleteSync(recursive: true));
     });
 
@@ -271,7 +271,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('current');
       final added = File(await appPath.getProfilePath('42'));
-      final staging = Directory.systemTemp.createTempSync('flclash-staging-');
+      final staging = Directory.systemTemp.createTempSync('flashco-staging-');
       addTearDown(() => staging.deleteSync(recursive: true));
       for (final id in [41, 42]) {
         File(BackupEntries.resolve(staging.path, BackupEntries.profile(id)))

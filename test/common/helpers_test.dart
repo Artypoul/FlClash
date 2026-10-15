@@ -1,5 +1,5 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/enum/enum.dart';
 import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
@@ -254,7 +254,7 @@ void main() {
           '### Features\n'
           '- Item 1\n'
           '$releaseNotesEndMarker\n'
-          '<a href="FlClash-0.8.96-android-arm64-v8a.apk">APK</a>\n'
+          '<a href="Flashco-0.8.96-android-arm64-v8a.apk">APK</a>\n'
           '- Not part of the notes\n';
 
       expect(parseReleaseBody(body), ['Item 1']);

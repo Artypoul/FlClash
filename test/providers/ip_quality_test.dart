@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
-import 'package:fl_clash/common/ip_quality.dart';
-import 'package:fl_clash/common/request.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/providers/ip_quality.dart';
+import 'package:flashco/common/ip_quality.dart';
+import 'package:flashco/common/request.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/providers/ip_quality.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:riverpod/riverpod.dart';
 

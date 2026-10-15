@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/enum/enum.dart';
 
 import 'model.dart';
 

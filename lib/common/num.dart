@@ -1,8 +1,8 @@
 import 'dart:math';
 
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/common.dart';
-import 'package:fl_clash/state.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/common.dart';
+import 'package:flashco/state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 

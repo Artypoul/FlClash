@@ -1,15 +1,15 @@
 import 'dart:io';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/core/controller.dart';
-import 'package:fl_clash/core/interface.dart';
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/models.dart';
-import 'package:fl_clash/providers/providers.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/dashboard/widget_metrics.dart';
-import 'package:fl_clash/views/dashboard/widgets/profile_detail.dart';
-import 'package:fl_clash/views/dashboard/widgets/profiles.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/core/controller.dart';
+import 'package:flashco/core/interface.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/models/models.dart';
+import 'package:flashco/providers/providers.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/dashboard/widget_metrics.dart';
+import 'package:flashco/views/dashboard/widgets/profile_detail.dart';
+import 'package:flashco/views/dashboard/widgets/profiles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';

@@ -1,5 +1,5 @@
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/icons/icons.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/icons/icons.dart';
 import 'package:material_ui/material_ui.dart';
 
 import 'card.dart';

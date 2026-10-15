@@ -92,10 +92,10 @@ BEGIN
             VALUE "CompanyName", "com.follow" "\0"
             VALUE "FileDescription", "Flashco" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "clash" "\0"
+            VALUE "InternalName", "Flashco" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.follow. All rights reserved." "\0"
-            VALUE "OriginalFilename", "FlClash.exe" "\0"
-            VALUE "ProductName", "clash" "\0"
+            VALUE "OriginalFilename", "Flashco.exe" "\0"
+            VALUE "ProductName", "Flashco" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:fl_clash/common/common.dart';
+import 'package:flashco/common/common.dart';
 import 'package:material_ui/material_ui.dart';
 
 /// A pulsing bar that holds the place of one line of [style] text.

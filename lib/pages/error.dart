@@ -1,7 +1,7 @@
-import 'package:fl_clash/common/color.dart';
-import 'package:fl_clash/common/shape.dart';
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/widgets/navigation_dock.dart';
+import 'package:flashco/common/color.dart';
+import 'package:flashco/common/shape.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/widgets/navigation_dock.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 

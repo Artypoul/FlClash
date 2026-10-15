@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/providers/app.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/providers/state.dart';
-import 'package:fl_clash/l10n/l10n.dart';
-import 'package:fl_clash/state.dart';
-import 'package:fl_clash/views/config/on_demand.dart';
-import 'package:fl_clash/widgets/widgets.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/config.dart';
+import 'package:flashco/providers/state.dart';
+import 'package:flashco/l10n/l10n.dart';
+import 'package:flashco/state.dart';
+import 'package:flashco/views/config/on_demand.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

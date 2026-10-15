@@ -1,6 +1,6 @@
-import 'package:fl_clash/icons/icons.dart';
-import 'package:fl_clash/pages/editor.dart';
-import 'package:fl_clash/providers/app.dart';
+import 'package:flashco/icons/icons.dart';
+import 'package:flashco/pages/editor.dart';
+import 'package:flashco/providers/app.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';

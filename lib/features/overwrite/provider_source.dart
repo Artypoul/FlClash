@@ -1,5 +1,5 @@
-import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/l10n/l10n.dart';
+import 'package:flashco/enum/enum.dart';
+import 'package:flashco/l10n/l10n.dart';
 
 extension ProviderSourceExt on ProviderSource {
   String label(AppLocalizations appLocalizations) => switch (this) {

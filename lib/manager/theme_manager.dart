@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/common/theme.dart';
-import 'package:fl_clash/providers/action.dart';
-import 'package:fl_clash/providers/config.dart';
-import 'package:fl_clash/state.dart';
+import 'package:flashco/common/common.dart';
+import 'package:flashco/common/theme.dart';
+import 'package:flashco/providers/action.dart';
+import 'package:flashco/providers/config.dart';
+import 'package:flashco/state.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

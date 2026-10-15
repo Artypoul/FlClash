@@ -4,18 +4,20 @@
 
 # Flashco
 
+Based on [FlClash](https://github.com/chen08209/FlClash), under GPL-3.0.
+
 A multi-platform proxy client based on FlClash and ClashMeta. Simple to use, open source and ad-free.
 
 **English** · [简体中文](README_zh_CN.md)
 
-Upstream FlClash resources:
+Project and upstream resources:
 
-[![Upstream release](https://img.shields.io/github/v/release/chen08209/FlClash?style=flat-square&label=release)](https://github.com/chen08209/FlClash/releases/latest)
-[![Upstream downloads](https://img.shields.io/github/downloads/chen08209/FlClash/total?style=flat-square&logo=github)](https://github.com/chen08209/FlClash/releases)
-[![License](https://img.shields.io/github/license/chen08209/FlClash?style=flat-square)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/Artypoul/Flashco?style=flat-square&label=release)](https://github.com/Artypoul/Flashco/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/Artypoul/Flashco/total?style=flat-square&logo=github)](https://github.com/Artypoul/Flashco/releases)
+[![License](https://img.shields.io/github/license/Artypoul/Flashco?style=flat-square)](LICENSE)
 [![Upstream Telegram](https://img.shields.io/badge/Telegram-channel-26A5E4?style=flat-square&logo=telegram&logoColor=white)](https://t.me/FlClash)
 
-[Upstream website](https://chen08209.github.io/FlClash) · [Download](#download) · [Changelog](CHANGELOG.md) · [Build from source](#build-from-source)
+[Upstream website](https://artypoul.github.io/Flashco) · [Download](#download) · [Changelog](CHANGELOG.md) · [Build from source](#build-from-source)
 
 </div>
 
@@ -41,10 +43,10 @@ Upstream FlClash resources:
 
 ## Download
 
-The links below provide upstream FlClash builds, not Flashco builds. Build Flashco from this checkout using the instructions below.
+The links below point to Flashco releases. Until a release is published, build Flashco from this checkout using the instructions below.
 
-Get the upstream build from [GitHub Releases](https://github.com/chen08209/FlClash/releases/latest), or open the
-[website](https://chen08209.github.io/FlClash#download), which picks the right file for your device.
+Get Flashco from [GitHub Releases](https://github.com/Artypoul/Flashco/releases/latest), or open the
+[website](https://artypoul.github.io/Flashco#download), which picks the right file for your device.
 
 | Platform | Packages | Notes |
 | --- | --- | --- |
@@ -54,8 +56,8 @@ Get the upstream build from [GitHub Releases](https://github.com/chen08209/FlCla
 | Linux | `.deb`, `.rpm` and AppImage, for x64 and ARM64 | See the tray note below. |
 
 <p>
-  <a href="https://chen08209.github.io/FlClash-fdroid-repo/repo?fingerprint=789D6D32668712EF7672F9E58DEEB15FBD6DCEEC5AE7A4371EA72F2AAE8A12FD"><img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" height="56"></a>
-  <a href="https://github.com/chen08209/FlClash/releases/latest"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" height="56"></a>
+  <a href="https://artypoul.github.io/Flashco-fdroid-repo/repo?fingerprint=789D6D32668712EF7672F9E58DEEB15FBD6DCEEC5AE7A4371EA72F2AAE8A12FD"><img alt="Get it on F-Droid" src="snapshots/get-it-on-fdroid.svg" height="56"></a>
+  <a href="https://github.com/Artypoul/Flashco/releases/latest"><img alt="Get it on GitHub" src="snapshots/get-it-on-github.svg" height="56"></a>
 </p>
 
 **Homebrew (upstream FlClash)**
@@ -77,10 +79,10 @@ sudo dnf install libayatana-appindicator-gtk3     # Fedora
 
 ## Usage
 
-Flashco keeps the existing application IDs, settings paths, executable names and URL schemes so updates preserve your installation and data.
+Flashco uses its own application IDs, settings paths, executable names and flashco URL scheme. It installs separately from FlClash; move profiles and settings through export/import.
 
 **Import a profile from a link.** Opening a link in this form imports the subscription into Flashco. The `clashmeta://`
-and `flclash://` schemes work the same way.
+and `flashco://` schemes work the same way.
 
 ```text
 clash://install-config?url=<URL-encoded subscription link>
@@ -90,15 +92,15 @@ clash://install-config?url=<URL-encoded subscription link>
 activity with one of these actions:
 
 ```text
-com.follow.clash.action.START
-com.follow.clash.action.STOP
-com.follow.clash.action.TOGGLE
+com.follow.flashco.action.START
+com.follow.flashco.action.STOP
+com.follow.flashco.action.TOGGLE
 ```
 
 From a computer, the same works over adb:
 
 ```bash
-adb shell am start -a com.follow.clash.action.TOGGLE
+adb shell am start -a com.follow.flashco.action.TOGGLE
 ```
 
 ## Build from source
@@ -130,12 +132,12 @@ Run `dart setup.dart --help` for the remaining options, such as `--targets` to b
 
 The following community links and star history belong to upstream FlClash. Upstream questions and announcements go to the
 [upstream Telegram channel](https://t.me/FlClash); bugs and feature requests go to
-[upstream GitHub Issues](https://github.com/chen08209/FlClash/issues).
+[Flashco GitHub Issues](https://github.com/Artypoul/Flashco/issues).
 
-<a href="https://star-history.com/#chen08209/FlClash&Date">
+<a href="https://star-history.com/#Artypoul/Flashco&Date">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date&theme=dark">
-    <img alt="Upstream star history" src="https://api.star-history.com/svg?repos=chen08209/FlClash&type=Date" width="640">
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Artypoul/Flashco&type=Date&theme=dark">
+    <img alt="Star history" src="https://api.star-history.com/svg?repos=Artypoul/Flashco&type=Date" width="640">
   </picture>
 </a>
 
