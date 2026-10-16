@@ -6,6 +6,54 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Migration', () {
+    test(
+      'persists TUN defaults for a new installation with API closed',
+      () async {
+        final store = _FakeMigrationStore(configMap: null, version: 0);
+
+        final config = await Migration(
+          store: store,
+        ).run(isNewInstallation: true);
+
+        expect(config.patchClashConfig.tun.enable, isTrue);
+        expect(config.patchClashConfig.tun.autoRoute, isTrue);
+        expect(config.patchClashConfig.externalController.name, 'close');
+        expect(config.patchClashConfig.secret, isEmpty);
+        expect(store.savedConfig, config);
+        expect(store.version, Migration.currentVersion);
+      },
+    );
+
+    test('preserves a saved choice to disable TUN', () async {
+      final configMap = _createConfigMap();
+      final store = _FakeMigrationStore(
+        configMap: configMap,
+        version: Migration.currentVersion,
+      );
+
+      final config = await Migration(store: store).run();
+
+      expect(config.patchClashConfig.tun.enable, isFalse);
+      expect(config.patchClashConfig.tun.autoRoute, isFalse);
+      expect(store.savedConfig, isNull);
+    });
+
+    test(
+      'does not enable TUN when recovering missing existing settings',
+      () async {
+        final store = _FakeMigrationStore(
+          configMap: null,
+          version: Migration.currentVersion,
+        );
+
+        final config = await Migration(store: store).run();
+
+        expect(config.patchClashConfig.tun.enable, isFalse);
+        expect(config.patchClashConfig.tun.autoRoute, isFalse);
+        expect(store.savedConfig, isNull);
+      },
+    );
+
     test('returns current config without rewriting storage', () async {
       final configMap = _createConfigMap(
         davProps: const DAVProps(

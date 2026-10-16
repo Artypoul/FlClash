@@ -75,7 +75,7 @@ class Migration {
 
   static const currentVersion = 1;
 
-  Future<Config> run() async {
+  Future<Config> run({bool isNewInstallation = false}) async {
     final configMap = await _store.getConfigMap();
     var oldVersion = await _store.getVersion();
     Config? config;
@@ -128,6 +128,16 @@ class Migration {
     }
 
     config = Config.realFromJson(data.configMap);
+    if (isNewInstallation) {
+      config = config.copyWith(
+        patchClashConfig: config.patchClashConfig.copyWith(
+          tun: config.patchClashConfig.tun.copyWith(
+            enable: true,
+            autoRoute: true,
+          ),
+        ),
+      );
+    }
     await _store.restore(data);
     if (!await _store.saveConfig(config)) {
       // An unopenable store is reported later by the corrupt-cache dialog,

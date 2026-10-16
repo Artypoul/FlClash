@@ -102,10 +102,11 @@ class Bootstrap {
   ) async {
     await _claimDataDirectory();
     globalState.packageInfo = await PackageInfo.fromPlatform();
-    if (await preferences.isNewInstallation) {
+    final isNewInstallation = await preferences.isNewInstallation;
+    if (isNewInstallation) {
       await database.initializeNewInstallationRules(russianServiceDirectRules);
     }
-    var config = await migration.run();
+    var config = await migration.run(isNewInstallation: isNewInstallation);
     _bootDecision = await bootGuard.evaluate(
       profileId: config.currentProfileId,
       crashlyticsEnabled: config.appSettingProps.crashlytics,
