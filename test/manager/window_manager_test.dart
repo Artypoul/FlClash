@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flashco/common/app_localizations.dart';
 import 'package:flashco/common/app_ports.dart';
@@ -142,11 +143,19 @@ void main() {
     container.dispose();
   });
 
-  Future<WindowListener> pumpWindowManager(WidgetTester tester) async {
+  Future<WindowListener> pumpWindowManager(
+    WidgetTester tester, {
+    Stream<ProcessSignal>? terminateSignals,
+  }) async {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(home: WindowManager(child: SizedBox.shrink())),
+        child: MaterialApp(
+          home: WindowManager(
+            terminateSignals: terminateSignals,
+            child: const SizedBox.shrink(),
+          ),
+        ),
       ),
     );
     await tester.pump();
@@ -184,6 +193,22 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(_RecordingSystemAction.calls, ['exit']);
+  });
+
+  testWidgets('a terminate signal exits like a terminate request', (
+    tester,
+  ) async {
+    final signals = StreamController<ProcessSignal>();
+    addTearDown(signals.close);
+    await pumpWindowManager(tester, terminateSignals: signals.stream);
+
+    signals.add(ProcessSignal.sigterm);
+    await tester.pumpAndSettle();
+
+    expect(_RecordingSystemAction.calls, ['exit']);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    expect(signals.hasListener, isFalse);
   });
 
   testWidgets('moving the window records its new position', (tester) async {
@@ -249,7 +274,7 @@ void main() {
 
       expect(window.blurRequests, hasLength(1));
       expect(window.blurRequests.single.enabled, isTrue);
-      expect(window.blurRequests.single.brightness, Brightness.dark);
+      expect(window.blurRequests.single.brightness, Brightness.light);
       expect(container.read(windowBlurProvider), isTrue);
     });
 
@@ -282,11 +307,11 @@ void main() {
 
       container
           .read(themeSettingProvider.notifier)
-          .update((state) => state.copyWith(themeMode: ThemeMode.light));
+          .update((state) => state.copyWith(themeMode: ThemeMode.dark));
       await tester.pumpAndSettle();
 
       expect(window.blurRequests.last.enabled, isTrue);
-      expect(window.blurRequests.last.brightness, Brightness.light);
+      expect(window.blurRequests.last.brightness, Brightness.dark);
       expect(container.read(windowBlurProvider), isTrue);
     });
   });

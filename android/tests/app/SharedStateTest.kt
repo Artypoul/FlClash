@@ -3,6 +3,7 @@ package com.follow.flashco.models
 import com.follow.flashco.common.AccessControlMode
 import com.google.gson.Gson
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -17,12 +18,13 @@ class SharedStateTest {
 
     @Test
     fun `setup params use the kebab-case spelling Flutter writes`() {
-        val json = """{"test-url":"https://example.test/204","selected-map":{"GLOBAL":"auto"}}"""
+        val json = """{"test-url":"https://example.test/204","selected-map":{"GLOBAL":"auto"},"skip-cert-verify":true}"""
 
         val params = gson.fromJson(json, SetupParams::class.java)
 
         assertEquals("https://example.test/204", params.testUrl)
         assertEquals(mapOf("GLOBAL" to "auto"), params.selectedMap)
+        assertTrue(params.skipCertVerify)
     }
 
     @Test
@@ -33,6 +35,7 @@ class SharedStateTest {
 
         assertTrue(encoded.contains("\"test-url\""))
         assertTrue(encoded.contains("\"selected-map\""))
+        assertTrue(encoded.contains("\"skip-cert-verify\""))
         assertTrue(!encoded.contains("testUrl"))
         assertTrue(!encoded.contains("selectedMap"))
     }
@@ -43,7 +46,7 @@ class SharedStateTest {
             {
               "startTip": "Starting",
               "stopTip": "Stopping",
-              "crashlytics": false,
+              "crashlytics": true,
               "currentProfileName": "Work",
               "stopText": "Halt",
               "onlyStatisticsProxy": true,
@@ -75,8 +78,8 @@ class SharedStateTest {
         val state = gson.fromJson(json, SharedState::class.java)
 
         assertEquals("Starting", state.startTip)
+        assertFalse(gson.toJson(state).contains("crashlytics"))
         assertEquals("Work", state.currentProfileName)
-        assertEquals(false, state.crashlytics)
         assertEquals(true, state.onlyStatisticsProxy)
         assertEquals(false, state.showStopAction)
         assertEquals(7890, state.vpnOptions?.port)
@@ -95,7 +98,6 @@ class SharedStateTest {
 
         assertEquals("Flashco", defaults.currentProfileName)
         assertEquals("Stop", defaults.stopText)
-        assertEquals(true, defaults.crashlytics)
         assertEquals(false, defaults.onlyStatisticsProxy)
         assertEquals(true, defaults.showStopAction)
         assertNull(defaults.vpnOptions)
@@ -112,7 +114,6 @@ class SharedStateTest {
         assertNotNull(state)
         assertEquals("Starting VPN...", state.startTip)
         assertEquals("Flashco", state.currentProfileName)
-        assertEquals(true, state.crashlytics)
         assertNull(state.vpnOptions)
         assertNull(state.setupParams)
     }

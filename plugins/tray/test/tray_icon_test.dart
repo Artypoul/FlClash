@@ -54,7 +54,7 @@ void main() {
     await Tray.instance.show(const TraySpec(icon: TrayIcon.asset(_asset)));
 
     expect(
-      lastIcon()['path'],
+      (lastIcon()['path'] as String).replaceAll('\\', '/'),
       endsWith('flutter_assets/assets/images/tray/unix/3.0x/status_1.png'),
     );
   });
@@ -67,7 +67,7 @@ void main() {
       await Tray.instance.show(const TraySpec(icon: TrayIcon.asset(_asset)));
 
       expect(
-        lastIcon()['path'],
+        (lastIcon()['path'] as String).replaceAll('\\', '/'),
         endsWith('flutter_assets/assets/images/tray/unix/status_1.png'),
       );
     },

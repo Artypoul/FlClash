@@ -30,8 +30,7 @@ abstract final class BackupEntries {
   static String script(Object id) => 'scripts/$id.js';
 
   static String provider(ClashProvider provider) =>
-      '$providersDirectoryName/${providerCacheDirectoryName(provider.kind)}/'
-      '${provider.fileName}';
+      '$providersDirectoryName/$rulesProviderDirectoryName/${provider.fileName}';
 
   /// A remote provider's cache belongs to the Core and downloads again.
   static List<String> of({
@@ -131,7 +130,7 @@ Future<MigrationData> readBackupArchive({
   if (!await configFile.exists()) {
     throw const BackupException(BackupFailure.invalid);
   }
-  final configMap = _decodeConfig(await configFile.readAsString());
+  var configMap = _decodeConfig(await configFile.readAsString());
   final version = configMap['version'] ?? 0;
   if (version is! int) {
     throw const BackupException(BackupFailure.invalid);
@@ -140,12 +139,16 @@ Future<MigrationData> readBackupArchive({
     throw const BackupException(BackupFailure.newerVersion);
   }
   if (version == 0) {
-    return migrateLegacyConfig(
+    final data = await migrateLegacyConfig(
       configMap: configMap,
       sourcePath: stagingDirPath,
       targetPath: stagingDirPath,
     );
+    return data.copyWith(
+      configMap: upgradeConfigMap(data.configMap, fromVersion: version),
+    );
   }
+  configMap = upgradeConfigMap(configMap, fromVersion: version)!;
   final databaseFile = File(join(stagingDirPath, backupDatabaseName));
   if (!await databaseFile.exists()) {
     return MigrationData(configMap: configMap);
@@ -169,33 +172,34 @@ Future<MigrationData> readBackupArchive({
     final results = await Future.wait([
       database.profilesDao.query().get(),
       database.scriptsDao.query().get(),
-      database.rules.all().map((item) => item.toRule()).get(),
-      (database.select(database.profileRuleLinks)..orderBy([
+      (database.select(database.rules)..orderBy([
             (t) => OrderingTerm(expression: t.order, nulls: NullsOrder.last),
           ]))
-          .map((item) => item.toLink())
+          .map((item) => item.toRule())
+          .get(),
+      database
+          .select(database.disabledRules)
+          .map((item) => item.toDisabledRule())
           .get(),
       (database.select(database.proxyGroups)..orderBy([
             (t) => OrderingTerm(expression: t.order, nulls: NullsOrder.last),
           ]))
           .map((item) => item.toProxyGroup())
           .get(),
-      database.clashProvidersDao.queryAll().get(),
-      (database.select(database.customProxies)..orderBy([
-            (t) => OrderingTerm(expression: t.order, nulls: NullsOrder.last),
-          ]))
-          .map((item) => item.toCustomProxy())
-          .get(),
+      database.clashProvidersDao.query().get(),
+      database.customProxiesDao.query().get(),
+      database.proxyDialers.readable((row) => row.toProxyDialer()).get(),
     ]);
     return MigrationData(
       configMap: configMap,
       profiles: results[0].cast<Profile>(),
       scripts: results[1].cast<Script>(),
       rules: results[2].cast<Rule>(),
-      links: results[3].cast<ProfileRuleLink>(),
+      disabledRules: results[3].cast<DisabledRule>(),
       proxyGroups: results[4].cast<ProxyGroup>(),
       clashProviders: results[5].cast<ClashProvider>(),
       customProxies: results[6].cast<CustomProxy>(),
+      proxyDialers: results[7].cast<ProxyDialer>(),
     );
   } finally {
     await database.close();

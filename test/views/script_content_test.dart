@@ -4,8 +4,9 @@ import 'package:flashco/l10n/l10n.dart';
 import 'package:flashco/models/models.dart';
 import 'package:flashco/providers/providers.dart';
 import 'package:flashco/state.dart';
-import 'package:flashco/views/profiles/overwrite/script.dart';
-import 'package:flashco/widgets/inherited.dart';
+import 'package:flashco/views/config/scripts.dart';
+import 'package:flashco/views/profiles/extend/script.dart';
+import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,7 +36,7 @@ void main() {
   }) {
     final profile = Profile.normal(label: 'p').copyWith(
       id: _profileId,
-      overwriteType: OverwriteType.script,
+      extendType: ExtendType.script,
       scriptId: selectedScriptId,
     );
     final built = ProviderContainer(
@@ -85,12 +86,45 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('the configure entry opens the scripts in a sheet over it', (
+    tester,
+  ) async {
+    container = buildContainer(scripts: [_script(10, 'alpha')]);
+
+    await pumpScriptContent(tester);
+    await tester.tap(find.text(currentAppLocalizations.goToConfigureScript));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ScriptsView), findsOneWidget);
+    expect(find.text(currentAppLocalizations.extendScript), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('leaves the gap the standard mode leaves above its entry', (
+    tester,
+  ) async {
+    container = buildContainer(scripts: [_script(10, 'alpha')]);
+
+    await pumpScriptContent(tester);
+
+    final listBottom = tester.getBottomLeft(find.byType(DecorationListItem)).dy;
+    final entryTop = tester
+        .getTopLeft(
+          find.descendant(
+            of: find.byType(MoreActionButton),
+            matching: find.byType(CommonCard),
+          ),
+        )
+        .dy;
+    expect(entryTop - listBottom, 20);
+  });
+
   testWidgets('renders only the header when no script exists', (tester) async {
     container = buildContainer(scripts: const []);
 
     await pumpScriptContent(tester);
 
-    expect(find.text(currentAppLocalizations.overrideScript), findsOneWidget);
+    expect(find.text(currentAppLocalizations.extendScript), findsOneWidget);
     expect(find.byType(Radio<int>), findsNothing);
   });
 

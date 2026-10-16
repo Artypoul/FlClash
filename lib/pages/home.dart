@@ -4,8 +4,8 @@ import 'package:flashco/icons/icons.dart';
 import 'package:flashco/manager/app_manager.dart';
 import 'package:flashco/models/common.dart';
 import 'package:flashco/providers/providers.dart';
-import 'package:flashco/views/dashboard/widgets/start_button.dart';
 import 'package:flashco/widgets/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -74,12 +74,6 @@ class _HomeShell extends ConsumerWidget {
     final floating = ref.watch(
       appSettingProvider.select((state) => state.floatingNavigationBar),
     );
-    final hasProfile = ref.watch(
-      profilesProvider.select((profiles) => profiles.isNotEmpty),
-    );
-    final isDashboard = ref.watch(
-      currentPageLabelProvider.select((label) => label == PageLabel.dashboard),
-    );
     return Material(
       color: context.colorScheme.surface,
       child: Column(
@@ -117,9 +111,6 @@ class _HomeShell extends ConsumerWidget {
                         onSelected: (index) {
                           _handleToPage(navigationItems[index].label, ref);
                         },
-                        trailing: hasProfile && isDashboard
-                            ? const StartButton()
-                            : null,
                       ),
                     ),
                   ),
@@ -224,7 +215,7 @@ class _NavigationPage extends StatelessWidget {
     return Consumer(
       builder: (_, ref, child) {
         final isActive = ref.watch(
-          currentPageLabelProvider.select((label) => label == item.label),
+          shownPageLabelProvider.select((label) => label == item.label),
         );
         // A kept-alive page off screen still ticks its animations, and
         // each tick asks for a frame.
@@ -277,15 +268,24 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
   @override
   void didUpdateWidget(covariant _HomePageView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.navigationItems.length != widget.navigationItems.length) {
+    if (!listEquals(
+      _labelsOf(oldWidget.navigationItems),
+      _labelsOf(widget.navigationItems),
+    )) {
       _order = null;
       _updatePageController();
     }
   }
 
-  int get _pageIndex {
-    final pageLabel = ref.read(currentPageLabelProvider);
-    return widget.navigationItems.indexWhere((item) => item.label == pageLabel);
+  static List<PageLabel> _labelsOf(List<NavigationItem> items) => [
+    for (final item in items) item.label,
+  ];
+
+  int get _pageIndex => _indexOf(ref.read(currentPageLabelProvider));
+
+  int _indexOf(PageLabel pageLabel) {
+    final shown = shownPageLabelOf(pageLabel, widget.navigationItems);
+    return widget.navigationItems.indexWhere((item) => item.label == shown);
   }
 
   Future<void> _toPage(
@@ -295,9 +295,7 @@ class _HomePageViewState extends ConsumerState<_HomePageView> {
     if (!mounted) {
       return;
     }
-    final index = widget.navigationItems.indexWhere(
-      (item) => item.label == pageLabel,
-    );
+    final index = _indexOf(pageLabel);
     if (index == -1) {
       return;
     }
@@ -437,7 +435,7 @@ class HomeBackScopeContainer extends ConsumerWidget {
   Widget build(BuildContext context, ref) {
     return CommonPopScope(
       onPop: (context) async {
-        final pageLabel = ref.read(currentPageLabelProvider);
+        final pageLabel = ref.read(shownPageLabelProvider);
         final realContext =
             GlobalObjectKey(pageLabel).currentContext ?? context;
         final canPop = Navigator.canPop(realContext);

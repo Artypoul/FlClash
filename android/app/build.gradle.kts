@@ -1,31 +1,9 @@
-import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
-import groovy.json.JsonSlurper
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
 plugins {
     id("com.android.application")
     id("dev.flutter.flutter-gradle-plugin")
-    id("com.google.gms.google-services") apply false
-    id("com.google.firebase.crashlytics") apply false
-}
-
-val firebaseConfigFile = file("google-services.json")
-val firebasePackages = if (firebaseConfigFile.isFile) {
-    val config = JsonSlurper().parse(firebaseConfigFile) as? Map<*, *>
-    (config?.get("client") as? List<*>)?.mapNotNull { client ->
-        val info = (client as? Map<*, *>)?.get("client_info") as? Map<*, *>
-        val androidInfo = info?.get("android_client_info") as? Map<*, *>
-        androidInfo?.get("package_name") as? String
-    }?.toSet().orEmpty()
-} else {
-    emptySet()
-}
-val hasFirebaseConfig = setOf("com.follow.flashco", "com.follow.flashco.dev")
-    .all { it in firebasePackages }
-if (hasFirebaseConfig) {
-    apply(plugin = "com.google.gms.google-services")
-    apply(plugin = "com.google.firebase.crashlytics")
 }
 
 val localProperties = Properties().apply {
@@ -100,11 +78,6 @@ android {
                 "proguard-rules.pro",
             )
 
-            if (hasFirebaseConfig) {
-                configure<CrashlyticsExtension> {
-                    nativeSymbolUploadEnabled = hasReleaseSigning
-                }
-            }
         }
     }
 
@@ -124,13 +97,6 @@ flutter {
     source = "../.."
 }
 
-// The Crashlytics plugin finalizes R8 with the mapping upload but leaves the native symbol upload to the caller.
-if (hasReleaseSigning && hasFirebaseConfig) {
-    tasks.matching { it.name == "assembleRelease" || it.name == "bundleRelease" }.configureEach {
-        finalizedBy("uploadCrashlyticsSymbolFileRelease")
-    }
-}
-
 dependencies {
     implementation(project(":service"))
     implementation(project(":common"))
@@ -140,9 +106,6 @@ dependencies {
     implementation(libs.smali.dexlib2) {
         exclude(group = "com.google.guava", module = "guava")
     }
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.crashlytics.ndk)
-    implementation(libs.firebase.analytics)
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
 }

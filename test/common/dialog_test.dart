@@ -7,7 +7,6 @@ import 'package:flashco/models/models.dart';
 import 'package:flashco/providers/app.dart';
 import 'package:flashco/state.dart';
 import 'package:flashco/views/disclaimer.dart';
-import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,8 +17,9 @@ import '../helpers/test_app.dart';
 Future<ProviderContainer> _pumpHost(
   WidgetTester tester, {
   Widget Function(Widget child)? homeBuilder,
+  Size size = const Size(1000, 800),
 }) async {
-  tester.view.physicalSize = const Size(1000, 800);
+  tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
@@ -27,9 +27,7 @@ Future<ProviderContainer> _pumpHost(
   final container = ProviderContainer();
   addTearDown(container.dispose);
   globalState.container = container;
-  container
-      .read(viewSizeProvider.notifier)
-      .update((_) => const Size(1000, 800));
+  container.read(viewSizeProvider.notifier).update((_) => size);
 
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -42,6 +40,20 @@ Future<ProviderContainer> _pumpHost(
   );
   await tester.pump();
   return container;
+}
+
+FilledButton _disclaimerAgreeButton(WidgetTester tester) {
+  return tester.widget<FilledButton>(
+    find.descendant(
+      of: find.byType(DisclaimerView),
+      matching: find.byType(FilledButton),
+    ),
+  );
+}
+
+Future<void> _agree(WidgetTester tester) async {
+  await tester.tap(find.text('Agree'));
+  await tester.pumpAndSettle();
 }
 
 /// The real manager stack mounts [StatusManager] above the app navigator, so
@@ -205,7 +217,7 @@ void main() {
     await result;
   });
 
-  testWidgets('showAllUpdatingMessagesDialog lists every message', (
+  testWidgets('showFailureDetails groups failures under their reason', (
     tester,
   ) async {
     await _pumpHost(tester);
@@ -213,29 +225,30 @@ void main() {
     const longMessage =
         'failed to update provider because the Go core returned a very long '
         'error message that cannot fit on a single line';
-    final result = dialogs.showAllUpdatingMessagesDialog(const [
+    final result = dialogs.showFailureDetails(const [
       UpdatingMessage(label: 'profile-a', message: 'updated'),
       UpdatingMessage(label: 'profile-b', message: longMessage),
+      UpdatingMessage(label: 'profile-c', message: longMessage),
     ]);
     await tester.pumpAndSettle();
 
+    expect(find.byType(AlertDialog), findsNothing);
+    expect(find.text('Error details'), findsOneWidget);
     expect(find.text('profile-a'), findsOneWidget);
     expect(find.text('profile-b'), findsOneWidget);
+    expect(find.text('profile-c'), findsOneWidget);
     final messageText = tester.widget<Text>(find.text(longMessage));
-    expect(messageText.maxLines, 2);
-    expect(messageText.overflow, TextOverflow.ellipsis);
-    expect(find.byGlyph(AppGlyphs.error), findsNothing);
+    expect(messageText.maxLines, isNull);
     expect(
-      find.ancestor(
-        of: find.text(longMessage),
-        matching: find.byType(TooltipText),
-      ),
-      findsOneWidget,
+      tester.getTopLeft(find.text('profile-c')).dy,
+      lessThan(tester.getTopLeft(find.text(longMessage)).dy),
     );
+    expect(find.byGlyph(AppGlyphs.error), findsNothing);
 
-    await tester.tap(find.text('Confirm'));
+    Navigator.of(tester.element(find.text('profile-a'))).pop();
     await tester.pumpAndSettle();
-    expect(await result, isTrue);
+    await result;
+    expect(find.text('profile-a'), findsNothing);
   });
 
   testWidgets(
@@ -246,8 +259,7 @@ void main() {
       final agreed = requestDisclaimerConsent();
       await tester.pumpAndSettle();
       expect(find.text('Data collection and privacy'), findsOneWidget);
-      await tester.tap(find.text('Agree'));
-      await tester.pumpAndSettle();
+      await _agree(tester);
       expect(await agreed, isTrue);
 
       final declined = requestDisclaimerConsent();
@@ -264,12 +276,69 @@ void main() {
     },
   );
 
+  for (final size in [const Size(1000, 800), const Size(400, 800)]) {
+    testWidgets(
+      'consent takes one click without scrolling or typing at $size',
+      (tester) async {
+        await _pumpHost(tester, size: size);
+        final agreed = requestDisclaimerConsent();
+        await tester.pumpAndSettle();
+
+        expect(_disclaimerAgreeButton(tester).onPressed, isNotNull);
+        await _agree(tester);
+
+        expect(find.byType(TextField), findsNothing);
+        expect(find.byType(DisclaimerView), findsNothing);
+        expect(await agreed, isTrue);
+      },
+    );
+  }
+  testWidgets(
+    'disclaimer consent on desktop keeps the title clear of the window corner',
+    (tester) async {
+      await _pumpHost(tester);
+
+      final agreed = requestDisclaimerConsent();
+      await tester.pumpAndSettle();
+
+      final view = find.byType(DisclaimerView);
+      expect(
+        find.descendant(of: view, matching: find.byType(AppBar)),
+        findsNothing,
+        reason:
+            'the macOS traffic lights sit over the top-left corner, where an '
+            'app bar puts its back button, and backing out declines anyway',
+      );
+      expect(
+        tester
+            .getTopLeft(
+              find.descendant(of: view, matching: find.text('Disclaimer')),
+            )
+            .dy,
+        greaterThanOrEqualTo(macOSTrafficLightsArea.height),
+      );
+      expect(
+        find.descendant(
+          of: find.byType(FilledButton),
+          matching: find.text('Agree'),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Exit'));
+      await tester.pumpAndSettle();
+      expect(await agreed, isFalse);
+    },
+  );
+
   testWidgets('DisclaimerView without consent shows no agree or exit', (
     tester,
   ) async {
     await _pumpHost(tester, homeBuilder: (_) => const DisclaimerView());
 
     expect(find.text('Disclaimer'), findsWidgets);
+    expect(find.textContaining('Created for fun.'), findsOneWidget);
+    expect(find.textContaining('Clash.Meta'), findsNothing);
     expect(find.text('Agree'), findsNothing);
     expect(find.text('Exit'), findsNothing);
   });

@@ -10,7 +10,11 @@ class TestProfiles extends Profiles {
   List<Profile> build() => initial;
 
   @override
-  void put(Profile profile, {Iterable<int> renameIn = const []}) {
+  Future<bool> hasSavedProfile(int id) async =>
+      state.any((profile) => profile.id == id);
+
+  @override
+  void put(Profile profile) {
     final next = List<Profile>.from(state);
     final index = next.indexWhere((item) => item.id == profile.id);
     if (index == -1) {

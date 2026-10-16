@@ -8,6 +8,7 @@ import 'package:flashco/common/constant.dart';
 import 'package:flashco/common/print.dart';
 import 'package:flashco/enum/enum.dart';
 import 'package:path/path.dart' as p;
+import 'package:win32_registry/win32_registry.dart';
 
 import 'core_manifest.dart';
 import 'launcher.dart';
@@ -54,7 +55,7 @@ final class HelperClient {
   final Dio _dio;
   final String Function() _expectedHelperPath;
   final Future<String> Function() _readCoreSha256;
-  final String baseUrl;
+  final String Function() _baseUrl;
   String? _coreSha256Cache;
 
   HelperClient({
@@ -63,7 +64,7 @@ final class HelperClient {
     Future<String> Function()? readCoreSha256,
     String? baseUrl,
   }) : _dio = dio ?? _createDio(),
-       baseUrl = baseUrl ?? _defaultBaseUrl(),
+       _baseUrl = baseUrl == null ? _defaultBaseUrl : (() => baseUrl),
        _expectedHelperPath = expectedHelperPath ?? _defaultHelperPath,
        _readCoreSha256 = readCoreSha256 ?? _readBundledCoreSha256;
 
@@ -111,10 +112,29 @@ final class HelperClient {
       );
   }
 
+  String get baseUrl => _baseUrl();
+
   static String _defaultBaseUrl() {
     return Platform.isLinux
         ? 'http://$appHelperService'
-        : 'http://$localhost:$helperPort';
+        : 'http://$localhost:${_readHelperPort()}';
+  }
+
+  /// Helpers installed before the port was published listen on [helperPort].
+  static int _readHelperPort() {
+    if (!Platform.isWindows) {
+      return helperPort;
+    }
+    try {
+      final key = LOCAL_MACHINE.open(helperPortKey);
+      try {
+        return key.getInt(helperPortValue) ?? helperPort;
+      } finally {
+        key.close();
+      }
+    } catch (_) {
+      return helperPort;
+    }
   }
 
   static Future<String> _readBundledCoreSha256() async {

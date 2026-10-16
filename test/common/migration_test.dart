@@ -6,6 +6,112 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Migration', () {
+    test(
+      'upgrading cleans inherited bypass rules once and preserves later edits',
+      () async {
+        final configMap = _createConfigMap();
+        (configMap['networkProps']! as Map<String, Object?>)['bypassDomain'] = [
+          '*zhihu.com',
+          '*zhimg.com',
+          '*jd.com',
+          '100ime-iat-api.xfyun.cn',
+          '*360buyimg.com',
+          'localhost',
+          '*.example.org',
+        ];
+        final store = _FakeMigrationStore(configMap: configMap, version: 1);
+
+        final upgraded = await Migration(store: store).run();
+
+        expect(upgraded.networkProps.bypassDomain, [
+          'localhost',
+          '*.example.org',
+        ]);
+        expect(store.savedConfig, upgraded);
+        expect(store.version, Migration.currentVersion);
+        expect(store.restoredData?.profiles, isEmpty);
+        final edited = upgraded.copyWith(
+          networkProps: upgraded.networkProps.copyWith(
+            bypassDomain: ['localhost', '*.example.org', '*jd.com'],
+          ),
+        );
+        final nextStore = _FakeMigrationStore(
+          configMap: jsonDecode(jsonEncode(edited)) as Map<String, Object?>,
+          version: store.version,
+        );
+
+        final reloaded = await Migration(store: nextStore).run();
+
+        expect(reloaded.networkProps.bypassDomain, [
+          'localhost',
+          '*.example.org',
+          '*jd.com',
+        ]);
+        expect(nextStore.savedConfig, isNull);
+      },
+    );
+
+    test('a failed bypass upgrade does not advance the version', () async {
+      final store = _FakeMigrationStore(
+        configMap: _createConfigMap(),
+        version: 1,
+        configSaveResult: false,
+      );
+
+      await expectLater(Migration(store: store).run(), throwsStateError);
+
+      expect(store.version, 1);
+      expect(store.events, isNot(contains('setVersion')));
+    });
+
+    test(
+      'persists TUN defaults for a new installation with API closed',
+      () async {
+        final store = _FakeMigrationStore(configMap: null, version: 0);
+
+        final config = await Migration(
+          store: store,
+        ).run(isNewInstallation: true);
+
+        expect(config.patchClashConfig.tun.enable, isTrue);
+        expect(config.patchClashConfig.tun.autoRoute, isTrue);
+        expect(config.patchClashConfig.externalController.name, 'close');
+        expect(config.patchClashConfig.secret, isEmpty);
+        expect(store.savedConfig, config);
+        expect(store.version, Migration.currentVersion);
+      },
+    );
+
+    test('preserves a saved choice to disable TUN', () async {
+      final configMap = _createConfigMap();
+      final store = _FakeMigrationStore(
+        configMap: configMap,
+        version: Migration.currentVersion,
+      );
+
+      final config = await Migration(store: store).run();
+
+      expect(config.patchClashConfig.tun.enable, isFalse);
+      expect(config.patchClashConfig.tun.autoRoute, isFalse);
+      expect(store.savedConfig, isNull);
+    });
+
+    test(
+      'does not enable TUN when recovering missing existing settings',
+      () async {
+        final store = _FakeMigrationStore(
+          configMap: null,
+          version: Migration.currentVersion,
+        );
+
+        final config = await Migration(store: store).run();
+
+        expect(config.patchClashConfig.tun.enable, isFalse);
+        expect(config.patchClashConfig.tun.autoRoute, isFalse);
+        expect(store.savedConfig, isNull);
+      },
+    );
+
     test('returns current config without rewriting storage', () async {
       final configMap = _createConfigMap(
         davProps: const DAVProps(
@@ -37,7 +143,10 @@ void main() {
         );
         final davProps = configMap['davProps']! as Map<String, Object?>;
         davProps['password'] = 'secret';
-        final store = _FakeMigrationStore(configMap: configMap, version: 1);
+        final store = _FakeMigrationStore(
+          configMap: configMap,
+          version: Migration.currentVersion,
+        );
 
         final config = await Migration(store: store).run();
 
@@ -181,6 +290,22 @@ void main() {
         'saveConfig',
         'isAvailable',
       ]);
+    });
+
+    test('keeps what it can read of a damaged current config', () async {
+      final configMap = _createConfigMap()
+        ..['currentProfileId'] = 7
+        ..['excludeSSIDs'] = 'home';
+      final store = _FakeMigrationStore(
+        configMap: configMap,
+        version: Migration.currentVersion,
+      );
+
+      final config = await Migration(store: store).run();
+
+      expect(config.currentProfileId, 7);
+      expect(config.excludeSSIDs, isEmpty);
+      expect(store.events, ['getConfigMap', 'getVersion']);
     });
 
     test('keeps the current version when password obfuscation fails', () async {

@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flashco/common/request.dart';
 import 'package:flashco/enum/enum.dart';
-import 'package:flashco/features/overwrite/overwrite.dart';
+import 'package:flashco/features/form/form.dart';
 import 'package:flashco/icons/icons.dart';
 import 'package:flashco/l10n/l10n.dart';
 import 'package:flashco/models/models.dart';
@@ -13,8 +13,9 @@ import 'package:flashco/pages/editor.dart';
 import 'package:flashco/providers/providers.dart';
 import 'package:flashco/state.dart';
 import 'package:flashco/views/about.dart';
+import 'package:flashco/views/config/rules.dart';
 import 'package:flashco/views/config/scripts.dart';
-import 'package:flashco/views/profiles/overwrite/standard.dart';
+import 'package:flashco/views/profiles/extend/standard.dart';
 import 'package:flashco/views/proxies/setting.dart';
 import 'package:flashco/widgets/widgets.dart';
 import 'package:flutter/gestures.dart';
@@ -24,6 +25,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../helpers/context_menu.dart';
 import '../helpers/glyph_finders.dart';
 import '../helpers/test_app.dart';
 import '../helpers/test_profiles.dart';
@@ -80,7 +82,7 @@ class _TestGlobalRules extends GlobalRules {
   Stream<List<Rule>> build() => Stream.value(initial);
 }
 
-class _TestProfileAddedRules extends ProfileAddedRules {
+class _TestProfileAddedRules extends ProfileRules {
   _TestProfileAddedRules(this.initial);
 
   final List<Rule> initial;
@@ -186,37 +188,47 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('about view renders version and link sections', (tester) async {
-    final container = _containerFor(tester);
+  testWidgets(
+    'about view describes the product without donor or repository links',
+    (tester) async {
+      final container = _containerFor(tester);
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const TestApp(child: AboutView()),
-      ),
-    );
-    await tester.pump();
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: AboutView()),
+        ),
+      );
+      await tester.pump();
 
-    expect(find.byType(AboutView), findsOneWidget);
-    expect(find.text('Telegram'), findsOneWidget);
-    final hero = find.byWidgetPredicate(
-      (widget) => widget.runtimeType.toString() == '_AboutHero',
-    );
-    expect(
-      tester.getRect(hero).top,
-      tester.getRect(find.byType(AppBar)).bottom + 12,
-    );
-    expect(tester.takeException(), null);
+      expect(find.byType(AboutView), findsOneWidget);
+      expect(
+        find.text('Free, non-commercial software. Created for fun.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('github.com'), findsNothing);
+      expect(find.textContaining('ClashMeta'), findsNothing);
+      expect(find.textContaining('Clash.Meta'), findsNothing);
+      expect(find.text('Telegram'), findsNothing);
+      final hero = find.byWidgetPredicate(
+        (widget) => widget.runtimeType.toString() == '_AboutHero',
+      );
+      expect(
+        tester.getRect(hero).top,
+        tester.getRect(find.byType(AppBar)).bottom + 12,
+      );
+      expect(tester.takeException(), null);
 
-    final scrollables = find.byType(Scrollable);
-    if (scrollables.evaluate().isNotEmpty) {
-      for (var index = 0; index < 4; index++) {
-        await tester.drag(scrollables.first, const Offset(0, -400));
-        await tester.pump();
+      final scrollables = find.byType(Scrollable);
+      if (scrollables.evaluate().isNotEmpty) {
+        for (var index = 0; index < 4; index++) {
+          await tester.drag(scrollables.first, const Offset(0, -400));
+          await tester.pump();
+        }
       }
-    }
-    expect(tester.takeException(), null);
-  });
+      expect(tester.takeException(), null);
+    },
+  );
 
   testWidgets('about view shows progress while checking for updates', (
     tester,
@@ -289,10 +301,11 @@ void main() {
     expect(find.byType(ScriptsView), findsOneWidget);
     expect(find.text('Script 0'), findsOneWidget);
     expect(find.text('Script 3'), findsOneWidget);
-    expect(find.byGlyph(AppGlyphs.more), findsNWidgets(4));
+    expect(find.byGlyph(AppGlyphs.more), findsNothing);
+    expect(find.text('Local'), findsNWidgets(4));
     expect(tester.takeException(), null);
 
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
     expect(find.text('Start from scratch'), findsOneWidget);
     expect(find.text('Import from URL'), findsOneWidget);
@@ -314,7 +327,7 @@ void main() {
       ),
     );
     await tester.pump();
-    await tester.tap(find.text('Add'));
+    await tester.tap(find.byTooltip('Add'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Start from scratch'));
     await settle(tester, 12);
@@ -337,10 +350,14 @@ void main() {
     tester,
   ) async {
     const url = 'https://example.com/remote.js';
-    final local = Script(id: 1, label: 'Local', lastUpdateTime: DateTime(2026));
+    final local = Script(
+      id: 1,
+      label: 'Local script',
+      lastUpdateTime: DateTime(2026),
+    );
     final remote = Script(
       id: 2,
-      label: 'Remote',
+      label: 'Remote script',
       lastUpdateTime: DateTime(2026),
       url: url,
     );
@@ -362,16 +379,11 @@ void main() {
     await tester.pump();
 
     expect(find.text(url), findsNothing);
+    expect(find.byType(LastUpdateTimeText), findsNWidgets(2));
+    expect(find.text('Local'), findsOneWidget);
+    expect(find.text('Remote'), findsOneWidget);
 
-    Finder menuOf(String label) => find.descendant(
-      of: find.ancestor(
-        of: find.text(label),
-        matching: find.byType(DecorationListItem),
-      ),
-      matching: find.byGlyph(AppGlyphs.more),
-    );
-
-    await tester.tap(menuOf('Local'));
+    await rightClick(tester, find.text('Local script'));
     await tester.pumpAndSettle();
     expect(find.text('Edit'), findsOneWidget);
     expect(find.text('Delete'), findsOneWidget);
@@ -380,7 +392,7 @@ void main() {
     await tester.tapAt(Offset.zero);
     await tester.pumpAndSettle();
 
-    await tester.tap(menuOf('Remote'));
+    await tester.longPress(find.text('Remote script'));
     await tester.pumpAndSettle();
     expect(find.text('Sync'), findsOneWidget);
     expect(find.text('URL'), findsOneWidget);
@@ -391,7 +403,7 @@ void main() {
     expect(action.updated, [remote]);
   });
 
-  testWidgets('scripts view reorders a script by long-press drag', (
+  testWidgets('scripts view reorders a script by its handle in sort mode', (
     tester,
   ) async {
     final scripts = List.generate(
@@ -416,11 +428,28 @@ void main() {
     );
     await tester.pump();
 
-    final from = tester.getCenter(find.text('Script 0'));
     final to = tester.getCenter(find.text('Script 2'));
-    final gesture = await tester.startGesture(from);
+    final pressed = await tester.startGesture(
+      tester.getCenter(find.text('Script 0')),
+    );
     await tester.pump(kLongPressTimeout + const Duration(milliseconds: 50));
-    await gesture.moveTo(to + const Offset(0, 100));
+    await pressed.moveTo(to + const Offset(0, 100));
+    await tester.pump();
+    await pressed.up();
+    await tester.pumpAndSettle();
+    expect(notifier.orders, isEmpty);
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Sort'));
+    await tester.pumpAndSettle();
+    final gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SortHandle).first),
+    );
+    await tester.pump(kPressTimeout);
+    await gesture.moveTo(
+      Offset(tester.getCenter(find.byType(SortHandle).first).dx, to.dy + 100),
+    );
     await tester.pump();
     await gesture.up();
     await tester.pumpAndSettle();
@@ -449,7 +478,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('standard overwrite renders added rules and selection state', (
+  testWidgets('standard extension renders added rules and selection state', (
     tester,
   ) async {
     final profile = Profile.normal();
@@ -476,7 +505,7 @@ void main() {
       profiles: [profile],
       overrides: [
         currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
-        profileAddedRulesProvider.overrideWith2(
+        profileRulesProvider.overrideWith2(
           (_) => _TestProfileAddedRules(addedRules),
         ),
         globalRulesProvider.overrideWith(() => _TestGlobalRules(globalRules)),
@@ -515,7 +544,7 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('standard overwrite picks a MATCH-TARGET from the profile', (
+  testWidgets('standard extension picks a MATCH-TARGET from the profile', (
     tester,
   ) async {
     final profile = Profile.normal();
@@ -524,7 +553,7 @@ void main() {
       profiles: [profile],
       overrides: [
         currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
-        profileAddedRulesProvider.overrideWith2(
+        profileRulesProvider.overrideWith2(
           (_) => _TestProfileAddedRules(const []),
         ),
         globalRulesProvider.overrideWith(() => _TestGlobalRules(const [])),
@@ -563,14 +592,58 @@ void main() {
 
     await tester.tap(find.text(l10n.matchTarget));
     await tester.pumpAndSettle();
-    expect(find.byType(OverwriteSelectionSheet<String>), findsOneWidget);
+    expect(find.byType(SelectionSheet<String>), findsOneWidget);
     expect(find.text('Proxy'), findsOneWidget);
 
     await tester.tap(find.text('HK'));
     await tester.pumpAndSettle();
-    expect(find.byType(OverwriteSelectionSheet<String>), findsNothing);
+    expect(find.byType(SelectionSheet<String>), findsNothing);
     expect(container.read(profilesProvider).first.matchTarget, 'HK');
     expect(find.text('HK'), findsOneWidget);
+    expect(tester.takeException(), null);
+  });
+
+  testWidgets('the global added rules page opens where they are added in a '
+      'sheet over itself', (tester) async {
+    final profile = Profile.normal();
+    final container = _containerFor(
+      tester,
+      profiles: [profile],
+      overrides: [
+        currentProfileIdProvider.overrideWithBuild((_, _) => profile.id),
+        profileRulesProvider.overrideWith2(
+          (_) => _TestProfileAddedRules(const []),
+        ),
+        globalRulesProvider.overrideWith(() => _TestGlobalRules(const [])),
+        profileDisabledRuleIdsProvider.overrideWith2(
+          (_) => _TestProfileDisabledRuleIds(const []),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(
+        container: container,
+        child: TestApp(
+          child: ProfileIdProvider(
+            profileId: profile.id,
+            child: const Scaffold(
+              body: CustomScrollView(slivers: [StandardContent()]),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    final l10n = AppLocalizations.current;
+
+    await tester.tap(find.text(l10n.controlGlobalAddedRules));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text(l10n.goToConfigureAddedRules));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(AddedRulesView), findsOneWidget);
+    expect(find.text(l10n.editGlobalRules), findsOneWidget);
     expect(tester.takeException(), null);
   });
 }

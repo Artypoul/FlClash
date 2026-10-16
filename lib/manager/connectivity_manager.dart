@@ -5,6 +5,7 @@ import 'package:flashco/common/common.dart';
 import 'package:flashco/enum/enum.dart';
 import 'package:flashco/providers/app.dart';
 import 'package:flashco/providers/config.dart';
+import 'package:flashco/providers/on_demand.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wifi_ssid/wifi_ssid.dart';
@@ -52,6 +53,16 @@ class _ConnectivityManagerState extends ConsumerState<ConnectivityManager> {
         unawaited(_updateSsid());
       }
     });
+    ref.listenManual(
+      locationPermissionsProvider.select(
+        (permission) => permission == WifiSsidPermission.granted,
+      ),
+      (previous, next) {
+        if (previous != next) {
+          unawaited(_updateSsid());
+        }
+      },
+    );
   }
 
   void _handleResults(List<ConnectivityResult> results) {

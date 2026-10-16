@@ -49,7 +49,7 @@ class _AppMigrationStore implements MigrationStore {
       data.profiles,
       data.scripts,
       data.rules,
-      data.links,
+      data.disabledRules,
       data.proxyGroups,
       clashProviders: data.clashProviders,
     );
@@ -73,9 +73,9 @@ class Migration {
     : _store = store,
       _migrateV0 = migrateV0 ?? oldToNowTask;
 
-  static const currentVersion = 1;
+  static const currentVersion = 2;
 
-  Future<Config> run() async {
+  Future<Config> run({bool isNewInstallation = false}) async {
     final configMap = await _store.getConfigMap();
     var oldVersion = await _store.getVersion();
     Config? config;
@@ -85,15 +85,14 @@ class Migration {
       );
     }
     if (oldVersion == currentVersion) {
-      try {
-        config = Config.realFromJson(configMap);
-      } catch (_) {
-        if (!_isV0(configMap)) {
-          throw StateError(
-            'Local data is damaged. A reset is required to fix this issue.',
-          );
+      if (configMap != null && _isV0(configMap)) {
+        try {
+          config = Config.strictFromJson(configMap);
+        } catch (_) {
+          oldVersion = 0;
         }
-        oldVersion = 0;
+      } else {
+        config = Config.realFromJson(configMap);
       }
       if (config != null) {
         final storedDavPassword = _getStoredDavPassword(configMap);
@@ -128,7 +127,19 @@ class Migration {
       }
     }
 
-    config = Config.realFromJson(data.configMap);
+    config = Config.realFromJson(
+      upgradeConfigMap(data.configMap, fromVersion: oldVersion),
+    );
+    if (isNewInstallation) {
+      config = config.copyWith(
+        patchClashConfig: config.patchClashConfig.copyWith(
+          tun: config.patchClashConfig.tun.copyWith(
+            enable: true,
+            autoRoute: true,
+          ),
+        ),
+      );
+    }
     await _store.restore(data);
     if (!await _store.saveConfig(config)) {
       // An unopenable store is reported later by the corrupt-cache dialog,
@@ -144,6 +155,34 @@ class Migration {
     await _store.setVersion(currentVersion);
     return config;
   }
+}
+
+Map<String, Object?>? upgradeConfigMap(
+  Map<String, Object?>? configMap, {
+  required int fromVersion,
+}) {
+  if (configMap == null || fromVersion >= 2) return configMap;
+  final network = configMap['networkProps'];
+  if (network is! Map) return configMap;
+  final domains = network['bypassDomain'];
+  if (domains is! List) return configMap;
+  const legacyBypassExceptions = {
+    '*zhihu.com',
+    '*zhimg.com',
+    '*jd.com',
+    '100ime-iat-api.xfyun.cn',
+    '*360buyimg.com',
+  };
+  return {
+    ...configMap,
+    'networkProps': <String, Object?>{
+      ...network,
+      'bypassDomain': [
+        for (final domain in domains)
+          if (!legacyBypassExceptions.contains(domain)) domain,
+      ],
+    },
+  };
 }
 
 bool _isV0(Map<String, Object?>? configMap) =>

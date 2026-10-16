@@ -5,52 +5,24 @@ import 'package:flashco/enum/enum.dart';
 import 'package:flashco/icons/icons.dart';
 import 'package:flashco/providers/providers.dart';
 import 'package:flashco/state.dart';
-import 'package:flashco/widgets/list.dart';
 import 'package:flashco/widgets/scaffold.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-@immutable
-class Contributor {
-  final String avatar;
-  final String name;
-
-  const Contributor({required this.avatar, required this.name});
-}
-
 class AboutView extends ConsumerWidget {
   const AboutView({super.key});
-
-  static const _contributors = [
-    Contributor(avatar: 'assets/images/avatar/june2.jpg', name: 'June2'),
-    Contributor(avatar: 'assets/images/avatar/arue.jpg', name: 'Arue'),
-  ];
 
   Future<void> _checkUpdate(BuildContext context, WidgetRef ref) async {
     if (ref.read(loadingProvider(LoadingTag.checkUpdate))) return;
     final commonAction = ref.read(commonActionProvider.notifier);
-    final data = await globalState.loadingRun<Map<String, dynamic>?>(
-      request.checkForUpdate,
+    final result = await globalState.loadingRun(
+      () async => (release: await request.checkForUpdate()),
       title: context.appLocalizations.checkUpdate,
       tag: LoadingTag.checkUpdate,
     );
-    unawaited(commonAction.checkUpdateResultHandle(data: data, isUser: true));
-  }
-
-  Widget _buildLinkItem({
-    required Glyph glyph,
-    required String title,
-    required String url,
-    required String label,
-  }) {
-    return ListItem(
-      leading: _LinkBadge(glyph: glyph),
-      title: Text(title),
-      subtitle: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis),
-      trailing: const GlyphIcon(AppGlyphs.openExternal),
-      onTap: () {
-        dialogs.openUrl(url);
-      },
+    if (result == null) return;
+    unawaited(
+      commonAction.checkUpdateResultHandle(data: result.release, isUser: true),
     );
   }
 
@@ -82,42 +54,6 @@ class AboutView extends ConsumerWidget {
             },
           ),
           const SizedBox(height: 8),
-          generateSectionV3(
-            title: appLocalizations.more,
-            items: [
-              _buildLinkItem(
-                glyph: AppGlyphs.code,
-                title: appLocalizations.project,
-                url: 'https://github.com/$repository',
-                label: 'github.com/$repository',
-              ),
-              _buildLinkItem(
-                glyph: AppGlyphs.cpu,
-                title: appLocalizations.core,
-                url: 'https://github.com/chen08209/Clash.Meta/tree/FlClash',
-                label: 'github.com/chen08209/Clash.Meta',
-              ),
-              _buildLinkItem(
-                glyph: AppGlyphs.send,
-                title: 'Telegram',
-                url: 'https://t.me/FlClash',
-                label: 't.me/FlClash',
-              ),
-            ],
-          ),
-          generateSectionV3(
-            title: appLocalizations.otherContributors,
-            items: [
-              for (final contributor in _contributors)
-                ListItem(
-                  leading: CircleAvatar(
-                    foregroundImage: AssetImage(contributor.avatar),
-                  ),
-                  title: Text(contributor.name),
-                  subtitle: Text(appLocalizations.appIconDesign),
-                ),
-            ],
-          ),
         ],
       ),
     );
@@ -235,33 +171,6 @@ class _Pill extends StatelessWidget {
           style: context.textTheme.labelMedium?.copyWith(
             color: foregroundColor,
             fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _LinkBadge extends StatelessWidget {
-  final Glyph glyph;
-
-  const _LinkBadge({required this.glyph});
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: colorScheme.secondaryContainer,
-        shape: AppShape.md,
-      ),
-      child: SizedBox.square(
-        dimension: 40,
-        child: Center(
-          child: GlyphIcon(
-            glyph,
-            size: 20,
-            color: colorScheme.onSecondaryContainer,
           ),
         ),
       ),

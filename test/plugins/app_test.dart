@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flashco/common/boot_record.dart';
 import 'package:flashco/common/constant.dart';
 import 'package:flashco/plugins/app.dart';
@@ -17,28 +20,6 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
     App().clearPackageIconCache();
-  });
-
-  test('reads previous execution crash state from Android', () async {
-    MethodCall? receivedCall;
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (call) async {
-          receivedCall = call;
-          return true;
-        });
-
-    final didCrash = await App().didCrashOnPreviousExecution();
-
-    expect(didCrash, isTrue);
-    expect(receivedCall, isNotNull);
-    expect(receivedCall!.method, 'didCrashOnPreviousExecution');
-  });
-
-  test('uses false when Android returns no crash state', () async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (_) async => null);
-
-    expect(await App().didCrashOnPreviousExecution(), isFalse);
   });
 
   test('requests every package icon from Android only once', () async {
@@ -92,6 +73,37 @@ void main() {
     },
   );
 
+  test(
+    'asks Android for a bounded number of package icons at a time',
+    () async {
+      var inFlight = 0;
+      var peak = 0;
+      final release = Completer<void>();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) async {
+            inFlight++;
+            peak = max(peak, inFlight);
+            await release.future;
+            inFlight--;
+            return '/icons/${call.arguments['packageName']}.png';
+          });
+
+      final app = App();
+      final icons = Future.wait([
+        for (var i = 0; i < maxConcurrentIconLoads * 2; i++)
+          app.getPackageIcon('com.$i'),
+      ]);
+      await pumpEventQueue();
+
+      expect(inFlight, maxConcurrentIconLoads);
+
+      release.complete();
+
+      expect(await icons, everyElement(isNotNull));
+      expect(peak, maxConcurrentIconLoads);
+    },
+  );
+
   test('caches a failed package icon lookup', () async {
     var iconCallCount = 0;
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -108,15 +120,6 @@ void main() {
     expect(iconCallCount, 2);
     expect(app.hasPackageIcon('com.a'), isTrue);
     expect(app.hasPackageIcon(''), isTrue);
-  });
-
-  test('uses false when crash detection is unavailable', () async {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-        .setMockMethodCallHandler(channel, (_) async {
-          throw PlatformException(code: 'unavailable');
-        });
-
-    expect(await App().didCrashOnPreviousExecution(), isFalse);
   });
 
   test('reads the last process exit info from Android', () async {

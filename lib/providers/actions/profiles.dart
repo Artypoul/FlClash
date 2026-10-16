@@ -3,9 +3,75 @@ part of '../action.dart';
 @Riverpod(keepAlive: true)
 class ProfilesAction extends _$ProfilesAction {
   CoreController get _core => ref.read(coreHandlerProvider);
+  var _importSequence = 0;
+  Future<void>? _bundledSubscriptionTask;
 
   @override
   void build() {}
+
+  Future<void> importBundledSubscription(String url) async {
+    if (_bundledSubscriptionTask case final pending?) return pending;
+    final task = _importBundledSubscription(url.trim());
+    _bundledSubscriptionTask = task;
+    try {
+      await task;
+    } finally {
+      _bundledSubscriptionTask = null;
+    }
+  }
+
+  Future<void> _importBundledSubscription(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null ||
+        uri.host.isEmpty ||
+        !const ['http', 'https'].contains(uri.scheme) ||
+        ref.read(safeModeProvider) ||
+        !ref.read(initProvider) ||
+        ref.read(coreStatusProvider) != CoreStatus.connected) {
+      return;
+    }
+    final setup = ref.read(setupActionProvider.notifier);
+    final runRequestToken = setup.runRequestToken;
+    final previousSequence = _importSequence;
+    if (!await preferences.isInit ||
+        await preferences.wasBundledSubscriptionImported(url)) {
+      return;
+    }
+    final profiles = ref.read(profilesProvider.notifier);
+    await profiles.settledWrites;
+    if ((await database.profilesDao.query().get()).any(
+      (profile) => profile.url == url,
+    )) {
+      await preferences.markBundledSubscriptionImported(url);
+      return;
+    }
+    if (!ref.mounted ||
+        _importSequence != previousSequence ||
+        !identical(setup.runRequestToken, runRequestToken)) {
+      return;
+    }
+    final sequence = ++_importSequence;
+    final profile = await globalState.loadingRun(
+      () => _withAgeSecretKey(
+        Profile.normal(url: url),
+        _download,
+      ).then(_withImportDefaults),
+      tag: LoadingTag.profiles,
+      silence: true,
+    );
+    if (profile == null || !ref.mounted) return;
+    putProfile(profile);
+    await profiles.settledWrites;
+    if (!(await database.profilesDao.query().get()).any(
+      (saved) => saved.id == profile.id && saved.url == url,
+    )) {
+      return;
+    }
+    await globalState.safeRun(
+      () => preferences.markBundledSubscriptionImported(url),
+    );
+    await _activateImportedProfile(profile, sequence, runRequestToken);
+  }
 
   void updateCurrentSelectedMap(String groupName, String proxyName) {
     final currentProfile = ref.read(currentProfileProvider);
@@ -45,7 +111,7 @@ class ProfilesAction extends _$ProfilesAction {
       final isNotNeedUpdate = profile.lastUpdateDate
           ?.add(profile.autoUpdateDuration)
           .isBeforeNow;
-      if (isNotNeedUpdate == false || profile.type == ProfileType.file) {
+      if (isNotNeedUpdate == false || profile.type != ProfileType.url) {
         continue;
       }
       try {
@@ -56,14 +122,47 @@ class ProfilesAction extends _$ProfilesAction {
     }
   }
 
-  void putProfile(Profile profile, {Iterable<int> renameIn = const []}) {
-    ref.read(profilesProvider.notifier).put(profile, renameIn: renameIn);
+  void putProfile(Profile profile) {
+    ref.read(profilesProvider.notifier).put(profile);
     if (ref.read(currentProfileIdProvider) != null) return;
     ref.read(currentProfileIdProvider.notifier).value = profile.id;
   }
 
+  Future<Profile> _withImportDefaults(Profile profile) async {
+    final selectedMap = await globalState.safeRun(() async {
+      final groups = await _core.getProfileGroupReferences(profile.id);
+      return {
+        for (final mode in [Mode.rule, Mode.global])
+          if (fastestChoice(groups, mode) case final choice?)
+            choice.selector.name: choice.automatic.name,
+        ...profile.selectedMap,
+      };
+    });
+    return profile.copyWith(selectedMap: selectedMap ?? profile.selectedMap);
+  }
+
+  Future<void> _activateImportedProfile(
+    Profile profile,
+    int sequence,
+    Object? runRequestToken,
+  ) async {
+    if (!await ref
+        .read(profilesProvider.notifier)
+        .hasSavedProfile(profile.id)) {
+      return;
+    }
+    if (!ref.mounted || sequence != _importSequence) return;
+    if (ref.read(profilesProvider).getProfile(profile.id) == null) return;
+    final setup = ref.read(setupActionProvider.notifier);
+    if (!identical(setup.runRequestToken, runRequestToken)) return;
+    ref.read(currentProfileIdProvider.notifier).value = profile.id;
+    await globalState.safeRun(
+      () => setup.setRunning(true, initialize: !ref.read(initProvider)),
+    );
+  }
+
   Future<List<Profile>> providerUsers(Profile profile) async {
-    if (!feature.customProviders) {
+    if (profile.type == ProfileType.custom) {
       return const [];
     }
     final users = await ref
@@ -75,25 +174,56 @@ class ProfilesAction extends _$ProfilesAction {
     ];
   }
 
-  /// [conflicts] would move to their subscription's provider of the new name.
-  Future<({List<Profile> renameIn, List<Profile> conflicts})> providerRename(
-    Profile previous,
-    Profile next,
-  ) async {
-    final label = ref.read(profilesProvider.notifier).labeled(next).realLabel;
-    if (!feature.customProviders || label == previous.realLabel) {
-      return (renameIn: const <Profile>[], conflicts: const <Profile>[]);
+  /// Where a profile's own group takes a name, the name stands for that group.
+  Future<List<Profile>> proxyUsers(Set<String> names) async {
+    final (ruleTargets, dialerTargets) = await (
+      database.rulesDao.targetsNaming(names),
+      database.proxyDialersDao.targetsNaming(names),
+    ).wait;
+    final users = <Profile>[];
+    for (final profile in ref.read(profilesProvider)) {
+      if (profile.type != ProfileType.custom) {
+        continue;
+      }
+      final groups = await database.proxyGroupsDao.query(profile.id).get();
+      final inUse = proxyNamesInUse(
+        names.difference({for (final group in groups) group.name}),
+        groups: groups,
+        ruleTargets: ruleTargets[profile.id] ?? const {},
+        dialerTargets: dialerTargets[profile.id] ?? const {},
+        overrides: profile.overrides,
+      );
+      if (inUse.isNotEmpty) {
+        users.add(profile);
+      }
     }
-    final renameIn = await providerUsers(previous);
-    final conflicts = await ref
-        .read(clashProvidersActionProvider.notifier)
-        .profilesDefining(ProviderKind.proxy, label, renameIn);
-    return (renameIn: renameIn, conflicts: conflicts);
+    return users;
+  }
+
+  Future<Set<String>> groupsInUse(int profileId, Set<int> groupIds) async {
+    final groups = await database.proxyGroupsDao.query(profileId).get();
+    final names = {
+      for (final group in groups)
+        if (groupIds.contains(group.id)) group.name,
+    };
+    final (ruleTargets, dialerTargets) = await (
+      database.rulesDao.targetsNaming(names),
+      database.proxyDialersDao.targetsNaming(names),
+    ).wait;
+    return proxyNamesInUse(
+      names,
+      groups: groups.where((group) => !groupIds.contains(group.id)),
+      ruleTargets: ruleTargets[profileId] ?? const {},
+      dialerTargets: dialerTargets[profileId] ?? const {},
+      overrides:
+          ref.read(profilesProvider).getProfile(profileId)?.overrides ??
+          const ProfileOverrides(),
+    );
   }
 
   Future<void> updateProfiles() async {
     for (final profile in ref.read(profilesProvider)) {
-      if (profile.type == ProfileType.file) continue;
+      if (profile.type != ProfileType.url) continue;
       await updateProfile(profile, showLoading: true);
     }
   }
@@ -101,21 +231,32 @@ class ProfilesAction extends _$ProfilesAction {
   Future<void> updateProfile(
     Profile profile, {
     bool showLoading = false,
-    Iterable<int> renameIn = const [],
   }) async {
     final operation = showLoading
         ? ref.read(updatingKeysProvider.notifier).start(profile.updatingKey)
         : null;
     try {
-      ref.read(profilesProvider.notifier).put(profile, renameIn: renameIn);
+      ref.read(profilesProvider.notifier).put(profile);
       final newProfile = await profile.update(
-        validate: (path) => _core.validateConfig(path),
+        validate: (path, key) => _core.validateProfile(path, key),
       );
       ref.read(profilesProvider.notifier).put(newProfile);
       if (profile.id == ref.read(currentProfileIdProvider)) {
         ref
             .read(setupActionProvider.notifier)
             .applyProfileDebounce(silence: true);
+      } else {
+        final label = ref
+            .read(profilesProvider.notifier)
+            .labeled(newProfile)
+            .realLabel;
+        unawaited(
+          ref.read(clashProvidersActionProvider.notifier).applyIfReferenced(
+            ProviderKind.proxy,
+            {label},
+            force: true,
+          ),
+        );
       }
     } finally {
       if (operation != null) {
@@ -129,41 +270,296 @@ class ProfilesAction extends _$ProfilesAction {
   Future<void> addProfileFormFile() async {
     final platformFile = await globalState.safeRun(picker.pickerFile);
     if (platformFile == null) return;
+    final sequence = ++_importSequence;
+    final runRequestToken = ref
+        .read(setupActionProvider.notifier)
+        .runRequestToken;
     final bytes = await platformFile.readBytes();
     globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     ref.read(currentPageLabelProvider.notifier).toProfiles();
     final profile = await globalState.loadingRun(
       tag: LoadingTag.profiles,
-      () async {
-        return Profile.normal(
-          label: platformFile.name,
-        ).saveFile(bytes, validate: (path) => _core.validateConfig(path));
-      },
+      () => _withAgeSecretKey(
+        Profile.normal(label: platformFile.name),
+        (profile) => profile.saveFile(
+          bytes,
+          validate: (path, key) => _core.validateProfile(path, key),
+        ),
+      ).then(_withImportDefaults),
       title: currentAppLocalizations.addProfile,
     );
     if (profile != null) {
       putProfile(profile);
+      await _activateImportedProfile(profile, sequence, runRequestToken);
     }
   }
 
-  Future<void> addProfileFormURL(String url, {String? label}) async {
+  int addCustomProfile(String label) {
+    final profile = Profile.custom(label: label);
+    putProfile(profile);
+    return profile.id;
+  }
+
+  void touchProfile(int id) {
+    final profile = ref.read(profilesProvider).getProfile(id);
+    if (profile == null) return;
+    ref
+        .read(profilesProvider.notifier)
+        .put(profile.copyWith(lastUpdateDate: DateTime.now()));
+  }
+
+  Future<CustomProfileImport> readCustomImport(
+    int profileId,
+    Uint8List bytes,
+  ) async {
+    final profiles = ref.read(profilesProvider);
+    final (ruleProviders, proxies, groupNames) = await (
+      database.clashProvidersDao.query().get(),
+      database.customProxiesDao.query().get(),
+      database.proxyGroupsDao.names(except: profileId).get(),
+    ).wait;
+    final CustomImportApp app = (
+      profileLabels: {
+        for (final profile in profiles) ...[profile.label, profile.realLabel],
+      },
+      profileSources: {
+        for (final profile in profiles)
+          if (profile.type == ProfileType.url)
+            (url: profile.url, ageSecretKey: profile.ageSecretKey):
+                profile.realLabel,
+      },
+      ruleProviderLabels: {
+        for (final provider in ruleProviders) provider.label,
+      },
+      ruleProviderSources: {
+        for (final provider in ruleProviders)
+          if (provider.isRemote)
+            (url: provider.url, ageSecretKey: ''): provider.label,
+      },
+      proxies: [for (final proxy in proxies) proxy.definition],
+      groupNames: groupNames.toSet(),
+    );
+    try {
+      return await compute(readCustomProfileImport, (bytes: bytes, app: app));
+    } on CustomImportException catch (error) {
+      final appLocalizations = currentAppLocalizations;
+      throw MessageException(switch (error.issue) {
+        CustomImportIssue.unreadable => appLocalizations.importConfigInvalid,
+        CustomImportIssue.ruleType => appLocalizations.failedItem(
+          error.item,
+          appLocalizations.ruleTextInvalid,
+        ),
+        CustomImportIssue.entry => appLocalizations.failedItem(
+          error.item,
+          error.detail,
+        ),
+      });
+    }
+  }
+
+  /// [config] replaces what [profileId] holds. The providers it adds are saved
+  /// before the groups and rules naming them, and loaded afterwards; the
+  /// future completes once they have loaded.
+  Future<void> importCustomProfile(int profileId, CustomProfileImport config) {
+    final profiles = ref.read(profilesProvider.notifier);
+    final clashProviders = ref.read(clashProvidersProvider.notifier);
+    final loads = <({String label, Future<void> Function() load})>[];
+    for (final (:label, :url, :ageSecretKey, :content)
+        in config.proxyProviders) {
+      final profile = Profile.normal(
+        label: label,
+        url: url,
+      ).copyWith(ageSecretKey: ageSecretKey);
+      profiles.put(profile);
+      loads.add((
+        label: label,
+        load: url.isNotEmpty
+            ? () => updateProfile(profile, showLoading: true)
+            : () async => profiles.put(
+                await profile.saveFile(
+                  utf8.encode(content),
+                  validate: (path, key) => _core.validateProfile(path, key),
+                ),
+              ),
+      ));
+    }
+    for (final (:label, :url, ageSecretKey: _, :content)
+        in config.ruleProviders) {
+      final provider = ClashProvider.create(label: label, url: url);
+      clashProviders.put(provider);
+      loads.add((
+        label: label,
+        load: url.isNotEmpty
+            ? () => ref
+                  .read(resourcesActionProvider.notifier)
+                  .updateRuleProvider(provider)
+            : () => ref
+                  .read(clashProvidersActionProvider.notifier)
+                  .putProvider(provider, content: utf8.encode(content)),
+      ));
+    }
+    final customProxies = ref.read(customProxiesProvider.notifier);
+    customProxies.putAll([
+      for (final definition in config.proxies)
+        CustomProxy.fromDefinition(definition),
+    ]);
+    final proxyIds = {
+      for (final proxy in customProxies.value) proxy.name: proxy.id,
+    };
+    ref.read(proxyGroupsProvider(profileId).notifier).setAll([
+      for (final group in config.proxyGroups) group.copyWith(id: snowflake.id),
+    ]);
+    ref.read(profileRulesProvider(profileId).notifier).setAll([
+      for (final rule in config.rules) rule.copyWith(id: snowflake.id),
+    ]);
+    ref.read(proxyDialersProvider(profileId).notifier).setAll({
+      for (final MapEntry(:key, :value) in config.dialers.entries)
+        ?proxyIds[key]: value,
+    });
+    profiles.updateProfile(
+      profileId,
+      (profile) => profile.copyWith(overrides: config.overrides),
+    );
+    return globalState.batchRun(
+      loads,
+      (item) => item.load(),
+      label: (item) => item.label,
+      concurrency: maxConcurrentImports,
+      tag: null,
+    );
+  }
+
+  void _showProfiles() {
     if (globalState.navigatorKey.currentState?.canPop() ?? false) {
       globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     }
     ref.read(currentPageLabelProvider.notifier).value = PageLabel.profiles;
+  }
+
+  Future<void> addProfileFromLink(
+    String link, {
+    String? label,
+    String ageSecretKey = '',
+  }) async {
+    final sequence = ++_importSequence;
+    final runRequestToken = ref
+        .read(setupActionProvider.notifier)
+        .runRequestToken;
+    _showProfiles();
     final profile = await globalState.loadingRun(
       tag: LoadingTag.profiles,
-      () async {
-        return Profile.normal(
-          label: label,
-          url: url,
-        ).update(validate: (path) => _core.validateConfig(path));
-      },
+      () =>
+          (link.isShareLink
+                  ? _fromShareLinks(Profile.normal(label: label), [link])
+                  : _withAgeSecretKey(
+                      Profile.normal(
+                        label: label,
+                        url: link,
+                      ).copyWith(ageSecretKey: ageSecretKey),
+                      _download,
+                    ))
+              .then(_withImportDefaults),
       title: currentAppLocalizations.addProfile,
     );
     if (profile != null) {
       putProfile(profile);
+      await _activateImportedProfile(profile, sequence, runRequestToken);
     }
+  }
+
+  /// Ids are taken up front so the list keeps the order of [links]; the share
+  /// links among them make up one profile, in the place of the first.
+  Future<void> addProfilesFromLinks(List<String> links) async {
+    final sequence = ++_importSequence;
+    final runRequestToken = ref
+        .read(setupActionProvider.notifier)
+        .runRequestToken;
+    _showProfiles();
+    final shareLinks = [
+      for (final link in links)
+        if (link.isShareLink) link,
+    ];
+    final imports = [
+      for (final link in links)
+        if (!link.isShareLink)
+          (profile: Profile.normal(url: link), shareLinks: const <String>[])
+        else if (link == shareLinks.first)
+          (profile: Profile.normal(), shareLinks: shareLinks),
+    ];
+    final imported = <int, Profile>{};
+    await globalState.batchRun(
+      imports,
+      (item) async {
+        final profile = await _withImportDefaults(
+          await (item.shareLinks.isEmpty
+              ? _download(item.profile)
+              : _fromShareLinks(item.profile, item.shareLinks)),
+        );
+        putProfile(profile);
+        imported[item.profile.id] = profile;
+      },
+      label: (item) => item.shareLinks.firstOrNull ?? item.profile.url,
+      concurrency: maxConcurrentImports,
+      tag: LoadingTag.profiles,
+    );
+    for (final item in imports.reversed) {
+      final profile = imported[item.profile.id];
+      if (profile == null) continue;
+      await _activateImportedProfile(profile, sequence, runRequestToken);
+      break;
+    }
+  }
+
+  Future<Profile> _download(Profile profile) {
+    return profile.update(
+      validate: (path, key) => _core.validateProfile(path, key),
+    );
+  }
+
+  Future<Profile> _withAgeSecretKey(
+    Profile profile,
+    Future<Profile> Function(Profile profile) save,
+  ) async {
+    try {
+      return await save(profile);
+    } on AgeSecretKeyRequiredException {
+      final key = (await dialogs.showAgeSecretKeyInput())?.trim();
+      if (key == null || key.isEmpty) {
+        rethrow;
+      }
+      return save(profile.copyWith(ageSecretKey: key));
+    }
+  }
+
+  Future<Profile> _fromShareLinks(Profile profile, List<String> links) async {
+    final appLocalizations = currentAppLocalizations;
+    final decoded = await _core.decodeShareLinks(links);
+    final taken = {...reservedCustomProxyNames};
+    final proxies = <Map<String, dynamic>>[];
+    for (final (index, definitions) in decoded.indexed) {
+      if (definitions.isEmpty) {
+        throw MessageException(
+          links.length == 1
+              ? appLocalizations.shareLinksInvalid
+              : appLocalizations.shareLinkUnreadable(links[index]),
+        );
+      }
+      for (final definition in definitions) {
+        final name = freeProxyName(linkProxyName(definition), taken);
+        proxies.add({...definition, 'name': name});
+      }
+    }
+    final first = proxies.first['name'] as String;
+    final label = proxies.length == 1
+        ? first
+        : appLocalizations.proxiesProfileLabel(first, proxies.length);
+    final config = await encodeYamlTask({'proxies': proxies});
+    return profile
+        .copyWith(label: profile.label.takeFirstValid([label]))
+        .saveFile(
+          utf8.encode(config),
+          validate: (path, _) => _core.validateConfig(path),
+        );
   }
 
   void setProfileAndAutoApply(Profile profile) {
@@ -176,7 +572,7 @@ class ProfilesAction extends _$ProfilesAction {
   Future<void> addProfileFormQrCode() async {
     final url = await globalState.safeRun(picker.pickerConfigQRCode);
     if (url == null) return;
-    unawaited(addProfileFormURL(url));
+    unawaited(addProfileFromLink(url));
   }
 
   void reorder(List<Profile> profiles) {

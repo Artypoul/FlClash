@@ -15,7 +15,6 @@ const _sharedState = SharedState(
   currentProfileName: 'profile',
   stopText: 'stopped',
   onlyStatisticsProxy: true,
-  crashlytics: false,
 );
 
 void main() {
@@ -84,7 +83,6 @@ void main() {
       const config = Config(
         themeProps: defaultThemeProps,
         currentProfileId: 42,
-        overrideDns: true,
         excludeSSIDs: ['home'],
       );
 
@@ -93,7 +91,6 @@ void main() {
 
       expect(restored, isNotNull);
       expect(restored!.currentProfileId, 42);
-      expect(restored.overrideDns, isTrue);
       expect(restored.excludeSSIDs, ['home']);
     });
 

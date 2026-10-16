@@ -56,37 +56,32 @@ void main() {
 
   test('a new database stores ordered global rules', () async {
     final database = await open(initialRules);
-    final rules = await database.rulesDao.queryGlobalAddedRules().get();
+    final rules = await database.rulesDao.queryGlobalRules().get();
 
     expect(rules.map((rule) => rule.rawValue), initialRules);
     expect(rules.map((rule) => rule.id).toSet(), hasLength(2));
     final orders = rules.map((rule) => rule.order!).toList();
     expect(orders, orderedEquals([...orders]..sort()));
     expect(orders.toSet(), hasLength(2));
-    final links = await database.select(database.profileRuleLinks).get();
-    expect(links, hasLength(2));
-    expect(
-      links.every((link) => link.profileId == null && link.scene == null),
-      isTrue,
-    );
+    final storedRules = await database.select(database.rules).get();
+    expect(storedRules, hasLength(2));
+    expect(storedRules.every((rule) => rule.profileId == null), isTrue);
     expect(
       await database.customSelect('PRAGMA foreign_key_check').get(),
       isEmpty,
     );
-    expect(database.schemaVersion, 10);
+    expect(database.schemaVersion, 20);
   });
 
-  test('the production catalogue remains editable', () async {
+  test('new installations include the editable ru bypass rule', () async {
     final database = await open(russianServiceDirectRules);
-    final rules = await database.rulesDao.queryGlobalAddedRules().get();
+    final rules = await database.rulesDao.queryGlobalRules().get();
     expect(rules.map((rule) => rule.rawValue), russianServiceDirectRules);
+    expect(rules.first.rawValue, 'DOMAIN-SUFFIX,ru,DIRECT');
     final edited = rules.first.copyWith(ruleTarget: 'REJECT');
-    await database.rulesDao.putGlobalRule(edited);
+    await database.rulesDao.putRule(edited);
 
-    expect(
-      (await database.rulesDao.queryGlobalAddedRules().get()).first,
-      edited,
-    );
+    expect((await database.rulesDao.queryGlobalRules().get()).first, edited);
   });
 
   test('a failed initial insert rolls back and can be retried', () async {
@@ -107,30 +102,30 @@ void main() {
     await close(failing);
 
     final database = await open(initialRules);
-    final rules = await database.rulesDao.queryGlobalAddedRules().get();
+    final rules = await database.rulesDao.queryGlobalRules().get();
     expect(rules.map((rule) => rule.rawValue), initialRules);
   });
 
   test('opening again preserves edits and deletions', () async {
     var database = await open(initialRules);
-    final rules = await database.rulesDao.queryGlobalAddedRules().get();
+    final rules = await database.rulesDao.queryGlobalRules().get();
     final edited = rules.first.copyWith(content: 'edited.example');
-    await database.rulesDao.putGlobalRule(edited);
+    await database.rulesDao.putRule(edited);
     await database.rulesDao.delRules([rules.last.id]);
     await close(database);
 
     database = await open(initialRules);
-    expect(await database.rulesDao.queryGlobalAddedRules().get(), [edited]);
+    expect(await database.rulesDao.queryGlobalRules().get(), [edited]);
   });
 
   test('an existing database never receives the initial catalogue', () async {
     var database = await open();
     const userRule = Rule(id: 1, content: 'user.example', ruleTarget: 'DIRECT');
-    await database.rulesDao.putGlobalRule(userRule);
+    await database.rulesDao.putRule(userRule);
     await close(database);
 
     database = await open(initialRules);
-    expect(await database.rulesDao.queryGlobalAddedRules().get(), [userRule]);
+    expect(await database.rulesDao.queryGlobalRules().get(), [userRule]);
   });
 
   test('an existing empty database is not seeded', () async {
@@ -139,18 +134,18 @@ void main() {
     await close(database);
 
     database = await open(initialRules);
-    expect(await database.rulesDao.queryGlobalAddedRules().get(), isEmpty);
+    expect(await database.rulesDao.queryGlobalRules().get(), isEmpty);
   });
 
   test('an upgrade does not insert initial rules', () async {
     var database = await open();
     await database.customSelect('SELECT 1').get();
     await close(database);
-    raw.execute('PRAGMA user_version = 9');
+    raw.execute('PRAGMA user_version = 19');
 
     database = await open(initialRules);
-    expect(await database.rulesDao.queryGlobalAddedRules().get(), isEmpty);
-    expect(raw.select('PRAGMA user_version').single['user_version'], 10);
+    expect(await database.rulesDao.queryGlobalRules().get(), isEmpty);
+    expect(raw.select('PRAGMA user_version').single['user_version'], 20);
   });
 
   test(
@@ -159,13 +154,13 @@ void main() {
       final database = await open(initialRules);
       const profile = Profile(id: 1, autoUpdateDuration: Duration.zero);
       await database.profilesDao.putAll([profile.toCompanion()]);
-      final rules = await database.rulesDao.queryGlobalAddedRules().get();
-      await database.rulesDao.putDisabledLink(profile.id, rules.first.id);
+      final rules = await database.rulesDao.queryGlobalRules().get();
+      await database.rulesDao.putDisabled(profile.id, rules.first.id);
 
       expect(await database.rulesDao.queryAddedRules(profile.id).get(), [
         rules.last,
       ]);
-      expect(await database.rulesDao.queryGlobalAddedRules().get(), rules);
+      expect(await database.rulesDao.queryGlobalRules().get(), rules);
     },
   );
 
@@ -175,7 +170,7 @@ void main() {
     input.clear();
     final database = await opening;
 
-    final rules = await database.rulesDao.queryGlobalAddedRules().get();
+    final rules = await database.rulesDao.queryGlobalRules().get();
     expect(rules.map((rule) => rule.rawValue), initialRules);
   });
 }

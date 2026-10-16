@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flashco/common/compute.dart';
 import 'package:flashco/core/event.dart';
 import 'package:flashco/core/desktop/model.dart';
 import 'package:flashco/core/interface.dart';
@@ -86,6 +87,13 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         'mode': 'rule',
         'rule': ['MATCH,DIRECT'],
       },
+      CoreMethod.getProfileGroupReferences =>
+        (json.decode(
+              await File(
+                'test/fixtures/core/profile_group_references.json',
+              ).readAsString(),
+            )
+            as Map)['result'],
       CoreMethod.getMemoryStats => {
         'rss': 2048,
         'heapInuse': 1024,
@@ -94,7 +102,9 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         'runtimeOther': 32,
       },
       CoreMethod.changeProxy => {'message': '', 'changed': true},
+      CoreMethod.compileRuleSet => {'behavior': 'ipcidr', 'format': 'text'},
       CoreMethod.getConnectionCount => 3,
+      CoreMethod.validateFilters => ['', 'missing closing )'],
       CoreMethod.watchRoute => {
         'core-epoch': 1,
         'picks-version': 0,
@@ -113,7 +123,8 @@ class _FailingConfigCoreHandler extends _RecordingCoreHandler {
     Object? arguments,
     Duration? timeout,
   }) async {
-    if (method == CoreMethod.getConfig) {
+    if (method == CoreMethod.getConfig ||
+        method == CoreMethod.getProfileGroupReferences) {
       throw const CoreMethodException(
         code: 'core_error',
         message: 'config not found',
@@ -135,7 +146,8 @@ class _EmptyConfigCoreHandler extends _RecordingCoreHandler {
     Object? arguments,
     Duration? timeout,
   }) async {
-    if (method == CoreMethod.getConfig) {
+    if (method == CoreMethod.getConfig ||
+        method == CoreMethod.getProfileGroupReferences) {
       return null;
     }
     return super.invokeMethod(
@@ -210,6 +222,15 @@ void main() {
     expect(handler.calls[CoreMethod.clearEffect], 42);
   });
 
+  test('validateFilters sends the filters and reads one error each', () async {
+    final handler = _RecordingCoreHandler();
+
+    final errors = await handler.validateFilters(['hk`jp', '(hk']);
+
+    expect(handler.calls[CoreMethod.validateFilters], ['hk`jp', '(hk']);
+    expect(errors, ['', 'missing closing )']);
+  });
+
   test('dumpRuleSet sends the rule set path', () async {
     final handler = _RecordingCoreHandler();
 
@@ -217,6 +238,38 @@ void main() {
 
     expect(handler.calls[CoreMethod.dumpRuleSet], '/rules.mrs');
   });
+
+  test('decryptConfig sends the path and the age key', () async {
+    final handler = _RecordingCoreHandler();
+
+    await handler.decryptConfig('/profile.yaml', 'AGE-SECRET-KEY-1A');
+
+    expect(handler.calls[CoreMethod.decryptConfig], {
+      'path': '/profile.yaml',
+      'age-secret-key': 'AGE-SECRET-KEY-1A',
+    });
+  });
+
+  test(
+    'compileRuleSet names a cached file and reads what the Core found',
+    () async {
+      final handler = _RecordingCoreHandler();
+
+      final info = await handler.compileRuleSet(
+        'abc',
+        url: 'https://example.com/r.list',
+      );
+
+      expect(handler.calls[CoreMethod.compileRuleSet], {
+        'name': 'abc',
+        'url': 'https://example.com/r.list',
+      });
+      expect(info, (
+        behavior: RuleProviderBehavior.ipcidr,
+        format: RuleProviderFormat.text,
+      ));
+    },
+  );
 
   test('event contract accepts batches and legacy single events', () async {
     final fixture =
@@ -340,6 +393,50 @@ void main() {
     expect(memory?.rss, 2048);
     expect(memory?.runtimeTotal, 1024 + 256 + 64 + 32);
   });
+
+  test(
+    'profile group references decode the native filtered membership',
+    () async {
+      final handler = _RecordingCoreHandler();
+      final groups = await handler.getProfileGroupReferences('/config.yaml');
+
+      expect(
+        handler.calls[CoreMethod.getProfileGroupReferences],
+        '/config.yaml',
+      );
+      expect(fastestChoice(groups, Mode.rule)?.automatic.name, 'Auto');
+      expect(
+        groups.getGroup('PROXY')!.all.map((proxy) => proxy.name),
+        isNot(contains('Fastest')),
+      );
+    },
+  );
+
+  test(
+    'profile group references preserve structured errors and reject empty results',
+    () async {
+      await expectLater(
+        _FailingConfigCoreHandler().getProfileGroupReferences('/missing.yaml'),
+        throwsA(
+          isA<CoreMethodException>().having(
+            (error) => error.code,
+            'code',
+            'core_error',
+          ),
+        ),
+      );
+      await expectLater(
+        _EmptyConfigCoreHandler().getProfileGroupReferences('/config.yaml'),
+        throwsA(
+          isA<CoreMethodException>().having(
+            (error) => error.code,
+            'code',
+            'empty_result',
+          ),
+        ),
+      );
+    },
+  );
 
   test('getConfig preserves structured core errors', () async {
     final handler = _FailingConfigCoreHandler();

@@ -2,6 +2,38 @@ import 'package:flashco/common/common.dart';
 import 'package:flashco/enum/enum.dart';
 import 'package:flashco/models/models.dart';
 
+typedef FastestChoice = ({Group selector, Group automatic});
+
+FastestChoice? fastestChoice(List<Group> groups, Mode mode) {
+  if (mode == Mode.direct) return null;
+  final choices = <FastestChoice>[];
+  for (final selector in groups) {
+    if (selector.type != GroupType.Selector ||
+        (mode == Mode.global
+            ? selector.name != GroupName.GLOBAL.name
+            : selector.name == GroupName.GLOBAL.name ||
+                  selector.hidden == true)) {
+      continue;
+    }
+    final automatic = groups.where(
+      (group) =>
+          group.type == GroupType.URLTest &&
+          selector.all.any((proxy) => proxy.name == group.name),
+    );
+    final fastest = automatic.where(
+      (group) => group.name.toLowerCase() == 'fastest',
+    );
+    final group =
+        fastest.firstOrNull ??
+        (automatic.length == 1 ? automatic.single : null);
+    if (group != null) choices.add((selector: selector, automatic: group));
+  }
+  return choices
+          .where((choice) => choice.selector.name == 'PROXY')
+          .firstOrNull ??
+      (choices.length == 1 ? choices.single : null);
+}
+
 List<Group> computeSort({
   required List<Group> groups,
   required ProxiesSortType sortType,

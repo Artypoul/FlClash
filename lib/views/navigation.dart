@@ -3,6 +3,7 @@ import 'package:flashco/enum/enum.dart';
 import 'package:flashco/icons/app_glyphs.dart';
 import 'package:flashco/models/models.dart';
 import 'package:flashco/views/views.dart';
+import 'package:flashco/views/dashboard/simple_home.dart';
 import 'package:material_ui/material_ui.dart';
 
 class Navigation implements NavigationPort {
@@ -19,7 +20,7 @@ class Navigation implements NavigationPort {
         glyph: AppGlyphs.dashboard,
         label: PageLabel.dashboard,
         builder: (_) =>
-            const DashboardView(key: GlobalObjectKey(PageLabel.dashboard)),
+            const SimpleHomeView(key: GlobalObjectKey(PageLabel.dashboard)),
       ),
       NavigationItem(
         glyph: AppGlyphs.proxies,
