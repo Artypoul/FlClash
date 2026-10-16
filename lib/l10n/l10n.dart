@@ -2530,61 +2530,11 @@ class AppLocalizations {
     );
   }
 
-  /// `The Software does not collect or upload your subscription URLs, node details, configuration content, visited websites, connection records, traffic content, or logs. This data stays on your device and the developers have no access to it.\n\nThe Software only reaches the network when you use a feature that needs it, such as fetching the subscription URL you provided when updating a profile, or contacting GitHub when checking for updates.\n\nThe desktop versions (Windows, macOS, Linux) include no analytics or crash reporting service. The Android version includes the following two Google Firebase services to improve stability:`
+  /// `Flashco does not use Firebase Analytics or Crashlytics. Crash recovery and application logs are processed locally unless you export them yourself. The Android QR scanner uses Google ML Kit, which can send device and application information, errors, and scanner usage and performance diagnostics to Google.\n\nNetwork features contact VPN and subscription providers, DNS resolvers, GitHub for updates and rule resources, connectivity-test endpoints, and IP information providers. These services can receive your connection IP and request details. IP quality checks can also send the address being checked to external providers. Subscription requests include the credentials required by your provider.`
   String get disclaimerPrivacyContent {
     return Intl.message(
-      'The Software does not collect or upload your subscription URLs, node details, configuration content, visited websites, connection records, traffic content, or logs. This data stays on your device and the developers have no access to it.\n\nThe Software only reaches the network when you use a feature that needs it, such as fetching the subscription URL you provided when updating a profile, or contacting GitHub when checking for updates.\n\nThe desktop versions (Windows, macOS, Linux) include no analytics or crash reporting service. The Android version includes the following two Google Firebase services to improve stability:',
+      'Flashco does not use Firebase Analytics or Crashlytics. Crash recovery and application logs are processed locally unless you export them yourself. The Android QR scanner uses Google ML Kit, which can send device and application information, errors, and scanner usage and performance diagnostics to Google.\n\nNetwork features contact VPN and subscription providers, DNS resolvers, GitHub for updates and rule resources, connectivity-test endpoints, and IP information providers. These services can receive your connection IP and request details. IP quality checks can also send the address being checked to external providers. Subscription requests include the credentials required by your provider.',
       name: 'disclaimerPrivacyContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Firebase Crashlytics (crash analytics)`
-  String get disclaimerCrashlyticsTitle {
-    return Intl.message(
-      'Firebase Crashlytics (crash analytics)',
-      name: 'disclaimerCrashlyticsTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `When the app crashes, a crash report is uploaded automatically.\n\nWhat is collected: the crash stack trace and error message, the time of the crash, the app version and build number, the device brand and model, the Android version, screen orientation, free memory and storage, whether the device is rooted, and a random installation ID that is created on install and reset on reinstall.\n\nPurpose: only to locate and fix crashes.\n\nYou can turn it off at any time under "Tools > General > Crash analytics".`
-  String get disclaimerCrashlyticsContent {
-    return Intl.message(
-      'When the app crashes, a crash report is uploaded automatically.\n\nWhat is collected: the crash stack trace and error message, the time of the crash, the app version and build number, the device brand and model, the Android version, screen orientation, free memory and storage, whether the device is rooted, and a random installation ID that is created on install and reset on reinstall.\n\nPurpose: only to locate and fix crashes.\n\nYou can turn it off at any time under "Tools > General > Crash analytics".',
-      name: 'disclaimerCrashlyticsContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Firebase Analytics (usage statistics)`
-  String get disclaimerAnalyticsTitle {
-    return Intl.message(
-      'Firebase Analytics (usage statistics)',
-      name: 'disclaimerAnalyticsTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Basic app usage statistics are collected automatically with Firebase.\n\nWhat is collected: basic events such as first launch, app opens and session length, and app updates; an app instance ID; the device model, OS version, and system language; and an approximate country- or region-level location inferred from the IP address.\n\nPurpose: only to understand the number of active devices, version distribution, and OS compatibility. The developers do not use this data for advertising, do not sell it, and do not link it to your subscriptions or configurations.`
-  String get disclaimerAnalyticsContent {
-    return Intl.message(
-      'Basic app usage statistics are collected automatically with Firebase.\n\nWhat is collected: basic events such as first launch, app opens and session length, and app updates; an app instance ID; the device model, OS version, and system language; and an approximate country- or region-level location inferred from the IP address.\n\nPurpose: only to understand the number of active devices, version distribution, and OS compatibility. The developers do not use this data for advertising, do not sell it, and do not link it to your subscriptions or configurations.',
-      name: 'disclaimerAnalyticsContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This data is processed and stored by Google on our behalf, may be transferred to servers outside your country or region (such as in the United States), and is governed by the Google Privacy Policy and the Firebase privacy and security documentation. Crash reports are kept for up to 90 days; statistics are kept under the Firebase default retention policy.`
-  String get disclaimerDataProcessingContent {
-    return Intl.message(
-      'This data is processed and stored by Google on our behalf, may be transferred to servers outside your country or region (such as in the United States), and is governed by the Google Privacy Policy and the Firebase privacy and security documentation. Crash reports are kept for up to 90 days; statistics are kept under the Firebase default retention policy.',
-      name: 'disclaimerDataProcessingContent',
       desc: '',
       args: [],
     );
@@ -2645,86 +2595,6 @@ class AppLocalizations {
     return Intl.message(
       'By installing, copying, or using the Software, you are deemed to have read and agreed to this entire statement. If you disagree with any of its terms, stop using and uninstall the Software immediately.',
       name: 'disclaimerAcceptContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Android only`
-  String get disclaimerAndroidOnly {
-    return Intl.message(
-      'Android only',
-      name: 'disclaimerAndroidOnly',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Google Privacy Policy`
-  String get disclaimerGooglePrivacy {
-    return Intl.message(
-      'Google Privacy Policy',
-      name: 'disclaimerGooglePrivacy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Firebase privacy and security`
-  String get disclaimerFirebasePrivacy {
-    return Intl.message(
-      'Firebase privacy and security',
-      name: 'disclaimerFirebasePrivacy',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Read to the end`
-  String get disclaimerReadToEnd {
-    return Intl.message(
-      'Read to the end',
-      name: 'disclaimerReadToEnd',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Restate the statement`
-  String get disclaimerRestateTitle {
-    return Intl.message(
-      'Restate the statement',
-      name: 'disclaimerRestateTitle',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `To confirm you understand, enter the following statement in full in the field below:`
-  String get disclaimerRestateTip {
-    return Intl.message(
-      'To confirm you understand, enter the following statement in full in the field below:',
-      name: 'disclaimerRestateTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Enter the statement above`
-  String get disclaimerRestateHint {
-    return Intl.message(
-      'Enter the statement above',
-      name: 'disclaimerRestateHint',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Does not match the statement`
-  String get disclaimerRestateMismatch {
-    return Intl.message(
-      'Does not match the statement',
-      name: 'disclaimerRestateMismatch',
       desc: '',
       args: [],
     );
@@ -4148,46 +4018,6 @@ class AppLocalizations {
   /// `Core status`
   String get coreStatus {
     return Intl.message('Core status', name: 'coreStatus', desc: '', args: []);
-  }
-
-  /// `Data collection notice`
-  String get dataCollectionTip {
-    return Intl.message(
-      'Data collection notice',
-      name: 'dataCollectionTip',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `This app uses Firebase Crashlytics to collect crash information to improve stability.\nThe collected data includes device information and crash details, and contains no personally sensitive data.\nYou can turn this off in settings.`
-  String get dataCollectionContent {
-    return Intl.message(
-      'This app uses Firebase Crashlytics to collect crash information to improve stability.\nThe collected data includes device information and crash details, and contains no personally sensitive data.\nYou can turn this off in settings.',
-      name: 'dataCollectionContent',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Crash analytics`
-  String get crashlytics {
-    return Intl.message(
-      'Crash analytics',
-      name: 'crashlytics',
-      desc: '',
-      args: [],
-    );
-  }
-
-  /// `Crash analytics uploads a crash log without sensitive information when the app crashes.`
-  String get crashlyticsTip {
-    return Intl.message(
-      'Crash analytics uploads a crash log without sensitive information when the app crashes.',
-      name: 'crashlyticsTip',
-      desc: '',
-      args: [],
-    );
   }
 
   /// `Append system DNS`

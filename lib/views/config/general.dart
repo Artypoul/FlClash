@@ -413,12 +413,6 @@ class GeneralView extends ConsumerWidget {
         select: (state) => state.openLogs,
         update: (state, value) => state.copyWith(openLogs: value),
       ),
-      if (system.isAndroid)
-        _appSettingToggle(
-          title: (l) => l.crashlytics,
-          select: (state) => state.crashlytics,
-          update: (state, value) => state.copyWith(crashlytics: value),
-        ),
     ];
   }
 
@@ -478,10 +472,7 @@ class GeneralView extends ConsumerWidget {
           generateSectionV3(
             title: appLocalizations.logsAndDiagnostics,
             items: _logItems(),
-            footer: [
-              appLocalizations.logcatDesc,
-              if (system.isAndroid) appLocalizations.crashlyticsTip,
-            ].join('\n'),
+            footer: appLocalizations.logcatDesc,
           ),
         ],
       ),

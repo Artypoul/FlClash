@@ -7,6 +7,64 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('Migration', () {
     test(
+      'upgrading cleans inherited bypass rules once and preserves later edits',
+      () async {
+        final configMap = _createConfigMap();
+        (configMap['networkProps']! as Map<String, Object?>)['bypassDomain'] = [
+          '*zhihu.com',
+          '*zhimg.com',
+          '*jd.com',
+          '100ime-iat-api.xfyun.cn',
+          '*360buyimg.com',
+          'localhost',
+          '*.example.org',
+        ];
+        final store = _FakeMigrationStore(configMap: configMap, version: 1);
+
+        final upgraded = await Migration(store: store).run();
+
+        expect(upgraded.networkProps.bypassDomain, [
+          'localhost',
+          '*.example.org',
+        ]);
+        expect(store.savedConfig, upgraded);
+        expect(store.version, Migration.currentVersion);
+        expect(store.restoredData?.profiles, isEmpty);
+        final edited = upgraded.copyWith(
+          networkProps: upgraded.networkProps.copyWith(
+            bypassDomain: ['localhost', '*.example.org', '*jd.com'],
+          ),
+        );
+        final nextStore = _FakeMigrationStore(
+          configMap: jsonDecode(jsonEncode(edited)) as Map<String, Object?>,
+          version: store.version,
+        );
+
+        final reloaded = await Migration(store: nextStore).run();
+
+        expect(reloaded.networkProps.bypassDomain, [
+          'localhost',
+          '*.example.org',
+          '*jd.com',
+        ]);
+        expect(nextStore.savedConfig, isNull);
+      },
+    );
+
+    test('a failed bypass upgrade does not advance the version', () async {
+      final store = _FakeMigrationStore(
+        configMap: _createConfigMap(),
+        version: 1,
+        configSaveResult: false,
+      );
+
+      await expectLater(Migration(store: store).run(), throwsStateError);
+
+      expect(store.version, 1);
+      expect(store.events, isNot(contains('setVersion')));
+    });
+
+    test(
       'persists TUN defaults for a new installation with API closed',
       () async {
         final store = _FakeMigrationStore(configMap: null, version: 0);
@@ -85,7 +143,10 @@ void main() {
         );
         final davProps = configMap['davProps']! as Map<String, Object?>;
         davProps['password'] = 'secret';
-        final store = _FakeMigrationStore(configMap: configMap, version: 1);
+        final store = _FakeMigrationStore(
+          configMap: configMap,
+          version: Migration.currentVersion,
+        );
 
         final config = await Migration(store: store).run();
 

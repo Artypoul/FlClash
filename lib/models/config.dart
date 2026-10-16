@@ -10,11 +10,6 @@ part 'generated/config.freezed.dart';
 part 'generated/config.g.dart';
 
 const defaultBypassDomain = [
-  '*zhihu.com',
-  '*zhimg.com',
-  '*jd.com',
-  '100ime-iat-api.xfyun.cn',
-  '*360buyimg.com',
   'localhost',
   '*.local',
   '127.*',
@@ -195,8 +190,6 @@ abstract class AppSettingProps with _$AppSettingProps {
     @JsonKey(readValue: _readSidebarExpanded)
     bool sidebarExpanded,
     @Default(0) int acceptedDisclaimerVersion,
-    @Default(false) bool crashlyticsTip,
-    @Default(false) bool crashlytics,
     @Default(true) bool minimizeOnExit,
     @Default(false) bool hidden,
     @Default(false) bool developerMode,

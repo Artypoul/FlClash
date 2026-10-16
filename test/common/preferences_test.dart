@@ -15,7 +15,6 @@ const _sharedState = SharedState(
   currentProfileName: 'profile',
   stopText: 'stopped',
   onlyStatisticsProxy: true,
-  crashlytics: false,
 );
 
 void main() {

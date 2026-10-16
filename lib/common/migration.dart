@@ -73,7 +73,7 @@ class Migration {
     : _store = store,
       _migrateV0 = migrateV0 ?? oldToNowTask;
 
-  static const currentVersion = 1;
+  static const currentVersion = 2;
 
   Future<Config> run({bool isNewInstallation = false}) async {
     final configMap = await _store.getConfigMap();
@@ -127,7 +127,9 @@ class Migration {
       }
     }
 
-    config = Config.realFromJson(data.configMap);
+    config = Config.realFromJson(
+      upgradeConfigMap(data.configMap, fromVersion: oldVersion),
+    );
     if (isNewInstallation) {
       config = config.copyWith(
         patchClashConfig: config.patchClashConfig.copyWith(
@@ -153,6 +155,34 @@ class Migration {
     await _store.setVersion(currentVersion);
     return config;
   }
+}
+
+Map<String, Object?>? upgradeConfigMap(
+  Map<String, Object?>? configMap, {
+  required int fromVersion,
+}) {
+  if (configMap == null || fromVersion >= 2) return configMap;
+  final network = configMap['networkProps'];
+  if (network is! Map) return configMap;
+  final domains = network['bypassDomain'];
+  if (domains is! List) return configMap;
+  const legacyBypassExceptions = {
+    '*zhihu.com',
+    '*zhimg.com',
+    '*jd.com',
+    '100ime-iat-api.xfyun.cn',
+    '*360buyimg.com',
+  };
+  return {
+    ...configMap,
+    'networkProps': <String, Object?>{
+      ...network,
+      'bypassDomain': [
+        for (final domain in domains)
+          if (!legacyBypassExceptions.contains(domain)) domain,
+      ],
+    },
+  };
 }
 
 bool _isV0(Map<String, Object?>? configMap) =>

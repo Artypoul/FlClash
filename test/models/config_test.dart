@@ -17,6 +17,43 @@ T roundTrip<T>(
 }
 
 void main() {
+  test(
+    'legacy telemetry settings cannot enable collection after an upgrade',
+    () {
+      final settings = AppSettingProps.fromJson({
+        'crashlytics': true,
+        'crashlyticsTip': true,
+      });
+
+      expect(settings.toJson(), isNot(contains('crashlytics')));
+      expect(settings.toJson(), isNot(contains('crashlyticsTip')));
+    },
+  );
+
+  test('saved custom bypass rules survive loading', () {
+    final network = NetworkProps.fromJson({
+      'bypassDomain': [
+        '*zhihu.com',
+        '*zhimg.com',
+        '*jd.com',
+        '100ime-iat-api.xfyun.cn',
+        '*360buyimg.com',
+        'localhost',
+        '*.example.org',
+      ],
+    });
+
+    expect(network.bypassDomain, [
+      '*zhihu.com',
+      '*zhimg.com',
+      '*jd.com',
+      '100ime-iat-api.xfyun.cn',
+      '*360buyimg.com',
+      'localhost',
+      '*.example.org',
+    ]);
+  });
+
   group('TUN upgrade compatibility', () {
     test('keeps the existing device name when settings omit it', () {
       expect(const Tun().device, 'Flashco');

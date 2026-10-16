@@ -6,7 +6,6 @@ import 'package:flashco/widgets/widgets.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// True only after "Agree" and the restatement; any other way out declines.
 Future<bool> requestDisclaimerConsent() async {
   return await BaseNavigator.push<bool>(
         rootNavigatorKey.currentContext!,
@@ -20,9 +19,6 @@ class DisclaimerView extends StatelessWidget {
 
   const DisclaimerView({super.key, this.requireConsent = false});
 
-  static const _googlePrivacyUrl = 'https://policies.google.com/privacy';
-  static const _firebasePrivacyUrl =
-      'https://firebase.google.com/support/privacy';
   static const _maxContentWidth = 720.0;
 
   List<({String title, String content})> _leadingTerms(AppLocalizations l) => [
@@ -149,33 +145,6 @@ class DisclaimerView extends StatelessWidget {
         index: privacyIndex,
         title: appLocalizations.disclaimerPrivacyTitle,
         content: appLocalizations.disclaimerPrivacyContent,
-        children: [
-          _DataServiceCard(
-            glyph: AppGlyphs.error,
-            title: appLocalizations.disclaimerCrashlyticsTitle,
-            content: appLocalizations.disclaimerCrashlyticsContent,
-          ),
-          _DataServiceCard(
-            glyph: AppGlyphs.dataUsage,
-            title: appLocalizations.disclaimerAnalyticsTitle,
-            content: appLocalizations.disclaimerAnalyticsContent,
-          ),
-          _TermParagraphs(appLocalizations.disclaimerDataProcessingContent),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _PolicyLink(
-                label: appLocalizations.disclaimerGooglePrivacy,
-                url: _googlePrivacyUrl,
-              ),
-              _PolicyLink(
-                label: appLocalizations.disclaimerFirebasePrivacy,
-                url: _firebasePrivacyUrl,
-              ),
-            ],
-          ),
-        ],
       ),
       for (final (index, term) in trailingTerms.indexed)
         _DisclaimerTerm(
@@ -231,13 +200,11 @@ class _DisclaimerTerm extends StatelessWidget {
   final int index;
   final String title;
   final String content;
-  final List<Widget> children;
 
   const _DisclaimerTerm({
     required this.index,
     required this.title,
     required this.content,
-    this.children = const [],
   });
 
   static const _badgeSize = 28.0;
@@ -284,8 +251,6 @@ class _DisclaimerTerm extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _TermParagraphs(content),
-          for (final child in children)
-            Padding(padding: const EdgeInsets.only(top: 12), child: child),
         ],
       ),
     );
@@ -317,95 +282,7 @@ class _TermParagraphs extends StatelessWidget {
   }
 }
 
-class _DataServiceCard extends StatelessWidget {
-  final Glyph glyph;
-  final String title;
-  final String content;
-
-  const _DataServiceCard({
-    required this.glyph,
-    required this.title,
-    required this.content,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
-    final textTheme = context.textTheme;
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: colorScheme.surfaceContainer,
-        shape: AppShape.xl,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                GlyphIcon(glyph, size: 20, color: colorScheme.primary),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                DecoratedBox(
-                  decoration: ShapeDecoration(
-                    color: colorScheme.tertiaryContainer,
-                    shape: AppShape.full,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 2,
-                    ),
-                    child: Text(
-                      context.appLocalizations.disclaimerAndroidOnly,
-                      style: textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onTertiaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            _TermParagraphs(content),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PolicyLink extends StatelessWidget {
-  final String label;
-  final String url;
-
-  const _PolicyLink({required this.label, required this.url});
-
-  @override
-  Widget build(BuildContext context) {
-    return ElasticButton(
-      child: TextButton.icon(
-        onPressed: () {
-          dialogs.openUrl(url);
-        },
-        icon: const GlyphIcon(AppGlyphs.openExternal, size: 18),
-        label: Text(label),
-      ),
-    );
-  }
-}
-
-class _ConsentLayout extends StatefulWidget {
+class _ConsentLayout extends StatelessWidget {
   final double maxWidth;
   final double gutter;
   final bool compact;
@@ -419,47 +296,11 @@ class _ConsentLayout extends StatefulWidget {
   });
 
   @override
-  State<_ConsentLayout> createState() => _ConsentLayoutState();
-}
-
-class _ConsentLayoutState extends State<_ConsentLayout> {
-  static const _endTolerance = 1.0;
-
-  bool _readToEnd = false;
-
-  bool _handleNotification(Notification notification) {
-    if (_readToEnd) {
-      return false;
-    }
-    final metrics = switch (notification) {
-      ScrollNotification(depth: 0, :final metrics) ||
-      ScrollMetricsNotification(depth: 0, :final metrics) => metrics,
-      _ => null,
-    };
-    if (metrics != null && metrics.extentAfter <= _endTolerance) {
-      setState(() {
-        _readToEnd = true;
-      });
-    }
-    return false;
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
-          child: NotificationListener<Notification>(
-            onNotification: _handleNotification,
-            child: widget.child,
-          ),
-        ),
-        _ConsentBar(
-          maxWidth: widget.maxWidth,
-          gutter: widget.gutter,
-          compact: widget.compact,
-          readToEnd: _readToEnd,
-        ),
+        Expanded(child: child),
+        _ConsentBar(maxWidth: maxWidth, gutter: gutter, compact: compact),
       ],
     );
   }
@@ -469,13 +310,11 @@ class _ConsentBar extends StatelessWidget {
   final double maxWidth;
   final double gutter;
   final bool compact;
-  final bool readToEnd;
 
   const _ConsentBar({
     required this.maxWidth,
     required this.gutter,
     required this.compact,
-    required this.readToEnd,
   });
 
   Widget _buildExitButton(BuildContext context) {
@@ -489,21 +328,10 @@ class _ConsentBar extends StatelessWidget {
     );
   }
 
-  Future<void> _handleAgree(BuildContext context) async {
-    final restated = await dialogs.showCommonDialog<bool>(
-      context: context,
-      dismissible: false,
-      child: const _RestateDialog(),
-    );
-    if (restated == true && context.mounted) {
-      Navigator.of(context).pop(true);
-    }
-  }
-
   Widget _buildAgreeButton(BuildContext context, {required String label}) {
     return ElasticButton(
       child: FilledButton(
-        onPressed: readToEnd ? () => _handleAgree(context) : null,
+        onPressed: () => Navigator.of(context).pop(true),
         child: Text(label),
       ),
     );
@@ -516,12 +344,7 @@ class _ConsentBar extends StatelessWidget {
         Expanded(child: _buildExitButton(context)),
         const SizedBox(width: 12),
         Expanded(
-          child: _buildAgreeButton(
-            context,
-            label: readToEnd
-                ? appLocalizations.agree
-                : appLocalizations.disclaimerReadToEnd,
-          ),
+          child: _buildAgreeButton(context, label: appLocalizations.agree),
         ),
       ],
     );
@@ -531,16 +354,7 @@ class _ConsentBar extends StatelessWidget {
     final appLocalizations = context.appLocalizations;
     return Row(
       children: [
-        Expanded(
-          child: readToEnd
-              ? const SizedBox.shrink()
-              : Text(
-                  appLocalizations.disclaimerReadToEnd,
-                  style: context.textTheme.bodyMedium?.copyWith(
-                    color: context.colorScheme.onSurfaceVariant,
-                  ),
-                ),
-        ),
+        const Spacer(),
         const SizedBox(width: 12),
         _buildExitButton(context),
         const SizedBox(width: 12),
@@ -572,113 +386,6 @@ class _ConsentBar extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-enum _Restatement {
-  partial,
-  diverged,
-  complete;
-
-  static _Restatement of(TextEditingValue value, String statement) {
-    if (value.text.trim() == statement) {
-      return complete;
-    }
-    // Pinyin or kana still being composed is not part of the restatement yet.
-    final composing = value.composing;
-    final committed = value.isComposingRangeValid
-        ? composing.textBefore(value.text) + composing.textAfter(value.text)
-        : value.text;
-    return statement.startsWith(committed.trimLeft()) ? partial : diverged;
-  }
-}
-
-class _RestateDialog extends StatefulWidget {
-  const _RestateDialog();
-
-  @override
-  State<_RestateDialog> createState() => _RestateDialogState();
-}
-
-class _RestateDialogState extends State<_RestateDialog> {
-  final _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Widget _buildStatement(String statement) {
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        color: context.colorScheme.surfaceContainerHighest,
-        shape: AppShape.lg,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: SelectableText(
-          statement,
-          style: context.textTheme.bodyMedium?.copyWith(height: 1.6),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final appLocalizations = context.appLocalizations;
-    final statement = appLocalizations.disclaimerNoServiceStatement;
-    return ValueListenableBuilder<TextEditingValue>(
-      valueListenable: _controller,
-      builder: (context, value, _) {
-        final restatement = _Restatement.of(value, statement);
-        return CommonDialog(
-          title: appLocalizations.disclaimerRestateTitle,
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(false);
-              },
-              child: Text(appLocalizations.cancel),
-            ),
-            TextButton(
-              onPressed: restatement == _Restatement.complete
-                  ? () {
-                      Navigator.of(context).pop(true);
-                    }
-                  : null,
-              child: Text(appLocalizations.confirm),
-            ),
-          ],
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                appLocalizations.disclaimerRestateTip,
-                style: context.textTheme.bodyMedium?.copyWith(
-                  color: context.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _buildStatement(statement),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _controller,
-                minLines: 3,
-                maxLines: 6,
-                decoration: InputDecoration(
-                  hintText: appLocalizations.disclaimerRestateHint,
-                  errorText: restatement == _Restatement.diverged
-                      ? appLocalizations.disclaimerRestateMismatch
-                      : null,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

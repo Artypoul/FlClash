@@ -376,10 +376,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashDetected": MessageLookupByLibrary.simpleMessage("检测到崩溃"),
     "crashDetectedTip": m3,
     "crashTest": MessageLookupByLibrary.simpleMessage("崩溃测试"),
-    "crashlytics": MessageLookupByLibrary.simpleMessage("崩溃分析"),
-    "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "崩溃分析开启后，应用崩溃时会上传不含敏感信息的日志。",
-    ),
     "create": MessageLookupByLibrary.simpleMessage("创建"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("创建时间"),
@@ -410,10 +406,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "cut": MessageLookupByLibrary.simpleMessage("剪切"),
     "dark": MessageLookupByLibrary.simpleMessage("深色"),
     "dashboard": MessageLookupByLibrary.simpleMessage("仪表盘"),
-    "dataCollectionContent": MessageLookupByLibrary.simpleMessage(
-      "本应用使用 Firebase Crashlytics 收集崩溃信息以改进应用稳定性。\n收集的数据包括设备信息和崩溃详情，不包含个人敏感数据。\n您可以在设置中关闭此功能。",
-    ),
-    "dataCollectionTip": MessageLookupByLibrary.simpleMessage("数据收集说明"),
     "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
       "保存更改失败，已回滚",
     ),
@@ -459,34 +451,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "一旦你安装、复制或使用本软件，即视为你已阅读并同意本声明的全部内容。如你不同意本声明的任何条款，请立即停止使用并卸载本软件。",
     ),
     "disclaimerAcceptTitle": MessageLookupByLibrary.simpleMessage("接受声明"),
-    "disclaimerAnalyticsContent": MessageLookupByLibrary.simpleMessage(
-      "随 Firebase 自动收集基础的应用使用统计。\n\n收集内容：首次启动、应用打开与会话时长、应用更新等基础事件，应用实例标识，设备型号、系统版本、系统语言，以及由 IP 地址推断的国家或地区级大致位置。\n\n用途：仅用于了解活跃设备数、版本分布与系统兼容情况。开发者不会将这些数据用于广告，不会出售，也不会与你的订阅或配置相关联。",
-    ),
-    "disclaimerAnalyticsTitle": MessageLookupByLibrary.simpleMessage(
-      "Firebase Analytics（使用统计）",
-    ),
-    "disclaimerAndroidOnly": MessageLookupByLibrary.simpleMessage("仅 Android"),
     "disclaimerChangesContent": MessageLookupByLibrary.simpleMessage(
       "开发者有权随版本更新修改本声明，修改后的内容随新版本发布即生效。你在更新后继续使用本软件，即视为接受修改后的声明。",
     ),
     "disclaimerChangesTitle": MessageLookupByLibrary.simpleMessage("声明变更"),
-    "disclaimerCrashlyticsContent": MessageLookupByLibrary.simpleMessage(
-      "应用发生崩溃时，自动上传崩溃报告。\n\n收集内容：崩溃堆栈与错误信息、崩溃发生时间、应用版本与构建号、设备品牌与型号、Android 系统版本、屏幕方向、剩余内存与存储空间、设备是否已 root，以及一个随安装生成、重装后即重置的随机安装标识。\n\n用途：仅用于定位和修复崩溃问题。\n\n你可以在“工具 > 常规 > 崩溃分析”中随时关闭。",
-    ),
-    "disclaimerCrashlyticsTitle": MessageLookupByLibrary.simpleMessage(
-      "Firebase Crashlytics（崩溃分析）",
-    ),
-    "disclaimerDataProcessingContent": MessageLookupByLibrary.simpleMessage(
-      "上述数据由 Google 代为处理和存储，可能被传输至你所在国家或地区以外（如美国）的服务器，并受 Google 隐私政策与 Firebase 隐私和安全说明约束。崩溃报告最多保留 90 天，统计数据按 Firebase 的默认策略保留。",
-    ),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "在使用 Flashco（以下简称“本软件”）前，请仔细阅读并充分理解本声明的全部内容。点击“同意”即表示你已阅读、理解并接受以下全部条款；如不同意，请点击“退出”并停止使用本软件。",
-    ),
-    "disclaimerFirebasePrivacy": MessageLookupByLibrary.simpleMessage(
-      "Firebase 隐私和安全说明",
-    ),
-    "disclaimerGooglePrivacy": MessageLookupByLibrary.simpleMessage(
-      "Google 隐私政策",
     ),
     "disclaimerLiabilityContent": MessageLookupByLibrary.simpleMessage(
       "在适用法律允许的最大范围内，开发者及所有贡献者均不对因使用或无法使用本软件而产生的任何直接、间接、偶然、特殊、惩罚性或后果性损害承担责任，包括但不限于数据丢失、设备损坏、网络异常、业务中断、利润损失或因此引起的任何法律纠纷，即使已被告知发生此类损害的可能性。",
@@ -500,24 +470,15 @@ class MessageLookup extends MessageLookupByLibrary {
       "本软件自身不提供任何代理服务器、节点、订阅、机场或网络接入服务，也不与任何此类服务的提供者存在合作、代理或担保关系。",
     ),
     "disclaimerPrivacyContent": MessageLookupByLibrary.simpleMessage(
-      "本软件不会收集或上传你的订阅地址、节点信息、配置内容、访问的网站、连接记录、流量内容和日志，这些数据仅保存在你的设备本地，开发者无法获取。\n\n本软件只会在你使用相应功能时访问外部网络，例如更新订阅时访问你提供的订阅地址、检查更新时访问 GitHub。\n\n桌面版（Windows、macOS、Linux）未集成任何数据统计或崩溃上报服务。Android 版集成了 Google Firebase 的以下两项服务，用于改进应用稳定性：",
+      "Flashco 不使用 Firebase Analytics 和 Crashlytics。崩溃恢复和应用日志处理在本地进行，除非您自行导出这些数据。Android QR 扫描器使用 Google ML Kit，可能向 Google 发送设备和应用信息、错误以及扫描器使用情况和性能诊断数据。\n\n网络功能会访问 VPN 和订阅提供商、DNS 服务器、用于更新和规则资源的 GitHub、连通性检测地址以及 IP 信息服务。这些服务可能收到您的连接 IP 和请求信息。IP 质量检测还可能将被检测的地址发送给外部服务。订阅请求包含您的提供商所需的访问凭据。",
     ),
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage("数据收集与隐私"),
-    "disclaimerReadToEnd": MessageLookupByLibrary.simpleMessage("请阅读至底部"),
     "disclaimerResponsibilityContent": MessageLookupByLibrary.simpleMessage(
       "你应自行确认使用本软件在你所在国家或地区是合法的，并对使用本软件的全部行为及其后果独立承担法律责任。\n\n你导入的订阅、节点与配置由你自行选择和判断，其来源是否合法、内容是否安全、服务是否稳定，均由你与相关提供者自行负责。",
     ),
     "disclaimerResponsibilityTitle": MessageLookupByLibrary.simpleMessage(
       "用户责任",
     ),
-    "disclaimerRestateHint": MessageLookupByLibrary.simpleMessage("在此输入上述声明"),
-    "disclaimerRestateMismatch": MessageLookupByLibrary.simpleMessage(
-      "与声明内容不一致",
-    ),
-    "disclaimerRestateTip": MessageLookupByLibrary.simpleMessage(
-      "为确认你已知悉，请在下方输入框中完整复述以下声明：",
-    ),
-    "disclaimerRestateTitle": MessageLookupByLibrary.simpleMessage("复述声明"),
     "disclaimerSoftwareContent": MessageLookupByLibrary.simpleMessage(
       "本软件是基于 Clash.Meta（mihomo）内核的开源网络代理客户端，仅提供配置管理、规则分流与流量转发等本地工具功能。",
     ),

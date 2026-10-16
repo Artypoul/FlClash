@@ -561,6 +561,34 @@ void main() {
       ),
     );
 
+    for (final version in [1, 2]) {
+      test(
+        'restoring version $version applies only the matching bypass upgrade',
+        () async {
+          final archivePath = await zipOf({
+            configJsonName: utf8.encode(
+              jsonEncode({
+                'version': version,
+                'networkProps': {
+                  'bypassDomain': ['*jd.com', 'localhost', '*.example.org'],
+                },
+              }),
+            ),
+          });
+
+          final data = await restore(archivePath);
+          final config = Config.fromJson(data.configMap!);
+
+          expect(
+            config.networkProps.bypassDomain,
+            version == 1
+                ? ['localhost', '*.example.org']
+                : ['*jd.com', 'localhost', '*.example.org'],
+          );
+        },
+      );
+    }
+
     test('the archive carries the database, the config and only the listed '
         'files', () async {
       await seedDatabase();

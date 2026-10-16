@@ -409,10 +409,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "crashDetected": MessageLookupByLibrary.simpleMessage("クラッシュを検出しました"),
     "crashDetectedTip": m3,
     "crashTest": MessageLookupByLibrary.simpleMessage("クラッシュテスト"),
-    "crashlytics": MessageLookupByLibrary.simpleMessage("クラッシュ分析"),
-    "crashlyticsTip": MessageLookupByLibrary.simpleMessage(
-      "クラッシュ分析を有効にすると、クラッシュ時に機密情報を含まないログをアップロードします。",
-    ),
     "create": MessageLookupByLibrary.simpleMessage("作成"),
     "createProfileFromUrlTip": m4,
     "creationTime": MessageLookupByLibrary.simpleMessage("作成日時"),
@@ -445,10 +441,6 @@ class MessageLookup extends MessageLookupByLibrary {
     "cut": MessageLookupByLibrary.simpleMessage("切り取り"),
     "dark": MessageLookupByLibrary.simpleMessage("ダーク"),
     "dashboard": MessageLookupByLibrary.simpleMessage("ダッシュボード"),
-    "dataCollectionContent": MessageLookupByLibrary.simpleMessage(
-      "本アプリは、安定性向上のために Firebase Crashlytics を使用してクラッシュ情報を収集します。\n収集されるデータにはデバイス情報とクラッシュの詳細が含まれますが、個人の機密データは含まれません。\nこの機能は設定で無効にできます。",
-    ),
-    "dataCollectionTip": MessageLookupByLibrary.simpleMessage("データ収集について"),
     "databaseWriteFailedTip": MessageLookupByLibrary.simpleMessage(
       "変更の保存に失敗したため、元に戻しました",
     ),
@@ -500,34 +492,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "本ソフトウェアをインストール、複製または使用した時点で、本声明のすべての内容を読み、同意したものとみなされます。いずれかの条項に同意いただけない場合は、直ちに使用を中止し、本ソフトウェアをアンインストールしてください。",
     ),
     "disclaimerAcceptTitle": MessageLookupByLibrary.simpleMessage("声明への同意"),
-    "disclaimerAnalyticsContent": MessageLookupByLibrary.simpleMessage(
-      "Firebase により基本的なアプリ利用統計が自動的に収集されます。\n\n収集内容：初回起動、アプリの起動とセッション時間、アプリの更新などの基本イベント、アプリインスタンス ID、端末のモデル、OS のバージョン、システム言語、および IP アドレスから推定される国または地域レベルのおおよその位置情報。\n\n目的：アクティブな端末数、バージョン分布、OS の互換性を把握するためにのみ使用します。開発者はこれらのデータを広告に使用したり、販売したり、サブスクリプションや設定と関連付けたりすることはありません。",
-    ),
-    "disclaimerAnalyticsTitle": MessageLookupByLibrary.simpleMessage(
-      "Firebase Analytics（利用統計）",
-    ),
-    "disclaimerAndroidOnly": MessageLookupByLibrary.simpleMessage("Android のみ"),
     "disclaimerChangesContent": MessageLookupByLibrary.simpleMessage(
       "開発者はバージョンの更新に伴い本声明を変更することがあり、変更内容は新しいバージョンの公開とともに効力を生じます。更新後も本ソフトウェアを引き続き使用した場合、変更後の声明に同意したものとみなされます。",
     ),
     "disclaimerChangesTitle": MessageLookupByLibrary.simpleMessage("本声明の変更"),
-    "disclaimerCrashlyticsContent": MessageLookupByLibrary.simpleMessage(
-      "アプリがクラッシュした際に、クラッシュレポートを自動的に送信します。\n\n収集内容：クラッシュのスタックトレースとエラー情報、発生日時、アプリのバージョンとビルド番号、端末のメーカーとモデル、Android のバージョン、画面の向き、空きメモリと空きストレージ、root 化の有無、およびインストール時に生成され再インストールでリセットされるランダムなインストール ID。\n\n目的：クラッシュの特定と修正のためにのみ使用します。\n\n「ツール > 一般 > クラッシュ分析」からいつでもオフにできます。",
-    ),
-    "disclaimerCrashlyticsTitle": MessageLookupByLibrary.simpleMessage(
-      "Firebase Crashlytics（クラッシュ分析）",
-    ),
-    "disclaimerDataProcessingContent": MessageLookupByLibrary.simpleMessage(
-      "これらのデータは Google が代わりに処理・保存し、お住まいの国または地域外（米国など）のサーバーに転送される場合があり、Google のプライバシーポリシーおよび Firebase のプライバシーとセキュリティに関する説明に従って取り扱われます。クラッシュレポートは最大 90 日間保存され、統計データは Firebase の既定の保存ポリシーに従って保存されます。",
-    ),
     "disclaimerDesc": MessageLookupByLibrary.simpleMessage(
       "Flashco（以下「本ソフトウェア」）をご利用になる前に、本声明の内容をよくお読みになり、十分にご理解ください。「同意する」をタップすると、以下のすべての条項を読み、理解し、承諾したものとみなされます。同意いただけない場合は「終了」をタップし、本ソフトウェアの使用を中止してください。",
-    ),
-    "disclaimerFirebasePrivacy": MessageLookupByLibrary.simpleMessage(
-      "Firebase のプライバシーとセキュリティ",
-    ),
-    "disclaimerGooglePrivacy": MessageLookupByLibrary.simpleMessage(
-      "Google プライバシーポリシー",
     ),
     "disclaimerLiabilityContent": MessageLookupByLibrary.simpleMessage(
       "適用法で認められる最大限の範囲において、開発者およびすべての貢献者は、本ソフトウェアの使用または使用不能に起因する直接的、間接的、偶発的、特別、懲罰的または結果的な損害（データの消失、機器の損傷、ネットワーク障害、業務の中断、逸失利益、およびそれに起因する法的紛争を含むがこれらに限らない）について、その可能性を知らされていた場合であっても、一切責任を負いません。",
@@ -543,26 +513,17 @@ class MessageLookup extends MessageLookupByLibrary {
       "本ソフトウェア自体は、プロキシサーバー、ノード、サブスクリプション、ネットワーク接続サービスを一切提供しておらず、それらのサービス提供者と提携、代理、保証の関係はありません。",
     ),
     "disclaimerPrivacyContent": MessageLookupByLibrary.simpleMessage(
-      "本ソフトウェアは、サブスクリプション URL、ノード情報、設定内容、閲覧したウェブサイト、接続記録、通信内容、ログを収集またはアップロードしません。これらのデータは端末内にのみ保存され、開発者がアクセスすることはできません。\n\n本ソフトウェアが外部ネットワークにアクセスするのは、プロファイル更新時に指定されたサブスクリプション URL へアクセスする場合や、アップデート確認時に GitHub へアクセスする場合など、該当する機能を使用したときのみです。\n\nデスクトップ版（Windows、macOS、Linux）には、統計やクラッシュレポートのサービスは一切組み込まれていません。Android 版には、安定性向上のため以下の 2 つの Google Firebase サービスが組み込まれています。",
+      "FlashcoはFirebase AnalyticsとCrashlyticsを使用しません。クラッシュからの復旧とアプリのログ処理は、自分でエクスポートしない限り端末内で行われます。AndroidのQRスキャナーはGoogle ML Kitを使用し、端末やアプリの情報、エラー、スキャナーの使用状況と性能に関する診断情報がGoogleに送信される場合があります。\n\nネットワーク機能は、VPN・サブスクリプションの提供元、DNSサーバー、更新やルール取得のためのGitHub、接続確認先、IP情報サービスにアクセスします。これらのサービスには接続元のIPアドレスとリクエスト情報が伝わる場合があります。IP品質の確認では、確認対象のIPアドレスも外部サービスに送信される場合があります。サブスクリプションのリクエストには、提供元が必要とする認証情報が含まれます。",
     ),
     "disclaimerPrivacyTitle": MessageLookupByLibrary.simpleMessage(
       "データ収集とプライバシー",
     ),
-    "disclaimerReadToEnd": MessageLookupByLibrary.simpleMessage("最後までお読みください"),
     "disclaimerResponsibilityContent": MessageLookupByLibrary.simpleMessage(
       "お住まいの国または地域で本ソフトウェアの使用が合法であることはご自身で確認する必要があり、本ソフトウェアを使用したすべての行為とその結果について、ご自身が単独で法的責任を負います。\n\nインポートするサブスクリプション、ノード、設定はご自身の判断で選択したものです。その出所の適法性、内容の安全性、サービスの安定性については、利用者と各提供者の間で解決してください。",
     ),
     "disclaimerResponsibilityTitle": MessageLookupByLibrary.simpleMessage(
       "利用者の責任",
     ),
-    "disclaimerRestateHint": MessageLookupByLibrary.simpleMessage("上記の声明を入力"),
-    "disclaimerRestateMismatch": MessageLookupByLibrary.simpleMessage(
-      "声明の内容と一致しません",
-    ),
-    "disclaimerRestateTip": MessageLookupByLibrary.simpleMessage(
-      "内容を理解したことを確認するため、以下の声明を下の入力欄に正確に入力してください：",
-    ),
-    "disclaimerRestateTitle": MessageLookupByLibrary.simpleMessage("声明の復唱"),
     "disclaimerSoftwareContent": MessageLookupByLibrary.simpleMessage(
       "本ソフトウェアは Clash.Meta（mihomo）コアをベースとしたオープンソースのネットワークプロキシクライアントであり、設定管理、ルールによる振り分け、トラフィック転送などのローカルツール機能のみを提供します。",
     ),

@@ -130,7 +130,7 @@ Future<MigrationData> readBackupArchive({
   if (!await configFile.exists()) {
     throw const BackupException(BackupFailure.invalid);
   }
-  final configMap = _decodeConfig(await configFile.readAsString());
+  var configMap = _decodeConfig(await configFile.readAsString());
   final version = configMap['version'] ?? 0;
   if (version is! int) {
     throw const BackupException(BackupFailure.invalid);
@@ -139,12 +139,16 @@ Future<MigrationData> readBackupArchive({
     throw const BackupException(BackupFailure.newerVersion);
   }
   if (version == 0) {
-    return migrateLegacyConfig(
+    final data = await migrateLegacyConfig(
       configMap: configMap,
       sourcePath: stagingDirPath,
       targetPath: stagingDirPath,
     );
+    return data.copyWith(
+      configMap: upgradeConfigMap(data.configMap, fromVersion: version),
+    );
   }
+  configMap = upgradeConfigMap(configMap, fromVersion: version)!;
   final databaseFile = File(join(stagingDirPath, backupDatabaseName));
   if (!await databaseFile.exists()) {
     return MigrationData(configMap: configMap);
