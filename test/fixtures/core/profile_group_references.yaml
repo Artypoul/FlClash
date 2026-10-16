@@ -1,0 +1,32 @@
+proxies:
+  - name: Node
+    type: direct
+proxy-providers:
+  remote:
+    type: http
+    url: https://never-fetch.invalid/proxies.yaml
+    path: ./never-create.yaml
+proxy-groups:
+  - name: PROXY
+    type: select
+    proxies: [Fastest, Auto, Safe, Node]
+    exclude-filter: '(?<=Fast)est$`^unused$'
+  - name: Typed
+    type: select
+    proxies: [Fastest, Auto, Safe]
+    exclude-type: 'uRlTeSt|Direct'
+  - name: Ordered
+    type: select
+    proxies: [Safe, Auto, Fastest, Auto]
+    use: [remote]
+    filter: '^Fast`^Auto'
+  - name: Fastest
+    type: url-test
+    hidden: true
+    proxies: [Node]
+  - name: Auto
+    type: url-test
+    proxies: [Node]
+  - name: Safe
+    type: fallback
+    proxies: [Node]

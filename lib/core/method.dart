@@ -17,6 +17,7 @@ enum CoreMethod {
   decodeShareLinks,
   updateConfig,
   getConfig,
+  getProfileGroupReferences,
   dumpRuleSet,
   compileRuleSet,
   getProxies,

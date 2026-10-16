@@ -63,6 +63,19 @@ class ProfilesAction extends _$ProfilesAction {
     ref.read(currentProfileIdProvider.notifier).value = profile.id;
   }
 
+  Future<Profile> _withImportDefaults(Profile profile) async {
+    final selectedMap = await globalState.safeRun(() async {
+      final groups = await _core.getProfileGroupReferences(profile.id);
+      return {
+        for (final mode in [Mode.rule, Mode.global])
+          if (fastestChoice(groups, mode) case final choice?)
+            choice.selector.name: choice.automatic.name,
+        ...profile.selectedMap,
+      };
+    });
+    return profile.copyWith(selectedMap: selectedMap ?? profile.selectedMap);
+  }
+
   Future<void> _activateImportedProfile(
     Profile profile,
     int sequence,
@@ -201,7 +214,7 @@ class ProfilesAction extends _$ProfilesAction {
           bytes,
           validate: (path, key) => _core.validateProfile(path, key),
         ),
-      ),
+      ).then(_withImportDefaults),
       title: currentAppLocalizations.addProfile,
     );
     if (profile != null) {
@@ -364,15 +377,17 @@ class ProfilesAction extends _$ProfilesAction {
     _showProfiles();
     final profile = await globalState.loadingRun(
       tag: LoadingTag.profiles,
-      () => link.isShareLink
-          ? _fromShareLinks(Profile.normal(label: label), [link])
-          : _withAgeSecretKey(
-              Profile.normal(
-                label: label,
-                url: link,
-              ).copyWith(ageSecretKey: ageSecretKey),
-              _download,
-            ),
+      () =>
+          (link.isShareLink
+                  ? _fromShareLinks(Profile.normal(label: label), [link])
+                  : _withAgeSecretKey(
+                      Profile.normal(
+                        label: label,
+                        url: link,
+                      ).copyWith(ageSecretKey: ageSecretKey),
+                      _download,
+                    ))
+              .then(_withImportDefaults),
       title: currentAppLocalizations.addProfile,
     );
     if (profile != null) {
@@ -404,9 +419,11 @@ class ProfilesAction extends _$ProfilesAction {
     await globalState.batchRun(
       imports,
       (item) async {
-        final profile = await (item.shareLinks.isEmpty
-            ? _download(item.profile)
-            : _fromShareLinks(item.profile, item.shareLinks));
+        final profile = await _withImportDefaults(
+          await (item.shareLinks.isEmpty
+              ? _download(item.profile)
+              : _fromShareLinks(item.profile, item.shareLinks)),
+        );
         putProfile(profile);
         imported[item.profile.id] = profile;
       },

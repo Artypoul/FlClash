@@ -32,6 +32,33 @@ class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 
 class _RealHttpOverrides extends HttpOverrides {}
 
+List<Group> _fixtureGroupReferences(Map config) {
+  final rawGroups = config['proxy-groups'] as List? ?? const [];
+  final groups = [
+    for (final raw in rawGroups)
+      Group(
+        name: raw['name'] as String,
+        type: GroupType.parse(raw['type'] as String),
+        all: [
+          for (final member in raw['proxies'] as List? ?? const [])
+            if (rawGroups.any((group) => group['name'] == member))
+              Proxy(name: member as String, type: 'URLTest'),
+        ],
+      ),
+  ];
+  return [
+    ...groups,
+    Group(
+      name: 'GLOBAL',
+      type: GroupType.Selector,
+      all: [
+        for (final group in groups)
+          Proxy(name: group.name, type: group.type.value),
+      ],
+    ),
+  ];
+}
+
 class _TestFilePicker extends FilePickerPlatform {
   PlatformFile? selected;
 
@@ -74,6 +101,7 @@ base class _TestPlatformFile extends PlatformFile {
 
 class _ImportSetupAction extends SetupAction {
   final requests = <({int? profileId, bool running, bool initialize})>[];
+  final selectionsAtStart = <Map<String, String>>[];
   Object? _token;
 
   @override
@@ -85,6 +113,11 @@ class _ImportSetupAction extends SetupAction {
   @override
   Future<bool> setRunning(bool running, {bool initialize = false}) async {
     _token = Object();
+    if (running) {
+      selectionsAtStart.add(
+        ref.read(currentProfileProvider)?.selectedMap ?? {},
+      );
+    }
     requests.add((
       profileId: ref.read(currentProfileIdProvider),
       running: running,
@@ -125,6 +158,14 @@ void main() {
   setUp(() {
     core = _MockCoreHandlerInterface();
     when(() => core.validateConfig(any())).thenAnswer((_) async => '');
+    when(() => core.getProfileGroupReferences(any())).thenAnswer((
+      invocation,
+    ) async {
+      final path = invocation.positionalArguments.single as String;
+      return _fixtureGroupReferences(
+        loadPlainYaml(await File(path).readAsString()) as Map,
+      );
+    });
     setup = _ImportSetupAction();
     container = ProviderContainer(
       overrides: [
@@ -165,6 +206,51 @@ void main() {
     return [for (final proxy in config['proxies'] as List) proxy as Map];
   }
 
+  const fastestConfig = <String, dynamic>{
+    'proxies': [
+      {'name': 'Node A', 'type': 'direct'},
+      {'name': 'Node B', 'type': 'direct'},
+    ],
+    'proxy-groups': [
+      {
+        'name': 'PROXY',
+        'type': 'select',
+        'proxies': ['Node A', 'Fastest'],
+      },
+      {
+        'name': 'Fastest',
+        'type': 'url-test',
+        'proxies': ['Node A', 'Node B'],
+      },
+    ],
+  };
+
+  test(
+    'a config without an automatic group keeps its normal selection',
+    () async {
+      final existing = Profile.normal(
+        label: 'Existing',
+      ).copyWith(selectedMap: {'PROXY': 'Node A'});
+      container.read(profilesProvider.notifier).put(existing);
+      container.read(currentProfileIdProvider.notifier).value = existing.id;
+      const link = 'vless://id@first.example:443#First';
+      decodesTo(link, [
+        {'name': 'First', 'type': 'vless', 'server': 'first.example'},
+      ]);
+
+      await container
+          .read(profilesActionProvider.notifier)
+          .addProfileFromLink(link);
+
+      final profile = container.read(currentProfileProvider)!;
+      expect(profile.selectedMap, isEmpty);
+      expect(setup.selectionsAtStart.single, profile.selectedMap);
+      expect(container.read(profilesProvider).first.selectedMap, {
+        'PROXY': 'Node A',
+      });
+    },
+  );
+
   group('file import', () {
     late FilePickerPlatform previousPicker;
     late _TestFilePicker filePicker;
@@ -178,17 +264,26 @@ void main() {
     tearDown(() => FilePickerPlatform.instance = previousPicker);
 
     test('selects and starts the validated file', () async {
-      final config = utf8.encode('proxies: []\n');
+      final config = utf8.encode(await encodeYamlTask(fastestConfig));
       filePicker.selected = _TestPlatformFile(config);
       final action = container.read(profilesActionProvider.notifier);
-      action.addCustomProfile('Existing');
+      final existing = Profile.normal(
+        label: 'Existing',
+      ).copyWith(selectedMap: {'PROXY': 'Node A'});
+      action.putProfile(existing);
 
       await action.addProfileFormFile();
 
       final profile = container.read(profilesProvider).last;
       expect(profile.label, 'config.yaml');
       expect(container.read(currentProfileIdProvider), profile.id);
-      expect(await (await profile.file).readAsString(), 'proxies: []\n');
+      expect(await (await profile.file).readAsBytes(), config);
+      expect(profile.selectedMap, {'PROXY': 'Fastest', 'GLOBAL': 'Fastest'});
+      expect(setup.selectionsAtStart.single, profile.selectedMap);
+      expect(
+        container.read(profilesProvider).first.selectedMap,
+        existing.selectedMap,
+      );
       expect(setup.requests, [
         (profileId: profile.id, running: true, initialize: true),
       ]);
@@ -438,6 +533,79 @@ void main() {
       },
     );
 
+    test(
+      'a stop during default selection still prevents automatic startup',
+      () async {
+        final entered = Completer<void>();
+        final pending = Completer<List<Group>>();
+        decodesTo(first, [firstProxy]);
+        when(() => core.getProfileGroupReferences(any())).thenAnswer((_) {
+          entered.complete();
+          return pending.future;
+        });
+        final importing = container
+            .read(profilesActionProvider.notifier)
+            .addProfileFromLink(first);
+        await entered.future;
+        await container.read(setupActionProvider.notifier).setRunning(false);
+        pending.complete(_fixtureGroupReferences(fastestConfig));
+        await importing;
+
+        expect(container.read(profilesProvider), hasLength(1));
+        expect(setup.requests.map((request) => request.running), [false]);
+      },
+    );
+
+    test(
+      'a default selection error preserves and starts the validated import',
+      () async {
+        decodesTo(first, [firstProxy]);
+        when(
+          () => core.getProfileGroupReferences(any()),
+        ).thenThrow(StateError('config unavailable'));
+
+        await container
+            .read(profilesActionProvider.notifier)
+            .addProfileFromLink(first);
+
+        final profile = container.read(profilesProvider).single;
+        expect(profile.selectedMap, isEmpty);
+        expect(setup.requests.single.profileId, profile.id);
+        expect(setup.requests.single.running, isTrue);
+      },
+    );
+
+    test(
+      'native exclusions choose the same available automatic group as the checkbox',
+      () async {
+        final response =
+            json.decode(
+                  await File(
+                    'test/fixtures/core/profile_group_references.json',
+                  ).readAsString(),
+                )
+                as Map;
+        final groups = [
+          for (final raw in response['result'] as List)
+            Group.fromJson(Map<String, dynamic>.from(raw as Map)),
+        ];
+        when(
+          () => core.getProfileGroupReferences(any()),
+        ).thenAnswer((_) async => groups);
+        decodesTo(first, [firstProxy]);
+
+        await container
+            .read(profilesActionProvider.notifier)
+            .addProfileFromLink(first);
+
+        expect(
+          container.read(currentProfileProvider)!.selectedMap['PROXY'],
+          'Auto',
+        );
+        expect(setup.selectionsAtStart.single['PROXY'], 'Auto');
+      },
+    );
+
     test('creating an empty custom profile does not start VPN', () {
       container.read(profilesActionProvider.notifier).addCustomProfile('Empty');
 
@@ -464,8 +632,9 @@ void main() {
     String url(String name) => 'http://127.0.0.1:${server.port}/$name';
 
     test('a subscription download selects and starts its profile', () async {
+      final body = await encodeYamlTask(fastestConfig);
       server.listen((request) async {
-        request.response.write('proxies: []\n');
+        request.response.write(body);
         await request.response.close();
       });
       final action = container.read(profilesActionProvider.notifier);
@@ -478,18 +647,21 @@ void main() {
       expect(container.read(currentProfileIdProvider), profile.id);
       expect(setup.requests.single.profileId, profile.id);
       expect(setup.requests.single.running, isTrue);
+      expect(profile.selectedMap, {'PROXY': 'Fastest', 'GLOBAL': 'Fastest'});
+      expect(setup.selectionsAtStart.single, profile.selectedMap);
     });
 
     test(
       'a batch activates the last successful input once despite reversed completion',
       () async {
+        final body = await encodeYamlTask(fastestConfig);
         final firstReceived = Completer<HttpRequest>();
         server.listen((request) async {
           if (request.uri.path == '/first') {
             firstReceived.complete(request);
             return;
           }
-          request.response.write('proxies: []\n');
+          request.response.write(body);
           await request.response.close();
         });
         final action = container.read(profilesActionProvider.notifier);
@@ -507,13 +679,19 @@ void main() {
         final firstRequest = await firstReceived.future;
         await secondSaved.future;
         expect(setup.requests, isEmpty);
-        firstRequest.response.write('proxies: []\n');
+        firstRequest.response.write(body);
         await firstRequest.response.close();
         await importing;
 
         final selected = container.read(currentProfileProvider)!;
         expect(selected.url, url('second'));
         expect(container.read(profilesProvider), hasLength(2));
+        for (final profile in container.read(profilesProvider)) {
+          expect(profile.selectedMap, {
+            'PROXY': 'Fastest',
+            'GLOBAL': 'Fastest',
+          });
+        }
         expect(setup.requests, [
           (profileId: selected.id, running: true, initialize: true),
         ]);

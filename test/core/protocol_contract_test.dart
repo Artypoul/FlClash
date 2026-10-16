@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flashco/common/compute.dart';
 import 'package:flashco/core/event.dart';
 import 'package:flashco/core/desktop/model.dart';
 import 'package:flashco/core/interface.dart';
@@ -86,6 +87,13 @@ class _RecordingCoreHandler extends CoreHandlerInterface {
         'mode': 'rule',
         'rule': ['MATCH,DIRECT'],
       },
+      CoreMethod.getProfileGroupReferences =>
+        (json.decode(
+              await File(
+                'test/fixtures/core/profile_group_references.json',
+              ).readAsString(),
+            )
+            as Map)['result'],
       CoreMethod.getMemoryStats => {
         'rss': 2048,
         'heapInuse': 1024,
@@ -115,7 +123,8 @@ class _FailingConfigCoreHandler extends _RecordingCoreHandler {
     Object? arguments,
     Duration? timeout,
   }) async {
-    if (method == CoreMethod.getConfig) {
+    if (method == CoreMethod.getConfig ||
+        method == CoreMethod.getProfileGroupReferences) {
       throw const CoreMethodException(
         code: 'core_error',
         message: 'config not found',
@@ -137,7 +146,8 @@ class _EmptyConfigCoreHandler extends _RecordingCoreHandler {
     Object? arguments,
     Duration? timeout,
   }) async {
-    if (method == CoreMethod.getConfig) {
+    if (method == CoreMethod.getConfig ||
+        method == CoreMethod.getProfileGroupReferences) {
       return null;
     }
     return super.invokeMethod(
@@ -383,6 +393,50 @@ void main() {
     expect(memory?.rss, 2048);
     expect(memory?.runtimeTotal, 1024 + 256 + 64 + 32);
   });
+
+  test(
+    'profile group references decode the native filtered membership',
+    () async {
+      final handler = _RecordingCoreHandler();
+      final groups = await handler.getProfileGroupReferences('/config.yaml');
+
+      expect(
+        handler.calls[CoreMethod.getProfileGroupReferences],
+        '/config.yaml',
+      );
+      expect(fastestChoice(groups, Mode.rule)?.automatic.name, 'Auto');
+      expect(
+        groups.getGroup('PROXY')!.all.map((proxy) => proxy.name),
+        isNot(contains('Fastest')),
+      );
+    },
+  );
+
+  test(
+    'profile group references preserve structured errors and reject empty results',
+    () async {
+      await expectLater(
+        _FailingConfigCoreHandler().getProfileGroupReferences('/missing.yaml'),
+        throwsA(
+          isA<CoreMethodException>().having(
+            (error) => error.code,
+            'code',
+            'core_error',
+          ),
+        ),
+      );
+      await expectLater(
+        _EmptyConfigCoreHandler().getProfileGroupReferences('/config.yaml'),
+        throwsA(
+          isA<CoreMethodException>().having(
+            (error) => error.code,
+            'code',
+            'empty_result',
+          ),
+        ),
+      );
+    },
+  );
 
   test('getConfig preserves structured core errors', () async {
     final handler = _FailingConfigCoreHandler();

@@ -189,6 +189,7 @@ var methodHandlers = map[CoreMethod]methodHandler{
 	validateConfigMethod:           withMessage(handleValidateConfig),
 	decryptConfigMethod:            withFallible(handleDecryptConfig),
 	getConfigMethod:                withFallible(handleGetConfig),
+	getProfileGroupRefsMethod:      withFallible(handleGetProfileGroupReferences),
 	setupConfigMethod:              withMessage(handleSetupConfig),
 	updateConfigMethod:             withMessage(updateConfig),
 	validateProxiesMethod:          withArguments(handleValidateProxies),

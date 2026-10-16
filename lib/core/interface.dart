@@ -38,6 +38,8 @@ mixin CoreInterface {
 
   Future<Map<String, dynamic>> getConfig(String path);
 
+  Future<List<Group>> getProfileGroupReferences(String path);
+
   Future<String> dumpRuleSet(String path);
 
   Future<RuleSetInfo> compileRuleSet(String name, {String url = ''});
@@ -293,6 +295,24 @@ abstract class CoreHandlerInterface with CoreInterface {
       );
     }
     return result;
+  }
+
+  @override
+  Future<List<Group>> getProfileGroupReferences(String path) async {
+    final result = await _invokeMethod<List<dynamic>>(
+      method: CoreMethod.getProfileGroupReferences,
+      arguments: path,
+    );
+    if (result == null) {
+      throw const CoreMethodException(
+        code: 'empty_result',
+        message: 'Core returned an empty group references result',
+      );
+    }
+    return [
+      for (final group in result)
+        Group.fromJson(Map<String, dynamic>.from(group as Map)),
+    ];
   }
 
   @override

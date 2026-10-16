@@ -12,38 +12,6 @@ import 'dashboard.dart';
 import 'widgets/core_status_button.dart';
 import '../profiles/add.dart';
 
-typedef _FastestChoice = ({Group selector, Group automatic});
-
-_FastestChoice? _fastestChoice(List<Group> groups, Mode mode) {
-  if (mode == Mode.direct) return null;
-  final choices = <_FastestChoice>[];
-  for (final selector in groups) {
-    if (selector.type != GroupType.Selector ||
-        (mode == Mode.global
-            ? selector.name != GroupName.GLOBAL.name
-            : selector.name == GroupName.GLOBAL.name ||
-                  selector.hidden == true)) {
-      continue;
-    }
-    final automatic = groups.where(
-      (group) =>
-          group.type == GroupType.URLTest &&
-          selector.all.any((proxy) => proxy.name == group.name),
-    );
-    final fastest = automatic.where(
-      (group) => group.name.toLowerCase() == 'fastest',
-    );
-    final group =
-        fastest.firstOrNull ??
-        (automatic.length == 1 ? automatic.single : null);
-    if (group != null) choices.add((selector: selector, automatic: group));
-  }
-  return choices
-          .where((choice) => choice.selector.name == 'PROXY')
-          .firstOrNull ??
-      (choices.length == 1 ? choices.single : null);
-}
-
 class SimpleHomeView extends ConsumerStatefulWidget {
   const SimpleHomeView({super.key});
 
@@ -55,7 +23,7 @@ class _SimpleHomeViewState extends ConsumerState<SimpleHomeView> {
   final _manualSelections = <(int, String), String>{};
   bool _changing = false;
 
-  String? _manualProxy(_FastestChoice choice, int profileId) {
+  String? _manualProxy(FastestChoice choice, int profileId) {
     final previous = _manualSelections[(profileId, choice.selector.name)];
     if (previous != choice.automatic.name &&
         choice.selector.all.any((proxy) => proxy.name == previous)) {
@@ -70,7 +38,7 @@ class _SimpleHomeViewState extends ConsumerState<SimpleHomeView> {
     return candidates.firstOrNull?.name;
   }
 
-  Future<void> _changeFastest(bool enabled, _FastestChoice choice) async {
+  Future<void> _changeFastest(bool enabled, FastestChoice choice) async {
     final profile = ref.read(currentProfileProvider);
     if (_changing || profile == null) return;
     final selection = choice.selector.getCurrentSelectedName(
@@ -128,7 +96,7 @@ class _SimpleHomeViewState extends ConsumerState<SimpleHomeView> {
   Widget build(BuildContext context) {
     final labels = context.appLocalizations;
     final profile = ref.watch(currentProfileProvider);
-    final choice = _fastestChoice(
+    final choice = fastestChoice(
       ref.watch(groupsProvider),
       ref.watch(patchClashConfigProvider.select((config) => config.mode)),
     );

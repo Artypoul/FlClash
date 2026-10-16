@@ -56,6 +56,7 @@ const (
 	crashMethod                    CoreMethod = "crash"
 	setupConfigMethod              CoreMethod = "setupConfig"
 	getConfigMethod                CoreMethod = "getConfig"
+	getProfileGroupRefsMethod      CoreMethod = "getProfileGroupReferences"
 	dumpRuleSetMethod              CoreMethod = "dumpRuleSet"
 	compileRuleSetMethod           CoreMethod = "compileRuleSet"
 	clearEffectMethod              CoreMethod = "clearEffect"

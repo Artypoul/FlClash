@@ -290,6 +290,12 @@ class CoreController {
     return _readConfig(await appPath.getProfilePath(id.toString()));
   }
 
+  Future<List<Group>> getProfileGroupReferences(int id) async {
+    return _interface.getProfileGroupReferences(
+      await appPath.getProfilePath(id.toString()),
+    );
+  }
+
   Future<Map<String, dynamic>> getAppliedConfig() async {
     return _readConfig(await appPath.configFilePath);
   }
