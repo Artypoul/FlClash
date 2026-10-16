@@ -179,6 +179,16 @@ void main() {
   }
 
   group('setRunning gating', () {
+    test('each explicit stop replaces the authoritative run token', () async {
+      expect(action.runRequestToken, isNull);
+      await action.setRunning(false);
+      final first = action.runRequestToken;
+      expect(first, isNotNull);
+      await action.setRunning(false);
+      expect(identical(action.runRequestToken, first), isFalse);
+      expect(container.read(runTimeProvider), isNull);
+    });
+
     test('ignores a start request before initialization completes', () async {
       await container.read(setupActionProvider.notifier).setRunning(true);
 

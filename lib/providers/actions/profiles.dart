@@ -3,6 +3,7 @@ part of '../action.dart';
 @Riverpod(keepAlive: true)
 class ProfilesAction extends _$ProfilesAction {
   CoreController get _core => ref.read(coreHandlerProvider);
+  var _importSequence = 0;
 
   @override
   void build() {}
@@ -60,6 +61,20 @@ class ProfilesAction extends _$ProfilesAction {
     ref.read(profilesProvider.notifier).put(profile);
     if (ref.read(currentProfileIdProvider) != null) return;
     ref.read(currentProfileIdProvider.notifier).value = profile.id;
+  }
+
+  Future<void> _activateImportedProfile(
+    Profile profile,
+    int sequence,
+    Object? runRequestToken,
+  ) async {
+    if (!ref.mounted || sequence != _importSequence) return;
+    final setup = ref.read(setupActionProvider.notifier);
+    if (!identical(setup.runRequestToken, runRequestToken)) return;
+    ref.read(currentProfileIdProvider.notifier).value = profile.id;
+    await globalState.safeRun(
+      () => setup.setRunning(true, initialize: !ref.read(initProvider)),
+    );
   }
 
   Future<List<Profile>> providerUsers(Profile profile) async {
@@ -171,6 +186,10 @@ class ProfilesAction extends _$ProfilesAction {
   Future<void> addProfileFormFile() async {
     final platformFile = await globalState.safeRun(picker.pickerFile);
     if (platformFile == null) return;
+    final sequence = ++_importSequence;
+    final runRequestToken = ref
+        .read(setupActionProvider.notifier)
+        .runRequestToken;
     final bytes = await platformFile.readBytes();
     globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     ref.read(currentPageLabelProvider.notifier).toProfiles();
@@ -187,6 +206,7 @@ class ProfilesAction extends _$ProfilesAction {
     );
     if (profile != null) {
       putProfile(profile);
+      await _activateImportedProfile(profile, sequence, runRequestToken);
     }
   }
 
@@ -337,6 +357,10 @@ class ProfilesAction extends _$ProfilesAction {
     String? label,
     String ageSecretKey = '',
   }) async {
+    final sequence = ++_importSequence;
+    final runRequestToken = ref
+        .read(setupActionProvider.notifier)
+        .runRequestToken;
     _showProfiles();
     final profile = await globalState.loadingRun(
       tag: LoadingTag.profiles,
@@ -353,34 +377,49 @@ class ProfilesAction extends _$ProfilesAction {
     );
     if (profile != null) {
       putProfile(profile);
+      await _activateImportedProfile(profile, sequence, runRequestToken);
     }
   }
 
   /// Ids are taken up front so the list keeps the order of [links]; the share
   /// links among them make up one profile, in the place of the first.
   Future<void> addProfilesFromLinks(List<String> links) async {
+    final sequence = ++_importSequence;
+    final runRequestToken = ref
+        .read(setupActionProvider.notifier)
+        .runRequestToken;
     _showProfiles();
     final shareLinks = [
       for (final link in links)
         if (link.isShareLink) link,
     ];
+    final imports = [
+      for (final link in links)
+        if (!link.isShareLink)
+          (profile: Profile.normal(url: link), shareLinks: const <String>[])
+        else if (link == shareLinks.first)
+          (profile: Profile.normal(), shareLinks: shareLinks),
+    ];
+    final imported = <int, Profile>{};
     await globalState.batchRun(
-      [
-        for (final link in links)
-          if (!link.isShareLink)
-            (profile: Profile.normal(url: link), shareLinks: const <String>[])
-          else if (link == shareLinks.first)
-            (profile: Profile.normal(), shareLinks: shareLinks),
-      ],
-      (item) async => putProfile(
-        await (item.shareLinks.isEmpty
+      imports,
+      (item) async {
+        final profile = await (item.shareLinks.isEmpty
             ? _download(item.profile)
-            : _fromShareLinks(item.profile, item.shareLinks)),
-      ),
+            : _fromShareLinks(item.profile, item.shareLinks));
+        putProfile(profile);
+        imported[item.profile.id] = profile;
+      },
       label: (item) => item.shareLinks.firstOrNull ?? item.profile.url,
       concurrency: maxConcurrentImports,
       tag: LoadingTag.profiles,
     );
+    for (final item in imports.reversed) {
+      final profile = imported[item.profile.id];
+      if (profile == null) continue;
+      await _activateImportedProfile(profile, sequence, runRequestToken);
+      break;
+    }
   }
 
   Future<Profile> _download(Profile profile) {

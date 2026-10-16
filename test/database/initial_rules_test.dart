@@ -73,10 +73,11 @@ void main() {
     expect(database.schemaVersion, 20);
   });
 
-  test('the production catalogue remains editable', () async {
+  test('new installations include the editable ru bypass rule', () async {
     final database = await open(russianServiceDirectRules);
     final rules = await database.rulesDao.queryGlobalRules().get();
     expect(rules.map((rule) => rule.rawValue), russianServiceDirectRules);
+    expect(rules.first.rawValue, 'DOMAIN-SUFFIX,ru,DIRECT');
     final edited = rules.first.copyWith(ruleTarget: 'REJECT');
     await database.rulesDao.putRule(edited);
 

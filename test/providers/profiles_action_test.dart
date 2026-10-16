@@ -1,5 +1,10 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:cross_file/cross_file.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flashco/common/common.dart';
 import 'package:flashco/core/controller.dart';
 import 'package:flashco/core/interface.dart';
@@ -8,13 +13,16 @@ import 'package:flashco/l10n/l10n.dart';
 import 'package:flashco/models/models.dart';
 import 'package:flashco/providers/action.dart';
 import 'package:flashco/providers/app.dart';
+import 'package:flashco/providers/config.dart';
 import 'package:flashco/providers/core.dart';
 import 'package:flashco/providers/database.dart';
+import 'package:flashco/providers/state.dart';
 import 'package:flashco/state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:yaml/yaml.dart';
 
 import '../helpers/test_app.dart';
@@ -22,12 +30,78 @@ import '../helpers/test_profiles.dart';
 
 class _MockCoreHandlerInterface extends Mock implements CoreHandlerInterface {}
 
+class _RealHttpOverrides extends HttpOverrides {}
+
+class _TestFilePicker extends FilePickerPlatform {
+  PlatformFile? selected;
+
+  @override
+  Future<PlatformFile?> pickFile({
+    String? dialogTitle,
+    String? initialDirectory,
+    FileType type = FileType.any,
+    List<String>? allowedExtensions,
+    Function(FilePickerStatus)? onFileLoading,
+    int compressionQuality = 0,
+    AndroidOptions androidOptions = const AndroidOptions(),
+    DarwinOptions darwinOptions = const DarwinOptions(),
+    WindowsOptions windowsOptions = const WindowsOptions(),
+    LinuxOptions linuxOptions = const LinuxOptions(),
+    WebOptions webOptions = const WebOptions(),
+  }) async => selected;
+}
+
+base class _TestPlatformFile extends PlatformFile {
+  _TestPlatformFile(this.bytes);
+
+  final Uint8List bytes;
+
+  @override
+  String get name => 'config.yaml';
+  @override
+  Uri get uri => Uri.dataFromBytes(bytes);
+  @override
+  XFile get xFile => XFile.fromData(bytes, name: name);
+  @override
+  int lengthSync() => bytes.length;
+  @override
+  Future<int> length() async => bytes.length;
+  @override
+  Future<Uint8List> readAsBytes() async => bytes;
+  @override
+  Stream<Uint8List> readAsByteStream() => Stream.value(bytes);
+}
+
+class _ImportSetupAction extends SetupAction {
+  final requests = <({int? profileId, bool running, bool initialize})>[];
+  Object? _token;
+
+  @override
+  Object? get runRequestToken => _token;
+
+  @override
+  void build() {}
+
+  @override
+  Future<bool> setRunning(bool running, {bool initialize = false}) async {
+    _token = Object();
+    requests.add((
+      profileId: ref.read(currentProfileIdProvider),
+      running: running,
+      initialize: initialize,
+    ));
+    ref.read(runTimeProvider.notifier).value = running ? 0 : null;
+    return true;
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late Directory home;
   late _MockCoreHandlerInterface core;
   late ProviderContainer container;
+  late _ImportSetupAction setup;
 
   setUpAll(() async {
     await AppLocalizations.load(const Locale('en'));
@@ -36,6 +110,12 @@ void main() {
     AppPath.temporaryDirectory = () async => home;
     AppPath.cacheDirectory = () async => home;
     AppPath.downloadDirectory = () async => home;
+    globalState.packageInfo = PackageInfo(
+      appName: 'Flashco',
+      packageName: 'com.follow.flashco',
+      version: '0.9.0',
+      buildNumber: '2026101401',
+    );
   });
 
   tearDownAll(() {
@@ -45,13 +125,18 @@ void main() {
   setUp(() {
     core = _MockCoreHandlerInterface();
     when(() => core.validateConfig(any())).thenAnswer((_) async => '');
+    setup = _ImportSetupAction();
     container = ProviderContainer(
       overrides: [
         profilesProvider.overrideWith(TestProfiles.new),
         coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        setupActionProvider.overrideWith(() => setup),
       ],
     );
     addTearDown(container.dispose);
+    container.listen(currentProfileIdProvider, (_, _) {});
+    container.listen(initProvider, (_, _) {});
+    container.listen(runTimeProvider, (_, _) {});
     globalState.container = container;
   });
 
@@ -80,6 +165,50 @@ void main() {
     return [for (final proxy in config['proxies'] as List) proxy as Map];
   }
 
+  group('file import', () {
+    late FilePickerPlatform previousPicker;
+    late _TestFilePicker filePicker;
+
+    setUp(() {
+      previousPicker = FilePickerPlatform.instance;
+      filePicker = _TestFilePicker();
+      FilePickerPlatform.instance = filePicker;
+    });
+
+    tearDown(() => FilePickerPlatform.instance = previousPicker);
+
+    test('selects and starts the validated file', () async {
+      final config = utf8.encode('proxies: []\n');
+      filePicker.selected = _TestPlatformFile(config);
+      final action = container.read(profilesActionProvider.notifier);
+      action.addCustomProfile('Existing');
+
+      await action.addProfileFormFile();
+
+      final profile = container.read(profilesProvider).last;
+      expect(profile.label, 'config.yaml');
+      expect(container.read(currentProfileIdProvider), profile.id);
+      expect(await (await profile.file).readAsString(), 'proxies: []\n');
+      expect(setup.requests, [
+        (profileId: profile.id, running: true, initialize: true),
+      ]);
+    });
+
+    test(
+      'cancelling the picker leaves selection and connection alone',
+      () async {
+        final action = container.read(profilesActionProvider.notifier);
+        final selected = action.addCustomProfile('Existing');
+
+        await action.addProfileFormFile();
+
+        expect(container.read(currentProfileIdProvider), selected);
+        expect(container.read(profilesProvider), hasLength(1));
+        expect(setup.requests, isEmpty);
+      },
+    );
+  });
+
   group('addProfileFromLink with a share link', () {
     test('saves a file profile named after the proxy it holds', () async {
       const link = 'vless://id@hk.example.com:443#HK';
@@ -99,6 +228,9 @@ void main() {
         {'name': 'HK', 'type': 'vless', 'server': 'hk.example.com'},
       ]);
       verify(() => core.validateConfig(any())).called(1);
+      expect(setup.requests, [
+        (profileId: profile.id, running: true, initialize: true),
+      ]);
     });
 
     test('names an unnamed proxy after its server', () async {
@@ -146,6 +278,7 @@ void main() {
       expect(find.text(currentAppLocalizations.shareLinksInvalid), findsOne);
       expect(container.read(profilesProvider), isEmpty);
       verifyNever(() => core.validateConfig(any()));
+      expect(setup.requests, isEmpty);
     });
   });
 
@@ -186,6 +319,9 @@ void main() {
         ['HK', 'HK-01', 'ss.example.com'],
       );
       verify(() => core.decodeShareLinks(links)).called(1);
+      expect(setup.requests, [
+        (profileId: profile.id, running: true, initialize: true),
+      ]);
     });
 
     testWidgets('names the link no proxy can be read from and adds nothing', (
@@ -219,6 +355,194 @@ void main() {
       );
       expect(container.read(profilesProvider), isEmpty);
       verifyNever(() => core.validateConfig(any()));
+      expect(setup.requests, isEmpty);
     });
+  });
+
+  group('import activation', () {
+    const first = 'vless://id@first.example:443#First';
+    const second = 'vless://id@second.example:443#Second';
+    const firstProxy = {
+      'name': 'First',
+      'type': 'vless',
+      'server': 'first.example',
+    };
+    const secondProxy = {
+      'name': 'Second',
+      'type': 'vless',
+      'server': 'second.example',
+    };
+
+    test(
+      'each import switches profiles without toggling a running VPN off',
+      () async {
+        container.read(initProvider.notifier).value = true;
+        decodesTo(first, [firstProxy]);
+        decodesTo(second, [secondProxy]);
+        final action = container.read(profilesActionProvider.notifier);
+
+        await action.addProfileFromLink(first);
+        final firstProfile = container.read(currentProfileProvider)!;
+        await action.addProfileFromLink(second);
+        final secondProfile = container.read(profilesProvider).last;
+
+        expect(container.read(currentProfileIdProvider), secondProfile.id);
+        expect(secondProfile.id, isNot(firstProfile.id));
+        expect(setup.requests, [
+          (profileId: firstProfile.id, running: true, initialize: false),
+          (profileId: secondProfile.id, running: true, initialize: false),
+        ]);
+      },
+    );
+
+    test('a slower earlier import does not replace the newer import', () async {
+      final pending = Completer<List<List<Map<String, dynamic>>>>();
+      when(
+        () => core.decodeShareLinks([first]),
+      ).thenAnswer((_) => pending.future);
+      decodesTo(second, [secondProxy]);
+      final action = container.read(profilesActionProvider.notifier);
+      final earlier = action.addProfileFromLink(first);
+      await action.addProfileFromLink(second);
+      final selected = container.read(currentProfileIdProvider);
+
+      pending.complete([
+        [firstProxy],
+      ]);
+      await earlier;
+
+      expect(container.read(profilesProvider), hasLength(2));
+      expect(container.read(currentProfileIdProvider), selected);
+      expect(setup.requests, hasLength(1));
+      expect(setup.requests.single.profileId, selected);
+      await Future<void>.delayed(const Duration(seconds: 1));
+    });
+
+    test(
+      'a later stop cancels pending import activation but preserves the import',
+      () async {
+        final pending = Completer<List<List<Map<String, dynamic>>>>();
+        when(
+          () => core.decodeShareLinks([first]),
+        ).thenAnswer((_) => pending.future);
+        final action = container.read(profilesActionProvider.notifier);
+        final importing = action.addProfileFromLink(first);
+        await container.read(setupActionProvider.notifier).setRunning(false);
+        pending.complete([
+          [firstProxy],
+        ]);
+        await importing;
+
+        expect(container.read(profilesProvider), hasLength(1));
+        expect(setup.requests.map((request) => request.running), [false]);
+      },
+    );
+
+    test('creating an empty custom profile does not start VPN', () {
+      container.read(profilesActionProvider.notifier).addCustomProfile('Empty');
+
+      expect(container.read(profilesProvider), hasLength(1));
+      expect(setup.requests, isEmpty);
+    });
+  });
+
+  group('subscription import', () {
+    late HttpServer server;
+    HttpOverrides? previousHttpOverrides;
+
+    setUp(() async {
+      previousHttpOverrides = HttpOverrides.current;
+      HttpOverrides.global = _RealHttpOverrides();
+      server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
+    });
+
+    tearDown(() async {
+      await server.close(force: true);
+      HttpOverrides.global = previousHttpOverrides;
+    });
+
+    String url(String name) => 'http://127.0.0.1:${server.port}/$name';
+
+    test('a subscription download selects and starts its profile', () async {
+      server.listen((request) async {
+        request.response.write('proxies: []\n');
+        await request.response.close();
+      });
+      final action = container.read(profilesActionProvider.notifier);
+      action.addCustomProfile('Existing');
+
+      await action.addProfileFromLink(url('subscription'));
+
+      final profile = container.read(profilesProvider).last;
+      expect(profile.type, ProfileType.url);
+      expect(container.read(currentProfileIdProvider), profile.id);
+      expect(setup.requests.single.profileId, profile.id);
+      expect(setup.requests.single.running, isTrue);
+    });
+
+    test(
+      'a batch activates the last successful input once despite reversed completion',
+      () async {
+        final firstReceived = Completer<HttpRequest>();
+        server.listen((request) async {
+          if (request.uri.path == '/first') {
+            firstReceived.complete(request);
+            return;
+          }
+          request.response.write('proxies: []\n');
+          await request.response.close();
+        });
+        final action = container.read(profilesActionProvider.notifier);
+        final secondSaved = Completer<void>();
+        container.listen(profilesProvider, (_, profiles) {
+          if (profiles.any((profile) => profile.url == url('second')) &&
+              !secondSaved.isCompleted) {
+            secondSaved.complete();
+          }
+        });
+        final importing = action.addProfilesFromLinks([
+          url('first'),
+          url('second'),
+        ]);
+        final firstRequest = await firstReceived.future;
+        await secondSaved.future;
+        expect(setup.requests, isEmpty);
+        firstRequest.response.write('proxies: []\n');
+        await firstRequest.response.close();
+        await importing;
+
+        final selected = container.read(currentProfileProvider)!;
+        expect(selected.url, url('second'));
+        expect(container.read(profilesProvider), hasLength(2));
+        expect(setup.requests, [
+          (profileId: selected.id, running: true, initialize: true),
+        ]);
+      },
+    );
+
+    test(
+      'a failed final batch item does not prevent starting the last valid one',
+      () async {
+        server.listen((request) async {
+          if (request.uri.path == '/failed') {
+            request.response.statusCode = HttpStatus.notFound;
+          } else {
+            request.response.write('proxies: []\n');
+          }
+          await request.response.close();
+        });
+
+        await container
+            .read(profilesActionProvider.notifier)
+            .addProfilesFromLinks([url('valid'), url('failed')]);
+
+        final profile = container.read(profilesProvider).single;
+        expect(profile.url, url('valid'));
+        expect(container.read(currentProfileIdProvider), profile.id);
+        expect(setup.requests, [
+          (profileId: profile.id, running: true, initialize: true),
+        ]);
+      },
+    );
   });
 }

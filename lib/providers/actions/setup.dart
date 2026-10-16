@@ -28,6 +28,8 @@ class SetupAction extends _$SetupAction {
   _SetupInputs? _appliedInputs;
   var _pendingForceApply = false;
 
+  Object? get runRequestToken => _latestRunRequest;
+
   bool get _isRunning => _startTime != null && _startTime!.isBeforeNow;
 
   @override
