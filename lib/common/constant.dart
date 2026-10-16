@@ -49,6 +49,9 @@ const sheetAppBarHeight = 68.0;
 const watchExecution = false;
 
 const safeModeBuild = bool.fromEnvironment('SAFE_MODE');
+const bundledSubscriptionUrl = String.fromEnvironment(
+  'BOOTSTRAP_SUBSCRIPTION_URL',
+);
 
 const disclaimerVersion = 1;
 

@@ -10,6 +10,10 @@ class TestProfiles extends Profiles {
   List<Profile> build() => initial;
 
   @override
+  Future<bool> hasSavedProfile(int id) async =>
+      state.any((profile) => profile.id == id);
+
+  @override
   void put(Profile profile) {
     final next = List<Profile>.from(state);
     final index = next.indexWhere((item) => item.id == profile.id);

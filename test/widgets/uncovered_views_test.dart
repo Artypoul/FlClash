@@ -188,37 +188,47 @@ void main() {
     expect(tester.takeException(), null);
   });
 
-  testWidgets('about view renders version and link sections', (tester) async {
-    final container = _containerFor(tester);
+  testWidgets(
+    'about view describes the product without donor or repository links',
+    (tester) async {
+      final container = _containerFor(tester);
 
-    await tester.pumpWidget(
-      UncontrolledProviderScope(
-        container: container,
-        child: const TestApp(child: AboutView()),
-      ),
-    );
-    await tester.pump();
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: const TestApp(child: AboutView()),
+        ),
+      );
+      await tester.pump();
 
-    expect(find.byType(AboutView), findsOneWidget);
-    expect(find.text('Telegram'), findsOneWidget);
-    final hero = find.byWidgetPredicate(
-      (widget) => widget.runtimeType.toString() == '_AboutHero',
-    );
-    expect(
-      tester.getRect(hero).top,
-      tester.getRect(find.byType(AppBar)).bottom + 12,
-    );
-    expect(tester.takeException(), null);
+      expect(find.byType(AboutView), findsOneWidget);
+      expect(
+        find.text('Free, non-commercial software. Created for fun.'),
+        findsOneWidget,
+      );
+      expect(find.textContaining('github.com'), findsNothing);
+      expect(find.textContaining('ClashMeta'), findsNothing);
+      expect(find.textContaining('Clash.Meta'), findsNothing);
+      expect(find.text('Telegram'), findsNothing);
+      final hero = find.byWidgetPredicate(
+        (widget) => widget.runtimeType.toString() == '_AboutHero',
+      );
+      expect(
+        tester.getRect(hero).top,
+        tester.getRect(find.byType(AppBar)).bottom + 12,
+      );
+      expect(tester.takeException(), null);
 
-    final scrollables = find.byType(Scrollable);
-    if (scrollables.evaluate().isNotEmpty) {
-      for (var index = 0; index < 4; index++) {
-        await tester.drag(scrollables.first, const Offset(0, -400));
-        await tester.pump();
+      final scrollables = find.byType(Scrollable);
+      if (scrollables.evaluate().isNotEmpty) {
+        for (var index = 0; index < 4; index++) {
+          await tester.drag(scrollables.first, const Offset(0, -400));
+          await tester.pump();
+        }
       }
-    }
-    expect(tester.takeException(), null);
-  });
+      expect(tester.takeException(), null);
+    },
+  );
 
   testWidgets('about view shows progress while checking for updates', (
     tester,

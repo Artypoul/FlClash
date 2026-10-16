@@ -4,9 +4,74 @@ part of '../action.dart';
 class ProfilesAction extends _$ProfilesAction {
   CoreController get _core => ref.read(coreHandlerProvider);
   var _importSequence = 0;
+  Future<void>? _bundledSubscriptionTask;
 
   @override
   void build() {}
+
+  Future<void> importBundledSubscription(String url) async {
+    if (_bundledSubscriptionTask case final pending?) return pending;
+    final task = _importBundledSubscription(url.trim());
+    _bundledSubscriptionTask = task;
+    try {
+      await task;
+    } finally {
+      _bundledSubscriptionTask = null;
+    }
+  }
+
+  Future<void> _importBundledSubscription(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null ||
+        uri.host.isEmpty ||
+        !const ['http', 'https'].contains(uri.scheme) ||
+        ref.read(safeModeProvider) ||
+        !ref.read(initProvider) ||
+        ref.read(coreStatusProvider) != CoreStatus.connected) {
+      return;
+    }
+    final setup = ref.read(setupActionProvider.notifier);
+    final runRequestToken = setup.runRequestToken;
+    final previousSequence = _importSequence;
+    if (!await preferences.isInit ||
+        await preferences.wasBundledSubscriptionImported(url)) {
+      return;
+    }
+    final profiles = ref.read(profilesProvider.notifier);
+    await profiles.settledWrites;
+    if ((await database.profilesDao.query().get()).any(
+      (profile) => profile.url == url,
+    )) {
+      await preferences.markBundledSubscriptionImported(url);
+      return;
+    }
+    if (!ref.mounted ||
+        _importSequence != previousSequence ||
+        !identical(setup.runRequestToken, runRequestToken)) {
+      return;
+    }
+    final sequence = ++_importSequence;
+    final profile = await globalState.loadingRun(
+      () => _withAgeSecretKey(
+        Profile.normal(url: url),
+        _download,
+      ).then(_withImportDefaults),
+      tag: LoadingTag.profiles,
+      silence: true,
+    );
+    if (profile == null || !ref.mounted) return;
+    putProfile(profile);
+    await profiles.settledWrites;
+    if (!(await database.profilesDao.query().get()).any(
+      (saved) => saved.id == profile.id && saved.url == url,
+    )) {
+      return;
+    }
+    await globalState.safeRun(
+      () => preferences.markBundledSubscriptionImported(url),
+    );
+    await _activateImportedProfile(profile, sequence, runRequestToken);
+  }
 
   void updateCurrentSelectedMap(String groupName, String proxyName) {
     final currentProfile = ref.read(currentProfileProvider);
@@ -81,7 +146,13 @@ class ProfilesAction extends _$ProfilesAction {
     int sequence,
     Object? runRequestToken,
   ) async {
+    if (!await ref
+        .read(profilesProvider.notifier)
+        .hasSavedProfile(profile.id)) {
+      return;
+    }
     if (!ref.mounted || sequence != _importSequence) return;
+    if (ref.read(profilesProvider).getProfile(profile.id) == null) return;
     final setup = ref.read(setupActionProvider.notifier);
     if (!identical(setup.runRequestToken, runRequestToken)) return;
     ref.read(currentProfileIdProvider.notifier).value = profile.id;

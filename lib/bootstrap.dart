@@ -8,6 +8,7 @@ import 'package:flashco/common/common.dart';
 import 'package:flashco/common/default_rules.dart';
 import 'package:flashco/common/launch.dart';
 import 'package:flashco/common/migration.dart';
+import 'package:flashco/common/personal_defaults.dart';
 import 'package:flashco/common/tray.dart';
 import 'package:flashco/common/window.dart';
 import 'package:flashco/database/database.dart';
@@ -114,6 +115,14 @@ class Bootstrap {
       config = config.copyWith(currentProfileId: null);
       await preferences.saveConfig(config);
     }
+    config = await initializePersonalDefaults(
+      config,
+      subscriptionUrl: bundledSubscriptionUrl,
+      enabled:
+          (system.isAndroid || system.isWindows) &&
+          !safeModeBuild &&
+          !_bootDecision.isDegraded,
+    );
     final patchClashConfig = config.patchClashConfig.ensureControllerSecret();
     if (patchClashConfig != config.patchClashConfig) {
       config = config.copyWith(patchClashConfig: patchClashConfig);
@@ -185,13 +194,25 @@ class Bootstrap {
     }
     await _showCrashRecoveryTip();
     await _container.read(coreActionProvider.notifier).startCore();
-    if (!_bootDecision.isDegraded) {
+    final hasBundledSubscription =
+        (system.isAndroid || system.isWindows) &&
+        bundledSubscriptionUrl.trim().isNotEmpty;
+    if (!_bootDecision.isDegraded &&
+        (!hasBundledSubscription ||
+            _container.read(profilesProvider).isNotEmpty)) {
       await _container.read(setupActionProvider.notifier).initStatus();
     }
     _container.read(initProvider.notifier).value = true;
     unawaited(_container.read(resourcesActionProvider.notifier).autoUpdate());
     await bootGuard.markRunning();
     unawaited(_container.read(locationPermissionsProvider.notifier).refresh());
+    if (hasBundledSubscription && !_bootDecision.isDegraded) {
+      await globalState.safeRun(
+        () => _container
+            .read(profilesActionProvider.notifier)
+            .importBundledSubscription(bundledSubscriptionUrl),
+      );
+    }
   }
 
   Future<void> _showCrashRecoveryTip() async {

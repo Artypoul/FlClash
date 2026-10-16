@@ -12,56 +12,10 @@ import 'dashboard.dart';
 import 'widgets/core_status_button.dart';
 import '../profiles/add.dart';
 
-class SimpleHomeView extends ConsumerStatefulWidget {
+class SimpleHomeView extends ConsumerWidget {
   const SimpleHomeView({super.key});
 
-  @override
-  ConsumerState<SimpleHomeView> createState() => _SimpleHomeViewState();
-}
-
-class _SimpleHomeViewState extends ConsumerState<SimpleHomeView> {
-  final _manualSelections = <(int, String), String>{};
-  bool _changing = false;
-
-  String? _manualProxy(FastestChoice choice, int profileId) {
-    final previous = _manualSelections[(profileId, choice.selector.name)];
-    if (previous != choice.automatic.name &&
-        choice.selector.all.any((proxy) => proxy.name == previous)) {
-      return previous;
-    }
-    final candidates = choice.selector.all.where(
-      (proxy) => choice.automatic.all.any((node) => node.name == proxy.name),
-    );
-    if (candidates.any((proxy) => proxy.name == choice.automatic.now)) {
-      return choice.automatic.now;
-    }
-    return candidates.firstOrNull?.name;
-  }
-
-  Future<void> _changeFastest(bool enabled, FastestChoice choice) async {
-    final profile = ref.read(currentProfileProvider);
-    if (_changing || profile == null) return;
-    final selection = choice.selector.getCurrentSelectedName(
-      profile.selectedMap[choice.selector.name] ?? '',
-    );
-    final target = enabled
-        ? choice.automatic.name
-        : _manualProxy(choice, profile.id);
-    if (target == null) return;
-    if (enabled && selection != choice.automatic.name) {
-      _manualSelections[(profile.id, choice.selector.name)] = selection;
-    }
-    setState(() => _changing = true);
-    try {
-      await ref
-          .read(proxiesActionProvider.notifier)
-          .changeProxy(groupName: choice.selector.name, proxyName: target);
-    } finally {
-      if (mounted) setState(() => _changing = false);
-    }
-  }
-
-  List<CommonPopupMenuItem> _menuItems() {
+  List<CommonPopupMenuItem> _menuItems(BuildContext context, WidgetRef ref) {
     final currentItems = ref.read(currentNavigationItemsStateProvider).value;
     return [
       CommonPopupMenuItem(
@@ -93,36 +47,33 @@ class _SimpleHomeViewState extends ConsumerState<SimpleHomeView> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final labels = context.appLocalizations;
     final profile = ref.watch(currentProfileProvider);
-    final choice = fastestChoice(
-      ref.watch(groupsProvider),
-      ref.watch(patchClashConfigProvider.select((config) => config.mode)),
-    );
-    final selection = choice == null
-        ? null
-        : ref.watch(selectedProxyNameProvider(choice.selector.name));
-    final fastest = choice != null && selection == choice.automatic.name;
     final coreStatus = ref.watch(coreStatusProvider);
-    final available =
-        profile != null &&
-        choice != null &&
-        coreStatus == CoreStatus.connected &&
-        !_changing &&
-        (!fastest || _manualProxy(choice, profile.id) != null);
     final running = ref.watch(isStartProvider);
     final hasProfiles = ref.watch(
       profilesProvider.select((profiles) => profiles.isNotEmpty),
     );
     final suspended = ref.watch(suspendProvider);
+    final scheme = context.colorScheme;
+    final connected = coreStatus == CoreStatus.connected && running;
+    final status = switch (coreStatus) {
+      CoreStatus.connecting => labels.connecting,
+      CoreStatus.disconnected => labels.disconnected,
+      CoreStatus.connected =>
+        running
+            ? (suspended ? labels.suspended : labels.connected)
+            : labels.disconnected,
+    };
+    final canToggle = hasProfiles || running;
     return CommonScaffold(
       title: appName,
       actions: [
         if (coreLib == null && coreStatus != CoreStatus.connected)
           const CoreStatusButton(),
       ],
-      menuItems: _menuItems(),
+      menuItems: _menuItems(context, ref),
       body: LayoutBuilder(
         builder: (context, constraints) {
           final padding = EdgeInsets.fromLTRB(
@@ -145,69 +96,98 @@ class _SimpleHomeViewState extends ConsumerState<SimpleHomeView> {
                   constraints: const BoxConstraints(maxWidth: 420),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        switch (coreStatus) {
-                          CoreStatus.connecting => labels.connecting,
-                          CoreStatus.disconnected => labels.disconnected,
-                          CoreStatus.connected =>
-                            running
-                                ? (suspended
-                                      ? labels.suspended
-                                      : labels.connected)
-                                : labels.disconnected,
-                        },
-                        textAlign: TextAlign.center,
-                        style: context.textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        height: 112,
-                        child: CommonFloatingActionButton(
-                          onPressed: hasProfiles || running
-                              ? ref
-                                    .read(commonActionProvider.notifier)
-                                    .toggleRunning
-                              : null,
-                          icon: GlyphIcon(
-                            running && suspended
-                                ? AppGlyphs.wifiOff
-                                : AppGlyphs.playPause(running ? 1 : 0),
-                            fill: 1,
+                      SizedBox.square(
+                        dimension: 112,
+                        child: Semantics(
+                          toggled: running,
+                          child: ElasticButton(
+                            enabled: canToggle,
+                            child: IconButton.filledTonal(
+                              tooltip: running ? labels.stop : labels.launch,
+                              style: IconButton.styleFrom(
+                                backgroundColor: running
+                                    ? scheme.primaryContainer
+                                    : Color.alphaBlend(
+                                        scheme.primaryContainer.withValues(
+                                          alpha: 0.24,
+                                        ),
+                                        scheme.surface,
+                                      ),
+                                foregroundColor: running
+                                    ? scheme.onPrimaryContainer
+                                    : scheme.primary,
+                                shape: AppShape.xxl,
+                              ),
+                              onPressed: canToggle
+                                  ? ref
+                                        .read(commonActionProvider.notifier)
+                                        .toggleRunning
+                                  : null,
+                              icon: const GlyphIcon(
+                                AppGlyphs.power,
+                                size: 64,
+                                fill: 1,
+                              ),
+                            ),
                           ),
-                          label: running ? labels.stop : labels.launch,
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: connected && !suspended
+                                  ? scheme.primary
+                                  : scheme.outline,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const SizedBox.square(dimension: 8),
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: Text(
+                              status,
+                              textAlign: TextAlign.center,
+                              style: context.textTheme.bodyLarge?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 24),
                       if (profile != null) ...[
-                        Text(
-                          profile.realLabel,
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: context.textTheme.bodyMedium,
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const GlyphIcon(AppGlyphs.layers, size: 22),
+                            const SizedBox(width: 12),
+                            Flexible(
+                              child: Text(
+                                profile.realLabel,
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 24),
                       ],
-                      generateSectionV3(
-                        items: [
-                          ListItem(
-                            onTap: () => showAddProfilePage(context),
-                            leading: const GlyphIcon(AppGlyphs.add),
-                            title: Text(labels.addConfiguration),
-                          ),
-                          ListItem.checkbox(
-                            value: fastest,
-                            onChanged: available
-                                ? (value) => _changeFastest(value!, choice)
-                                : null,
-                            title: Text(labels.fastestServer),
-                            subtitle: profile != null && choice == null
-                                ? Text(labels.fastestServerUnavailable)
-                                : null,
-                          ),
-                        ],
+                      TextButton.icon(
+                        onPressed: () => showAddProfilePage(context),
+                        icon: const GlyphIcon(AppGlyphs.add, size: 20),
+                        label: Text(
+                          labels.addConfiguration,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ],
                   ),

@@ -177,6 +177,15 @@ class Profiles extends _$Profiles {
 
   var _queue = Future<void>.value();
 
+  Future<void> get settledWrites => _queue;
+
+  Future<bool> hasSavedProfile(int id) async {
+    await settledWrites;
+    return (await database.profilesDao.query().get()).any(
+      (profile) => profile.id == id,
+    );
+  }
+
   /// Writes run in turn and each writes the rows as the state holds them then,
   /// so a put issued before a rewrite landed writes it along, not over it.
   Future<void> _serial(Future<void> Function() write) {

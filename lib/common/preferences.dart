@@ -41,6 +41,31 @@ class Preferences {
     await preferences?.setInt('version', version);
   }
 
+  Future<bool> wasBundledSubscriptionImported(String url) async {
+    final store = await sharedPreferencesCompleter.future;
+    return store?.getBool('bundledSubscription.${url.toMd5()}') ?? false;
+  }
+
+  Future<void> markBundledSubscriptionImported(String url) async {
+    final store = await sharedPreferencesCompleter.future;
+    if (await store?.setBool('bundledSubscription.${url.toMd5()}', true) !=
+        true) {
+      throw StateError('Failed to save bundled subscription status');
+    }
+  }
+
+  Future<bool> werePersonalDefaultsApplied() async {
+    final store = await sharedPreferencesCompleter.future;
+    return store?.getBool('personalDefaults.v1') ?? false;
+  }
+
+  Future<void> markPersonalDefaultsApplied() async {
+    final store = await sharedPreferencesCompleter.future;
+    if (await store?.setBool('personalDefaults.v1', true) != true) {
+      throw StateError('Failed to save personal startup defaults status');
+    }
+  }
+
   Future<void> saveShareState(SharedState shareState) async {
     final preferences = await sharedPreferencesCompleter.future;
     await preferences?.setString('sharedState', json.encode(shareState));

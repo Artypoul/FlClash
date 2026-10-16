@@ -337,6 +337,8 @@ void main() {
     await _pumpHost(tester, homeBuilder: (_) => const DisclaimerView());
 
     expect(find.text('Disclaimer'), findsWidgets);
+    expect(find.textContaining('Created for fun.'), findsOneWidget);
+    expect(find.textContaining('Clash.Meta'), findsNothing);
     expect(find.text('Agree'), findsNothing);
     expect(find.text('Exit'), findsNothing);
   });

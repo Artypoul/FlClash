@@ -274,7 +274,7 @@ void main() {
 
       expect(window.blurRequests, hasLength(1));
       expect(window.blurRequests.single.enabled, isTrue);
-      expect(window.blurRequests.single.brightness, Brightness.dark);
+      expect(window.blurRequests.single.brightness, Brightness.light);
       expect(container.read(windowBlurProvider), isTrue);
     });
 
@@ -307,11 +307,11 @@ void main() {
 
       container
           .read(themeSettingProvider.notifier)
-          .update((state) => state.copyWith(themeMode: ThemeMode.light));
+          .update((state) => state.copyWith(themeMode: ThemeMode.dark));
       await tester.pumpAndSettle();
 
       expect(window.blurRequests.last.enabled, isTrue);
-      expect(window.blurRequests.last.brightness, Brightness.light);
+      expect(window.blurRequests.last.brightness, Brightness.dark);
       expect(container.read(windowBlurProvider), isTrue);
     });
   });

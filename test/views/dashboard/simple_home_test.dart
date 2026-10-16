@@ -10,6 +10,7 @@ import 'package:flashco/views/dashboard/simple_home.dart';
 import 'package:flashco/widgets/widgets.dart';
 import 'package:flashco/views/navigation.dart';
 import 'package:flashco/views/profiles/add.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -20,6 +21,17 @@ import '../../helpers/glyph_finders.dart';
 import '../../helpers/test_profiles.dart';
 
 class _MockCore extends Mock implements CoreHandlerInterface {}
+
+class _RecordingSetup extends SetupAction {
+  final requests = <bool>[];
+
+  @override
+  Future<bool> setRunning(bool running, {bool initialize = false}) async {
+    requests.add(running);
+    ref.read(runTimeProvider.notifier).value = running ? 1000 : null;
+    return true;
+  }
+}
 
 const _nodeA = Proxy(name: 'Node A', type: 'Vless');
 const _nodeB = Proxy(name: 'Node B', type: 'Vless');
@@ -65,6 +77,7 @@ void main() {
     container = ProviderContainer(
       overrides: [
         coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+        setupActionProvider.overrideWith(_RecordingSetup.new),
         suspendProvider.overrideWith((_) => excludedWifi),
         profilesProvider.overrideWith(
           () => TestProfiles([
@@ -118,78 +131,65 @@ void main() {
   ) async {
     await pumpHome(tester);
     expect(find.byType(SimpleHomeView), findsOneWidget);
-    expect(find.byType(CommonFloatingActionButton), findsOneWidget);
-    expect(find.text('Launch'), findsOneWidget);
+    expect(find.byTooltip('Launch'), findsOneWidget);
+    expect(find.text('Launch'), findsNothing);
     expect(find.text('Add configuration'), findsOneWidget);
     expect(find.text('My config'), findsOneWidget);
-    expect(
-      tester.getSize(find.byType(FloatingActionButton)).width,
-      greaterThan(300),
-    );
+    final power = find.byTooltip('Launch');
+    expect(tester.getSize(power).width, tester.getSize(power).height);
+    expect(tester.getSize(power).width, greaterThanOrEqualTo(112));
+    expect(find.byType(CommonCheckBox), findsNothing);
+    expect(find.byType(TextButton), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-    'Fastest toggles the existing selector and restores manual pick',
-    (tester) async {
-      await pumpHome(tester);
-      expect(
-        tester.widget<CommonCheckBox>(find.byType(CommonCheckBox)).value,
-        isFalse,
-      );
-      await tester.tap(find.byType(CommonCheckBox));
-      await tester.pump();
-      expect(
-        container.read(currentProfileProvider)!.selectedMap['PROXY'],
-        'Fastest',
-      );
-      await tester.tap(find.byType(CommonCheckBox));
-      await tester.pump();
-      expect(
-        container.read(currentProfileProvider)!.selectedMap['PROXY'],
-        'Node A',
-      );
-    },
-  );
-
-  testWidgets(
-    'saved Fastest choice is reflected and can hold its current node',
-    (tester) async {
-      container
-          .read(profilesProvider.notifier)
-          .put(
-            const Profile(
-              id: 1,
-              label: 'My config',
-              autoUpdateDuration: Duration.zero,
-              selectedMap: {'PROXY': 'Fastest'},
-            ),
-          );
-      await pumpHome(tester);
-      expect(
-        tester.widget<CommonCheckBox>(find.byType(CommonCheckBox)).value,
-        isTrue,
-      );
-      await tester.tap(find.byType(CommonCheckBox));
-      await tester.pump();
-      expect(
-        container.read(currentProfileProvider)!.selectedMap['PROXY'],
-        'Node B',
-      );
-    },
-  );
-
-  testWidgets('failed selection rolls back the checkbox and releases it', (
+  testWidgets('power button starts and stops through the existing action', (
     tester,
   ) async {
-    when(() => core.changeProxy(any())).thenThrow(Exception('offline'));
     await pumpHome(tester);
-    await tester.tap(find.byType(CommonCheckBox));
+    await tester.tap(find.byTooltip('Launch'));
     await tester.pump();
-    final checkbox = tester.widget<CommonCheckBox>(find.byType(CommonCheckBox));
-    expect(checkbox.value, isFalse);
-    expect(checkbox.onChanged, isNotNull);
-    expect(tester.takeException(), isNull);
+    expect(find.text('Connected'), findsOneWidget);
+    expect(find.byTooltip('Stop'), findsOneWidget);
+    expect(find.text('Stop'), findsNothing);
+    await tester.tap(find.byTooltip('Stop'));
+    await tester.pump();
+    expect(find.text('Disconnected'), findsOneWidget);
+    final setup =
+        container.read(setupActionProvider.notifier) as _RecordingSetup;
+    expect(setup.requests, [true, false]);
+  });
+
+  testWidgets('keyboard activates the focused power button', (tester) async {
+    await pumpHome(tester);
+    Focus.of(tester.element(find.byGlyph(AppGlyphs.power))).requestFocus();
+    await tester.pump();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+    final setup =
+        container.read(setupActionProvider.notifier) as _RecordingSetup;
+    expect(setup.requests, [true]);
+  });
+
+  testWidgets('opening home preserves the saved server selection', (
+    tester,
+  ) async {
+    container
+        .read(profilesProvider.notifier)
+        .put(
+          const Profile(
+            id: 1,
+            label: 'My config',
+            autoUpdateDuration: Duration.zero,
+            selectedMap: {'PROXY': 'Fastest'},
+          ),
+        );
+    await pumpHome(tester);
+    expect(find.byType(CommonCheckBox), findsNothing);
+    expect(container.read(currentProfileProvider)!.selectedMap, {
+      'PROXY': 'Fastest',
+    });
+    verifyNever(() => core.changeProxy(any()));
   });
 
   testWidgets('empty configuration keeps import and disables launch', (
@@ -199,34 +199,12 @@ void main() {
     await pumpHome(tester);
     expect(
       tester
-          .widget<FloatingActionButton>(find.byType(FloatingActionButton))
+          .widget<IconButton>(find.widgetWithGlyph(IconButton, AppGlyphs.power))
           .onPressed,
       isNull,
     );
     expect(find.text('Add configuration'), findsOneWidget);
-    expect(
-      tester.widget<CommonCheckBox>(find.byType(CommonCheckBox)).onChanged,
-      isNull,
-    );
-  });
-
-  testWidgets('unavailable Core or missing Fastest disables the checkbox', (
-    tester,
-  ) async {
-    container.read(coreStatusProvider.notifier).value = CoreStatus.disconnected;
-    await pumpHome(tester);
-    expect(
-      tester.widget<CommonCheckBox>(find.byType(CommonCheckBox)).onChanged,
-      isNull,
-    );
-    container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
-    container.read(groupsProvider.notifier).value = [];
-    await tester.pump();
-    expect(
-      tester.widget<CommonCheckBox>(find.byType(CommonCheckBox)).onChanged,
-      isNull,
-    );
-    expect(tester.takeException(), isNull);
+    expect(find.byType(CommonCheckBox), findsNothing);
   });
 
   testWidgets('small screen with large text scrolls without overflow', (
@@ -237,7 +215,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await pumpHome(tester, scale: 2);
-    await tester.ensureVisible(find.byType(CommonCheckBox));
+    await tester.ensureVisible(find.text('Add configuration'));
     expect(tester.takeException(), isNull);
   });
 
@@ -251,31 +229,7 @@ void main() {
     await tester.pump();
     expect(find.text('Connected'), findsNothing);
     expect(find.text('Disconnected'), findsWidgets);
-    expect(find.text('Stop'), findsOneWidget);
-  });
-
-  testWidgets('disabling Fastest restores a manual entry outside its nodes', (
-    tester,
-  ) async {
-    container.read(groupsProvider.notifier).value = [
-      _groups.first.copyWith(
-        now: 'Manual group',
-        all: [
-          ..._groups.first.all,
-          const Proxy(name: 'Manual group', type: 'Selector'),
-        ],
-      ),
-      _groups.last,
-    ];
-    await pumpHome(tester);
-    await tester.tap(find.byType(CommonCheckBox));
-    await tester.pump();
-    await tester.tap(find.byType(CommonCheckBox));
-    await tester.pump();
-    expect(
-      container.read(currentProfileProvider)!.selectedMap['PROXY'],
-      'Manual group',
-    );
+    expect(find.byTooltip('Stop'), findsOneWidget);
   });
 
   testWidgets('configuration action opens the existing import screen', (
@@ -291,6 +245,7 @@ void main() {
   testWidgets('all controls inherit the application theme in light and dark', (
     tester,
   ) async {
+    final buttonColors = <Color?>[];
     for (final mode in [ThemeMode.light, ThemeMode.dark]) {
       container
           .read(themeSettingProvider.notifier)
@@ -300,7 +255,9 @@ void main() {
           );
       await pumpHome(tester);
       await tester.pumpAndSettle();
-      final context = tester.element(find.byType(CommonFloatingActionButton));
+      final context = tester.element(
+        find.widgetWithGlyph(IconButton, AppGlyphs.power),
+      );
       final scheme = container.read(
         genColorSchemeProvider(
           mode == ThemeMode.light ? Brightness.light : Brightness.dark,
@@ -310,25 +267,26 @@ void main() {
       final surface = tester.widget<Material>(
         find
             .descendant(
-              of: find.byType(FloatingActionButton),
+              of: find.widgetWithGlyph(IconButton, AppGlyphs.power),
               matching: find.byType(Material),
             )
             .first,
       );
-      expect(surface.color, scheme.primaryContainer);
-      expect(surface.shape, AppShape.md);
-      expect(find.byType(CommonCheckBox), findsOneWidget);
-      expect(find.byType(ListItem<dynamic>), findsNWidgets(2));
+      buttonColors.add(surface.color);
+      expect(surface.shape, AppShape.xxl);
+      expect(find.byType(CommonCheckBox), findsNothing);
+      expect(find.byType(ListItem<dynamic>), findsNothing);
       expect(tester.takeException(), isNull);
     }
+    expect(buttonColors.first, isNot(buttonColors.last));
   });
 
-  testWidgets('stopped launch keeps its play icon on excluded Wi-Fi', (
+  testWidgets('stopped launch keeps its power button on excluded Wi-Fi', (
     tester,
   ) async {
     excludedWifi = true;
     await pumpHome(tester);
-    expect(find.text('Launch'), findsOneWidget);
+    expect(find.byTooltip('Launch'), findsOneWidget);
     expect(find.byGlyph(AppGlyphs.wifiOff), findsNothing);
     expect(tester.takeException(), isNull);
   });
