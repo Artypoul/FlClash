@@ -15,10 +15,13 @@ void main() {
     );
   });
 
-  test('every preset rule is a direct domain suffix without extra options', () {
+  test('every preset rule is direct without extra options', () {
     for (final raw in russianServiceDirectRules) {
       final rule = Rule.parse(raw);
-      expect(rule.ruleAction, RuleAction.DOMAIN_SUFFIX);
+      expect(
+        rule.ruleAction,
+        anyOf(RuleAction.DOMAIN_SUFFIX, RuleAction.GEOIP),
+      );
       expect(rule.ruleTarget, 'DIRECT');
       expect(rule.rawValue, raw);
       expect(rule.noResolve, isFalse);
@@ -26,6 +29,21 @@ void main() {
       expect(rule.ruleProvider, isNull);
       expect(rule.subRule, isNull);
     }
+  });
+
+  test('direct rules include exactly one Russian GEOIP rule', () {
+    final russianGeoIpRules = russianServiceDirectRules
+        .where((raw) => raw == 'GEOIP,RU,DIRECT')
+        .toList();
+
+    expect(russianGeoIpRules, hasLength(1));
+    final rule = Rule.parse(russianGeoIpRules.single);
+    expect(rule.ruleAction, RuleAction.GEOIP);
+    expect(rule.content, 'RU');
+    expect(rule.ruleTarget, 'DIRECT');
+    expect(rule.rawValue, 'GEOIP,RU,DIRECT');
+    expect(rule.noResolve, isFalse);
+    expect(rule.src, isFalse);
   });
 
   test('the catalogue avoids broad country exclusions', () {

@@ -1,0 +1,104 @@
+{
+  "total_count": 11,
+  "jobs": [
+    {
+      "id": 117016381176,
+      "name": "Windows helper test",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-16T14:12:41Z",
+      "completed_at": "2026-10-16T14:14:33Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117016381194,
+      "name": "Rust",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-16T14:12:40Z",
+      "completed_at": "2026-10-16T14:14:33Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117016381276,
+      "name": "Go core",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-16T14:12:40Z",
+      "completed_at": "2026-10-16T14:16:26Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117016381289,
+      "name": "Desktop windows",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-16T14:12:40Z",
+      "completed_at": "2026-10-16T14:24:08Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117016381335,
+      "name": "Plugins",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-16T14:12:40Z",
+      "completed_at": "2026-10-16T14:15:02Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117016381375,
+      "name": "Dart",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-16T14:12:40Z",
+      "completed_at": "2026-10-16T14:29:57Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117016381398,
+      "name": "Android unit tests",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-16T14:12:41Z",
+      "completed_at": "2026-10-16T14:19:07Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117016381444,
+      "name": "Desktop macos",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-16T14:12:45Z",
+      "completed_at": "2026-10-16T14:24:39Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117016381612,
+      "name": "Desktop linux",
+      "status": "completed",
+      "conclusion": "success",
+      "started_at": "2026-10-16T14:12:41Z",
+      "completed_at": "2026-10-16T14:18:50Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117024328556,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-16T14:29:58Z",
+      "completed_at": "2026-10-16T14:29:57Z",
+      "run_attempt": 1
+    },
+    {
+      "id": 117024330168,
+      "name": "upload",
+      "status": "completed",
+      "conclusion": "skipped",
+      "started_at": "2026-10-16T14:29:58Z",
+      "completed_at": "2026-10-16T14:29:58Z",
+      "run_attempt": 1
+    }
+  ]
+}

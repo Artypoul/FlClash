@@ -62,6 +62,96 @@ void main() {
     expect(script, isNot(contains('FlClashHelperService')));
   });
 
+  group('Windows installer process and Helper guards', () {
+    late String script;
+
+    setUp(() {
+      script = File('windows/packaging/exe/inno_setup.iss').readAsStringSync();
+    });
+
+    test('keeps the Windows identity and prevents automatic app closing', () {
+      final windows =
+          loadYaml(
+                File(
+                  'windows/packaging/exe/make_config.yaml',
+                ).readAsStringSync(),
+              )
+              as YamlMap;
+      final runner = File('windows/runner/Runner.rc').readAsStringSync();
+
+      expect(windows['app_id'], '2E1E050C-79CA-52FB-82C4-52FDC3F5D780');
+      expect(runner, contains('VALUE "CompanyName", "com.follow"'));
+      expect(runner, contains('VALUE "ProductName", "Flashco"'));
+      expect(script, contains('CloseApplications=no'));
+    });
+
+    test('does not terminate processes globally by executable name', () {
+      expect(script.toLowerCase(), isNot(contains('taskkill')));
+      expect(script.toLowerCase(), isNot(contains('/f /im')));
+      expect(script, contains('function HasRunningInstalledApp(): Boolean;'));
+    });
+
+    test(
+      'guards install and uninstall with process and Helper ownership checks',
+      () {
+        expect(
+          script,
+          contains('function HelperOwnershipConflict(): Boolean;'),
+        );
+        expect(
+          script,
+          contains(
+            'function StopInstalledHelper(var FailureMessage: String): Boolean;',
+          ),
+        );
+        expect(
+          script,
+          contains(
+            'function PrepareToInstall(var NeedsRestart: Boolean): String;',
+          ),
+        );
+        expect(script, contains('function InitializeUninstall(): Boolean;'));
+        expect(script, contains('ConnectServer'));
+        expect(script, contains('Win32_Process'));
+        expect(script, contains('Win32_Service'));
+        expect(script, contains('PathName'));
+        expect(script, contains('SameText'));
+        expect(script, contains('ExpandFileName'));
+        expect(script, contains('Exec('));
+        expect(script, contains('ResultCode'));
+      },
+    );
+
+    test('reports stale proxy cleanup failures after file installation', () {
+      expect(script, contains('CurStep = ssPostInstall'));
+      expect(script, contains('--clear-stale-proxy'));
+      expect(script, contains('Log('));
+      expect(script, contains('mbError'));
+      expect(script, contains('SetupLogging=yes'));
+      expect(script, contains('PartialPostInstallFailure'));
+      expect(script, contains('GetCustomSetupExitCode'));
+      expect(script, contains('Result := 9;'));
+      expect(script, contains('WizardForm.FinishedHeadingLabel.Caption'));
+      expect(script, contains('WizardForm.FinishedLabel.Caption'));
+      expect(script, contains('ShouldLaunchAfterInstall'));
+
+      final runSection = script.substring(script.indexOf('[Run]'));
+      expect(runSection, contains('Check: ShouldLaunchAfterInstall'));
+      final postInstallHandler = script.substring(
+        script.indexOf('procedure CurStepChanged(CurStep: TSetupStep);'),
+        script.indexOf('procedure CurPageChanged(CurPageID: Integer);'),
+      );
+      expect(postInstallHandler, contains('PartialPostInstallFailure := True'));
+      expect(postInstallHandler, isNot(contains('MsgBox(')));
+    });
+
+    test('preserves user data during install and uninstall', () {
+      expect(script, isNot(contains('[InstallDelete]')));
+      expect(script, isNot(contains('[UninstallDelete]')));
+      expect(script.toLowerCase(), isNot(contains('deletefile')));
+    });
+  });
+
   group('Linux packaging teardown', () {
     for (final format in ['deb', 'rpm']) {
       test('$format removes the Helper unit only on a real uninstall', () {

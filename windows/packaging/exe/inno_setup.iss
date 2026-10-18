@@ -14,47 +14,351 @@ Compression=lzma
 SolidCompression=yes
 SetupIconFile={{SETUP_ICON_FILE}}
 WizardStyle=modern
+CloseApplications=no
+SetupLogging=yes
 PrivilegesRequired={{PRIVILEGES_REQUIRED}}
 ArchitecturesAllowed={{ARCH}}
 ArchitecturesInstallIn64BitMode={{ARCH}}
 
 [Code]
-procedure KillProcesses;
-var
-  Processes: TArrayOfString;
-  i: Integer;
-  ResultCode: Integer;
-begin
-  Processes := ['Flashco.exe', 'FlashcoCore.exe', 'FlashcoHelperService.exe'];
+const
+  HelperServiceName = 'FlashcoHelperService';
 
-  for i := 0 to GetArrayLength(Processes)-1 do
+var
+  GuardFailureMessage: String;
+  PartialPostInstallFailure: Boolean;
+  PartialPostInstallFailureMessage: String;
+
+function NormalizeFullPath(const Value: String): String;
+var
+  Path: String;
+begin
+  Result := '';
+  Path := Trim(Value);
+  StringChangeEx(Path, '/', '\', True);
+
+  if not (((Length(Path) >= 3) and (Copy(Path, 2, 2) = ':\')) or
+      (Copy(Path, 1, 2) = '\\')) then
   begin
-    Exec('taskkill', '/f /im ' + Processes[i], '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exit;
+  end;
+
+  Result := ExpandFileName(Path);
+  if (Length(Result) > 3) and (Copy(Result, Length(Result), 1) = '\') then
+  begin
+    Delete(Result, Length(Result), 1);
   end;
 end;
 
-procedure UnregisterHelperService;
+function TryExtractExecutablePath(const CommandLine: String; var ExecutablePath: String): Boolean;
 var
+  ClosingQuote: Integer;
+  Remainder: String;
+  i: Integer;
+begin
+  Result := False;
+  ExecutablePath := '';
+  if CommandLine = '' then
+  begin
+    Exit;
+  end;
+
+  if Copy(CommandLine, 1, 1) = '"' then
+  begin
+    ClosingQuote := Pos('"', Copy(CommandLine, 2, Length(CommandLine)));
+    if ClosingQuote = 0 then
+    begin
+      Exit;
+    end;
+    ExecutablePath := Copy(CommandLine, 2, ClosingQuote - 1);
+    Remainder := Copy(CommandLine, ClosingQuote + 2, Length(CommandLine));
+    if (Remainder <> '') and (Copy(Remainder, 1, 1) <> ' ') and
+        (Copy(Remainder, 1, 1) <> #9) then
+    begin
+      Exit;
+    end;
+  end
+  else
+  begin
+    i := 1;
+    while (i <= Length(CommandLine)) and
+        (Copy(CommandLine, i, 1) <> ' ') and (Copy(CommandLine, i, 1) <> #9) do
+    begin
+      i := i + 1;
+    end;
+    ExecutablePath := Copy(CommandLine, 1, i - 1);
+  end;
+
+  Result := ExecutablePath <> '';
+end;
+
+function QueryHelperService(var Found: Boolean; var BinaryPath, State: String;
+    var FailureMessage: String): Boolean;
+var
+  Locator: Variant;
+  Services: Variant;
+  Objects: Variant;
+  Service: Variant;
+  Count: Integer;
+begin
+  Result := False;
+  Found := False;
+  BinaryPath := '';
+  State := '';
+  try
+    Locator := CreateOleObject('WbemScripting.SWbemLocator');
+    Services := Locator.ConnectServer('.', 'root\CIMV2');
+    Objects := Services.ExecQuery(
+      'SELECT PathName, State FROM Win32_Service WHERE Name=''' + HelperServiceName + '''');
+    Count := Objects.Count;
+    if Count < 0 then
+    begin
+      FailureMessage := 'Windows could not verify the Helper service registration.';
+      Exit;
+    end;
+    if Count = 0 then
+    begin
+      Result := True;
+      Exit;
+    end;
+    if Count <> 1 then
+    begin
+      FailureMessage := 'Windows returned an unexpected number of Helper service registrations.';
+      Exit;
+    end;
+
+    Service := Objects.ItemIndex(0);
+    if VarIsNull(Service.PathName) or VarIsEmpty(Service.PathName) or
+        VarIsNull(Service.State) or VarIsEmpty(Service.State) then
+    begin
+      FailureMessage := 'Windows did not provide the Helper service path and state.';
+      Exit;
+    end;
+    BinaryPath := Service.PathName;
+    State := Service.State;
+    if (Trim(BinaryPath) = '') or (Trim(State) = '') then
+    begin
+      FailureMessage := 'Windows returned an incomplete Helper service path or state.';
+      Exit;
+    end;
+    if not (SameText(State, 'Stopped') or SameText(State, 'Start Pending') or
+        SameText(State, 'Stop Pending') or SameText(State, 'Running') or
+        SameText(State, 'Continue Pending') or SameText(State, 'Pause Pending') or
+        SameText(State, 'Paused')) then
+    begin
+      FailureMessage := 'Windows returned an unknown Helper service state.';
+      Exit;
+    end;
+    Found := True;
+    Result := True;
+  except
+    FailureMessage := 'Windows could not verify the Helper service registration: ' + GetExceptionMessage;
+  end;
+end;
+
+function HelperOwnershipConflict(): Boolean;
+var
+  Found: Boolean;
+  BinaryPath: String;
+  State: String;
+  ServiceExePath: String;
+  ExpectedPath: String;
+begin
+  Result := True;
+  if not QueryHelperService(Found, BinaryPath, State, GuardFailureMessage) then
+  begin
+    Exit;
+  end;
+  if not Found then
+  begin
+    Result := False;
+    Exit;
+  end;
+
+  if not TryExtractExecutablePath(BinaryPath, ServiceExePath) then
+  begin
+    GuardFailureMessage := 'The registered Helper service has an unrecognized executable command line.';
+    Exit;
+  end;
+  ServiceExePath := NormalizeFullPath(ServiceExePath);
+  ExpectedPath := NormalizeFullPath(ExpandConstant('{app}\FlashcoHelperService.exe'));
+  if (ServiceExePath = '') or (ExpectedPath = '') then
+  begin
+    GuardFailureMessage := 'Windows could not verify the Helper service executable path.';
+    Exit;
+  end;
+  if not SameText(ServiceExePath, ExpectedPath) then
+  begin
+    GuardFailureMessage := 'A Helper service with the same service name belongs to another installation. Remove it from that installation first.';
+    Exit;
+  end;
+
+  Result := False;
+end;
+
+function HelperServiceStillRegistered(var FailureMessage: String): Boolean;
+var
+  Found: Boolean;
+  BinaryPath: String;
+  State: String;
+begin
+  Result := True;
+  if not QueryHelperService(Found, BinaryPath, State, FailureMessage) then
+  begin
+    Exit;
+  end;
+  if Found then
+  begin
+    FailureMessage := 'The Helper service is still registered. It was left unchanged; retry after it has stopped.';
+    Exit;
+  end;
+  Result := False;
+end;
+
+function HasRunningInstalledApp(): Boolean;
+var
+  Locator: Variant;
+  Services: Variant;
+  Objects: Variant;
+  Process: Variant;
+  Count: Integer;
+  i: Integer;
+  ImagePath: String;
+  ExpectedPath: String;
+begin
+  Result := True;
+  try
+    Locator := CreateOleObject('WbemScripting.SWbemLocator');
+    Services := Locator.ConnectServer('.', 'root\CIMV2');
+    Objects := Services.ExecQuery(
+      'SELECT ExecutablePath FROM Win32_Process WHERE Name=''Flashco.exe''');
+    Count := Objects.Count;
+    if Count < 0 then
+    begin
+      GuardFailureMessage := 'Windows could not verify whether Flashco is running.';
+      Exit;
+    end;
+
+    ExpectedPath := NormalizeFullPath(ExpandConstant('{app}\Flashco.exe'));
+    if ExpectedPath = '' then
+    begin
+      GuardFailureMessage := 'Windows could not verify the Flashco installation path.';
+      Exit;
+    end;
+
+    for i := 0 to Count - 1 do
+    begin
+      Process := Objects.ItemIndex(i);
+      if VarIsNull(Process.ExecutablePath) or VarIsEmpty(Process.ExecutablePath) then
+      begin
+        GuardFailureMessage := 'Windows could not identify the path of a running Flashco process. Close Flashco and retry.';
+        Exit;
+      end;
+      ImagePath := NormalizeFullPath(Process.ExecutablePath);
+      if ImagePath = '' then
+      begin
+        GuardFailureMessage := 'Windows returned an invalid path for a running Flashco process.';
+        Exit;
+      end;
+      if SameText(ImagePath, ExpectedPath) then
+      begin
+        GuardFailureMessage := 'Flashco is still running from this installation. Turn off the VPN and choose Exit from the Flashco tray menu, then retry.';
+        Exit;
+      end;
+    end;
+
+    Result := False;
+  except
+    GuardFailureMessage := 'Windows could not verify whether Flashco is running: ' + GetExceptionMessage;
+  end;
+end;
+
+function StopInstalledHelper(var FailureMessage: String): Boolean;
+var
+  Found: Boolean;
+  BinaryPath: String;
+  State: String;
+  ServiceExePath: String;
+  ExpectedPath: String;
   HelperPath: String;
   ResultCode: Integer;
 begin
-  HelperPath := ExpandConstant('{app}\\FlashcoHelperService.exe');
-  if FileExists(HelperPath) then
+  Result := False;
+  if not QueryHelperService(Found, BinaryPath, State, FailureMessage) then
   begin
-    Exec(HelperPath, 'uninstall', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    Exit;
   end;
+  if not Found then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  if not TryExtractExecutablePath(BinaryPath, ServiceExePath) then
+  begin
+    FailureMessage := 'The registered Helper service has an unrecognized executable command line.';
+    Exit;
+  end;
+  ServiceExePath := NormalizeFullPath(ServiceExePath);
+  ExpectedPath := NormalizeFullPath(ExpandConstant('{app}\FlashcoHelperService.exe'));
+  if (ServiceExePath = '') or (ExpectedPath = '') or
+      not SameText(ServiceExePath, ExpectedPath) then
+  begin
+    FailureMessage := 'The registered Helper service does not belong to this installation. It was left unchanged.';
+    Exit;
+  end;
+
+  HelperPath := ExpandConstant('{app}\FlashcoHelperService.exe');
+  if not FileExists(HelperPath) then
+  begin
+    FailureMessage := 'The installed Helper executable is missing, so its service could not be removed safely.';
+    Exit;
+  end;
+  if not Exec(HelperPath, 'uninstall', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+  begin
+    FailureMessage := 'Windows could not start the installed Helper to remove its service.';
+    Exit;
+  end;
+  if ResultCode <> 0 then
+  begin
+    FailureMessage := 'The installed Helper failed to remove its service (exit code ' + IntToStr(ResultCode) + ').';
+    Exit;
+  end;
+  if not QueryHelperService(Found, BinaryPath, State, FailureMessage) then
+  begin
+    Exit;
+  end;
+  if Found then
+  begin
+    FailureMessage := 'The Helper reported success, but Windows still reports its service as registered.';
+    Exit;
+  end;
+  Result := True;
 end;
 
-procedure ClearStaleProxy;
+function ClearStaleProxy(var FailureMessage: String): Boolean;
 var
   AppPath: String;
   ResultCode: Integer;
 begin
-  AppPath := ExpandConstant('{app}\\{{EXECUTABLE_NAME}}');
-  if FileExists(AppPath) then
+  Result := False;
+  AppPath := ExpandConstant('{app}\{{EXECUTABLE_NAME}}');
+  if not FileExists(AppPath) then
   begin
-    Exec(AppPath, '--clear-stale-proxy', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    FailureMessage := 'Flashco is missing, so stale proxy settings could not be cleared.';
+    Exit;
   end;
+  if not Exec(AppPath, '--clear-stale-proxy', '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+  begin
+    FailureMessage := 'Windows could not start Flashco to clear stale proxy settings.';
+    Exit;
+  end;
+  if ResultCode <> 0 then
+  begin
+    FailureMessage := 'Flashco could not clear stale proxy settings (exit code ' + IntToStr(ResultCode) + ').';
+    Exit;
+  end;
+  Result := True;
 end;
 
 function PointsIntoApp(Value: String): Boolean;
@@ -87,25 +391,124 @@ begin
 end;
 
 function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  FailureMessage: String;
 begin
-  UnregisterHelperService;
-  KillProcesses;
   Result := '';
+  GuardFailureMessage := '';
+  if HasRunningInstalledApp() then
+  begin
+    Result := GuardFailureMessage;
+    Exit;
+  end;
+  if HelperOwnershipConflict() then
+  begin
+    Result := GuardFailureMessage;
+    Exit;
+  end;
+  if not StopInstalledHelper(FailureMessage) then
+  begin
+    Result := FailureMessage;
+    Exit;
+  end;
+  if HelperServiceStillRegistered(FailureMessage) then
+  begin
+    Result := FailureMessage;
+    Exit;
+  end;
+  GuardFailureMessage := '';
+  if HasRunningInstalledApp() then
+  begin
+    Result := GuardFailureMessage;
+    Exit;
+  end;
+  if HelperOwnershipConflict() then
+  begin
+    Result := GuardFailureMessage;
+  end;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
+var
+  FailureMessage: String;
 begin
   if CurStep = ssPostInstall then
   begin
-    ClearStaleProxy;
+    if not ClearStaleProxy(FailureMessage) then
+    begin
+      PartialPostInstallFailure := True;
+      PartialPostInstallFailureMessage := FailureMessage;
+      Log('Post-install stale proxy cleanup failed: ' + FailureMessage);
+    end;
+  end;
+end;
+
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if (CurPageID = wpFinished) and PartialPostInstallFailure then
+  begin
+    WizardForm.FinishedHeadingLabel.Caption := 'Installation completed with a warning';
+    WizardForm.FinishedLabel.Caption := 'Flashco files were installed, but stale proxy cleanup failed. Review proxy settings before launching Flashco.' + #13#10 + PartialPostInstallFailureMessage;
+    WizardForm.AdjustLabelHeight(WizardForm.FinishedLabel);
+  end;
+end;
+
+function ShouldLaunchAfterInstall(): Boolean;
+begin
+  Result := not PartialPostInstallFailure;
+end;
+
+function GetCustomSetupExitCode: Integer;
+begin
+  Result := 0;
+  if PartialPostInstallFailure then
+  begin
+    Result := 9;
   end;
 end;
 
 function InitializeUninstall(): Boolean;
+var
+  FailureMessage: String;
 begin
-  UnregisterHelperService;
-  KillProcesses;
-  ClearStaleProxy;
+  Result := False;
+  GuardFailureMessage := '';
+  if HasRunningInstalledApp() then
+  begin
+    MsgBox(GuardFailureMessage, mbError, MB_OK);
+    Exit;
+  end;
+  if HelperOwnershipConflict() then
+  begin
+    MsgBox(GuardFailureMessage, mbError, MB_OK);
+    Exit;
+  end;
+  if not StopInstalledHelper(FailureMessage) then
+  begin
+    MsgBox(FailureMessage, mbError, MB_OK);
+    Exit;
+  end;
+  if HelperServiceStillRegistered(FailureMessage) then
+  begin
+    MsgBox(FailureMessage, mbError, MB_OK);
+    Exit;
+  end;
+  GuardFailureMessage := '';
+  if HasRunningInstalledApp() then
+  begin
+    MsgBox(GuardFailureMessage, mbError, MB_OK);
+    Exit;
+  end;
+  if HelperOwnershipConflict() then
+  begin
+    MsgBox(GuardFailureMessage, mbError, MB_OK);
+    Exit;
+  end;
+  if not ClearStaleProxy(FailureMessage) then
+  begin
+    MsgBox(FailureMessage + ' Uninstall was canceled; review the application state before retrying.', mbError, MB_OK);
+    Exit;
+  end;
   Result := True;
 end;
 
@@ -158,4 +561,4 @@ Source: "{{SOURCE_DIR}}\\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdi
 Name: "{autoprograms}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"
 Name: "{autodesktop}\\{{DISPLAY_NAME}}"; Filename: "{app}\\{{EXECUTABLE_NAME}}"; Tasks: desktopicon
 [Run]
-Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent
+Filename: "{app}\\{{EXECUTABLE_NAME}}"; Description: "{cm:LaunchProgram,{{DISPLAY_NAME}}}"; Check: ShouldLaunchAfterInstall; Flags: {% if PRIVILEGES_REQUIRED == 'admin' %}runascurrentuser{% endif %} nowait postinstall skipifsilent

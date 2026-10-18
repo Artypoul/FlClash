@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:typed_data';
 
+import 'package:dio/dio.dart';
+import 'package:flashco/common/request.dart';
 import 'package:flashco/core/controller.dart';
 import 'package:flashco/core/interface.dart';
 import 'package:flashco/enum/enum.dart';
@@ -22,6 +25,7 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockCoreHandlerInterface core;
+  late HttpClientAdapter originalRequestAdapter;
 
   setUpAll(() {
     core = MockCoreHandlerInterface();
@@ -33,7 +37,14 @@ void main() {
     );
   });
 
-  setUp(() => reset(core));
+  setUp(() {
+    reset(core);
+    originalRequestAdapter = request.dio.httpClientAdapter;
+  });
+
+  tearDown(() {
+    request.dio.httpClientAdapter = originalRequestAdapter;
+  });
 
   ProviderContainer buildContainer() {
     final container = ProviderContainer(
@@ -159,6 +170,8 @@ void main() {
   group('CommonAction.autoCheckUpdate', () {
     test('returns without a network call when the setting is off', () async {
       final container = buildContainer();
+      final adapter = _UpdateAdapter((_) async => _releaseResponse('v0.8.96'));
+      request.dio.httpClientAdapter = adapter;
       container
           .read(appSettingProvider.notifier)
           .update((state) => state.copyWith(autoCheckUpdate: false));
@@ -167,6 +180,72 @@ void main() {
         container.read(commonActionProvider.notifier).autoCheckUpdate(),
         completion(isFalse),
       );
+      expect(adapter.calls, 0);
+    });
+
+    test('checks the current release once when enabled', () async {
+      final container = buildContainer();
+      final adapter = _UpdateAdapter(
+        (_) async => _releaseResponse(runningVersion),
+      );
+      request.dio.httpClientAdapter = adapter;
+
+      await expectLater(
+        container.read(commonActionProvider.notifier).autoCheckUpdate(),
+        completion(isFalse),
+      );
+      expect(adapter.calls, 1);
+    });
+
+    test('a delayed check does not block unrelated provider updates', () async {
+      final container = buildContainer();
+      final response = Completer<ResponseBody>();
+      final adapter = _UpdateAdapter((_) => response.future);
+      request.dio.httpClientAdapter = adapter;
+
+      final pending = container
+          .read(commonActionProvider.notifier)
+          .autoCheckUpdate();
+      await adapter.dispatched.future;
+
+      expect(adapter.calls, 1);
+      final before = container.read(appSettingProvider).showTrayTitle;
+      container.read(commonActionProvider.notifier).updateSpeedStatistics();
+      expect(container.read(appSettingProvider).showTrayTitle, !before);
+
+      response.complete(_releaseResponse(runningVersion));
+      await expectLater(pending, completion(isFalse));
     });
   });
 }
+
+class _UpdateAdapter implements HttpClientAdapter {
+  _UpdateAdapter(this.respond);
+
+  final Future<ResponseBody> Function(RequestOptions options) respond;
+  final dispatched = Completer<void>();
+  var calls = 0;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    calls++;
+    if (!dispatched.isCompleted) dispatched.complete();
+    return respond(options);
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
+Future<ResponseBody> _releaseResponse(String tag) async =>
+    ResponseBody.fromString(
+      '{"tag_name":"v$tag","body":"notes"}',
+      200,
+      headers: {
+        Headers.contentTypeHeader: [Headers.jsonContentType],
+      },
+    );

@@ -21,6 +21,16 @@ void main() {
       expect(results.rest, ['android']);
     });
 
+    test('parses the universal APK option', () {
+      final results = setup.createSetupArgParser().parse([
+        'android',
+        '--universal-apk',
+      ]);
+
+      expect(results['universal-apk'], isTrue);
+      expect(results.rest, ['android']);
+    });
+
     test('accepts dev application environment', () {
       final results = setup.createSetupArgParser().parse([
         'android',
@@ -33,6 +43,7 @@ void main() {
 
     test('Flutter build environment does not depend on Core SHA256', () {
       expect(setup.createBuildEnvironment('dev'), {'APP_ENV': 'dev'});
+      expect(setup.createBuildEnvironment('stable'), {'APP_ENV': 'stable'});
     });
 
     test('omits verbose from flutter build args by default', () {
@@ -55,6 +66,52 @@ void main() {
         'dart-define-from-file=env.json',
         'split-per-abi',
       ]);
+    });
+
+    test('universal Android APK omits split-per-abi and keeps define file', () {
+      final args = setup.createFlutterBuildArgs(
+        platform: 'android',
+        verbose: false,
+        universalApk: true,
+      );
+
+      expect(args, ['dart-define-from-file=env.json']);
+    });
+
+    test(
+      'universal APK rejects architecture selection and non-Android targets',
+      () {
+        expect(
+          setup.validateUniversalApkOptions(
+            platform: 'android',
+            androidArch: 'arm64',
+            universalApk: true,
+          ),
+          isNotNull,
+        );
+        expect(
+          setup.validateUniversalApkOptions(
+            platform: 'windows',
+            universalApk: true,
+          ),
+          isNotNull,
+        );
+        expect(
+          setup.validateUniversalApkOptions(
+            platform: 'android',
+            androidArch: 'arm64',
+          ),
+          isNull,
+        );
+      },
+    );
+
+    test('Windows package arguments remain unchanged', () {
+      expect(
+        setup.createFlutterBuildArgs(platform: 'windows', verbose: false),
+        ['dart-define-from-file=env.json'],
+      );
+      expect(setup.createPackageTargets('windows', null), 'exe,zip');
     });
 
     test('refuses to package while a native build hook is skipped', () {

@@ -1,0 +1,2 @@
+V2 Signer: certificate DN: C=US, O=Android, CN=Android Debug
+V2 Signer: certificate SHA-256 digest: 4499bcc38d8453d6547bc22d6f192b69dc1b0818b2cb6a272169913567ab93d6

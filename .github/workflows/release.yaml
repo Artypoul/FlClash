@@ -1,0 +1,384 @@
+name: release
+run-name: release-${{ inputs.release_tag }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Stable version tag to package (for example v1.2.3)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: release-${{ inputs.release_tag }}
+  queue: max
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: '3.47.6'
+  GO_VERSION: '1.27.1'
+  NDK_VERSION: r28c
+  RELEASE_TAG: ${{ inputs.release_tag }}
+  ANDROID_CERT_SHA256: ${{ vars.ANDROID_CERT_SHA256 }}
+
+jobs:
+  preflight:
+    name: preflight
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      source_sha: ${{ steps.release.outputs.source_sha }}
+      release_version: ${{ steps.release.outputs.release_version }}
+      build_number: ${{ steps.release.outputs.build_number }}
+      recovery_action: ${{ steps.release.outputs.recovery_action }}
+      original_run_id: ${{ steps.release.outputs.original_run_id }}
+      original_run_attempt: ${{ steps.release.outputs.original_run_attempt }}
+      bundle_artifact_name: ${{ steps.release.outputs.bundle_artifact_name }}
+    steps:
+      - name: Checkout dispatched main commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: false
+      - name: Disable native asset hooks for metadata-only preflight
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('pubspec.yaml')
+          source = path.read_bytes()
+          newline = b'\r\n' if b'\r\n' in source else b'\n'
+          before = newline.join((
+              b'  user_defines:',
+              b'    setup:',
+              b'      build_assets: true',
+              b'    rust_api:',
+              b'      build_assets: true',
+          ))
+          after = before.replace(b'build_assets: true', b'build_assets: false')
+          if source.count(before) != 1:
+              raise SystemExit('Expected exactly the two native hook settings.')
+          path.write_bytes(source.replace(before, after, 1))
+          PY
+      - name: Resolve Dart dependencies without native assets
+        run: flutter pub get
+      - name: Verify release identity and published history
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: dart run tool/release_cli.dart preflight
+
+  android:
+    name: android
+    needs: preflight
+    if: needs.preflight.outputs.recovery_action == 'build'
+    runs-on: ubuntu-24.04
+    environment: flashco-release
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout verified source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.preflight.outputs.source_sha }}
+          fetch-depth: 0
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: false
+      - uses: nttld/setup-ndk@v1
+        id: ndk
+        with:
+          ndk-version: ${{ env.NDK_VERSION }}
+          add-to-path: true
+          link-to-sdk: true
+      - name: Verify Go and Rust toolchains
+        run: |
+          go version
+          rustc --version
+          cargo --version
+      - run: flutter pub get
+      - name: Keep tracked dependency declarations unchanged
+        run: git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Prepare Android signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: java tool/PrepareAndroidSigning.java
+      - name: Build universal stable APK (setup.dart rejects disabled asset hooks)
+        env:
+          ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
+        run: dart setup.dart android --env stable --targets apk --universal-apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-android-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/Flashco-${{ needs.preflight.outputs.release_version }}-android.apk
+          if-no-files-found: error
+          retention-days: 3
+      - name: Remove signing material and runner-local Android properties
+        if: always()
+        run: |
+          rm -f android/app/keystore.jks android/local.properties
+          find android/app android -maxdepth 1 -type f \( -name '.keystore-*.tmp' -o -name '.local-properties-*.tmp' \) -delete
+
+  windows:
+    name: windows
+    needs: preflight
+    if: needs.preflight.outputs.recovery_action == 'build'
+    runs-on: windows-2022
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout verified source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.preflight.outputs.source_sha }}
+          fetch-depth: 0
+          submodules: recursive
+      - name: Enable Git long paths
+        run: git config --global core.longpaths true
+      - name: Verify Windows packaging tools
+        shell: pwsh
+        run: |
+          gcc --version
+          $iscc = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path $iscc)) {
+            $iscc = (Get-Command iscc -ErrorAction Stop).Source
+          }
+          & $iscc /?
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: false
+      - name: Verify Go and Rust toolchains
+        run: |
+          go version
+          rustc --version
+          cargo --version
+      - run: flutter pub get
+      - name: Keep tracked dependency declarations unchanged
+        run: git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Build Windows x64 EXE and ZIP (setup.dart rejects disabled asset hooks)
+        run: dart setup.dart windows --env stable --targets exe,zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            dist/Flashco-${{ needs.preflight.outputs.release_version }}-windows-amd64-setup.exe
+            dist/Flashco-${{ needs.preflight.outputs.release_version }}-windows-amd64.zip
+          if-no-files-found: error
+          retention-days: 3
+
+  bundle:
+    name: bundle
+    needs: [preflight, android, windows]
+    if: >-
+      always() &&
+      needs.preflight.result == 'success' &&
+      (
+        needs.preflight.outputs.recovery_action == 'reuse' ||
+        (needs.android.result == 'success' && needs.windows.result == 'success')
+      )
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      bundle_verified: ${{ steps.release.outputs.bundle_verified }}
+    steps:
+      - name: Checkout verified source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.preflight.outputs.source_sha }}
+          fetch-depth: 0
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: false
+      - name: Discover Android APK inspection tools
+        shell: bash
+        run: |
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          test -d "$sdk_root"
+          analyzer="$sdk_root/cmdline-tools/latest/bin/apkanalyzer"
+          signer="$(
+            for directory in "$sdk_root"/build-tools/*; do
+              version="${directory##*/}"
+              if [[ -d "$directory" && "$version" =~ ^[0-9]+([.][0-9]+)*$ && -e "$directory/apksigner" ]]; then
+                printf '%s\t%s\n' "$version" "$directory/apksigner"
+              fi
+            done | sort -V -k1,1 | tail -n 1 | cut -f2-
+          )"
+          test -x "$analyzer"
+          test -n "$signer" && test -x "$signer"
+          printf '%s\n' "$sdk_root" "$analyzer" "$signer"
+          printf 'ANDROID_HOME=%s\n' "$sdk_root" >> "$GITHUB_ENV"
+          printf '%s\n' "$(dirname "$analyzer")" "$(dirname "$signer")" >> "$GITHUB_PATH"
+      - run: mkdir -p build/release-bundle
+      - name: Download original bundle when recovering
+        if: needs.preflight.outputs.recovery_action == 'reuse'
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.preflight.outputs.bundle_artifact_name }}
+          run-id: ${{ needs.preflight.outputs.original_run_id }}
+          github-token: ${{ github.token }}
+          path: build/release-bundle
+      - name: Download current Android payload
+        if: needs.preflight.outputs.recovery_action == 'build'
+        uses: actions/download-artifact@v4
+        with:
+          name: release-android-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/release-bundle
+      - name: Download current Windows payload
+        if: needs.preflight.outputs.recovery_action == 'build'
+        uses: actions/download-artifact@v4
+        with:
+          name: release-windows-${{ github.run_id }}-${{ github.run_attempt }}
+          path: build/release-bundle
+      - name: Get Flutter dependencies with native hooks enabled
+        run: flutter pub get
+      - name: Keep tracked dependency declarations unchanged
+        run: git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Verify pinned native build toolchains
+        run: |
+          go version
+          rustc --version
+          cargo --version
+      - name: Verify or create the complete bundle
+        id: release
+        env:
+          ORIGINAL_RUN_ID: ${{ needs.preflight.outputs.original_run_id }}
+          ORIGINAL_RUN_ATTEMPT: ${{ needs.preflight.outputs.original_run_attempt }}
+          RECOVERY_ACTION: ${{ needs.preflight.outputs.recovery_action }}
+          SOURCE_SHA: ${{ needs.preflight.outputs.source_sha }}
+          RELEASE_VERSION: ${{ needs.preflight.outputs.release_version }}
+          BUILD_NUMBER: ${{ needs.preflight.outputs.build_number }}
+        run: dart run tool/release_cli.dart bundle
+      - name: Save complete bundle artifact before publishing
+        if: needs.preflight.outputs.recovery_action == 'build'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ needs.preflight.outputs.bundle_artifact_name }}
+          path: build/release-bundle/
+          if-no-files-found: error
+          retention-days: 90
+
+  publish:
+    name: publish
+    needs: [preflight, bundle]
+    if: >-
+      !cancelled() &&
+      needs.preflight.result == 'success' &&
+      needs.bundle.result == 'success'
+    runs-on: ubuntu-24.04
+    outputs:
+      draft_release_id: ${{ steps.release.outputs.draft_release_id }}
+      draft_release_completed: ${{ steps.release.outputs.draft_release_completed }}
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - name: Checkout verified source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.preflight.outputs.source_sha }}
+          fetch-depth: 0
+          submodules: recursive
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: false
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: false
+      - name: Discover Android APK inspection tools
+        shell: bash
+        run: |
+          sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          test -d "$sdk_root"
+          analyzer="$sdk_root/cmdline-tools/latest/bin/apkanalyzer"
+          signer="$(
+            for directory in "$sdk_root"/build-tools/*; do
+              version="${directory##*/}"
+              if [[ -d "$directory" && "$version" =~ ^[0-9]+([.][0-9]+)*$ && -e "$directory/apksigner" ]]; then
+                printf '%s\t%s\n' "$version" "$directory/apksigner"
+              fi
+            done | sort -V -k1,1 | tail -n 1 | cut -f2-
+          )"
+          test -x "$analyzer"
+          test -n "$signer" && test -x "$signer"
+          printf '%s\n' "$sdk_root" "$analyzer" "$signer"
+          printf 'ANDROID_HOME=%s\n' "$sdk_root" >> "$GITHUB_ENV"
+          printf '%s\n' "$(dirname "$analyzer")" "$(dirname "$signer")" >> "$GITHUB_PATH"
+      - name: Download original complete bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.preflight.outputs.bundle_artifact_name }}
+          run-id: ${{ needs.preflight.outputs.original_run_id }}
+          github-token: ${{ github.token }}
+          path: build/release-bundle
+      - name: Get Flutter dependencies with native hooks enabled
+        run: flutter pub get
+      - name: Keep tracked dependency declarations unchanged
+        run: git diff --exit-code -- pubspec.yaml pubspec.lock
+      - name: Verify pinned native build toolchains
+        run: |
+          go version
+          rustc --version
+          cargo --version
+      - name: Create a GitHub draft release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RECOVERY_ACTION: ${{ needs.preflight.outputs.recovery_action }}
+          ORIGINAL_RUN_ID: ${{ needs.preflight.outputs.original_run_id }}
+          ORIGINAL_RUN_ATTEMPT: ${{ needs.preflight.outputs.original_run_attempt }}
+          SOURCE_SHA: ${{ needs.preflight.outputs.source_sha }}
+          RELEASE_VERSION: ${{ needs.preflight.outputs.release_version }}
+          BUILD_NUMBER: ${{ needs.preflight.outputs.build_number }}
+        run: dart run tool/release_cli.dart publish

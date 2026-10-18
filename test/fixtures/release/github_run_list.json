@@ -1,0 +1,13 @@
+[
+  {
+    "conclusion": "success",
+    "createdAt": "2026-10-16T14:12:37Z",
+    "databaseId": 38913914849,
+    "event": "push",
+    "headSha": "83089903cc33bbfb720af5e7ec37ba58cef5474e",
+    "status": "completed",
+    "updatedAt": "2026-10-16T14:29:58Z",
+    "url": "https://github.com/Artypoul/Flashco/actions/runs/38913914849",
+    "workflowName": "build"
+  }
+]
