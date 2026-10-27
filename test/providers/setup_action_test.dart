@@ -78,6 +78,7 @@ class TestCommonAction extends CommonAction {
 
 class TestSetupAction extends SetupAction {
   final List<bool> coreRunningCalls = [];
+  final List<String> events = [];
   final List<Completer<void>> pendingCoreCalls = [];
   int trafficResets = 0;
   int applyProfileCalls = 0;
@@ -90,12 +91,14 @@ class TestSetupAction extends SetupAction {
   @override
   Future<AuthorizeCode> authorizeCore() async {
     authorizeCalls++;
+    events.add('authorization');
     return authorizeResult;
   }
 
   @override
   Future<bool> setCoreRunning(bool running) async {
     coreRunningCalls.add(running);
+    if (running) events.add('listener started');
     if (blockCoreCalls) {
       final gate = Completer<void>();
       pendingCoreCalls.add(gate);
@@ -119,7 +122,23 @@ class TestSetupAction extends SetupAction {
   }) async {
     applyProfileCalls++;
     appliedForce.add(force);
-    await preloadInvoke?.call();
+    final shouldContinue = await requestAdmin(true);
+    if (!shouldContinue || authorizeResult == AuthorizeCode.error) return false;
+    events.add('config applied');
+    return true;
+  }
+}
+
+class _AuthorizationSetupAction extends SetupAction {
+  AuthorizeCode authorizeResult = AuthorizeCode.error;
+  final List<bool> coreRunningCalls = [];
+
+  @override
+  Future<AuthorizeCode> authorizeCore() async => authorizeResult;
+
+  @override
+  Future<bool> setCoreRunning(bool running) async {
+    coreRunningCalls.add(running);
     return true;
   }
 }
@@ -205,6 +224,53 @@ void main() {
       expect(action.applyProfileCalls, 1);
       expect(globalState.needInitStatus, isFalse);
     });
+
+    test(
+      'initialization applies authorization and config before listening',
+      () async {
+        container
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(tun: state.tun.copyWith(enable: true)),
+            );
+
+        await container
+            .read(setupActionProvider.notifier)
+            .setRunning(true, initialize: true);
+
+        expect(action.events, [
+          'authorization',
+          'config applied',
+          'listener started',
+        ]);
+      },
+    );
+
+    test(
+      'authorization denial leaves initialization stopped and retryable',
+      () async {
+        container
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(tun: state.tun.copyWith(enable: true)),
+            );
+        action.authorizeResult = AuthorizeCode.error;
+
+        await container
+            .read(setupActionProvider.notifier)
+            .setRunning(true, initialize: true);
+
+        expect(action.events, isNot(contains('listener started')));
+        expect(action.coreRunningCalls.where((running) => running), isEmpty);
+
+        action.authorizeResult = AuthorizeCode.none;
+        await container
+            .read(setupActionProvider.notifier)
+            .setRunning(true, initialize: true);
+
+        expect(action.coreRunningCalls.where((running) => running), [true]);
+      },
+    );
 
     test('safe mode runs the profile but never touches the listener', () async {
       final scopedAction = TestSetupAction();
@@ -537,6 +603,39 @@ void main() {
   });
 
   group('latest-intent arbitration', () {
+    test(
+      'a superseded start does not hand off after vpn options resolve',
+      () async {
+        final options = await container.read(vpnOptionsProvider.future);
+        final pendingOptions = Completer<VpnOptions>();
+        final scopedAction = TestSetupAction();
+        final scoped = ProviderContainer(
+          overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
+            setupActionProvider.overrideWith(() => scopedAction),
+            commonActionProvider.overrideWith(TestCommonAction.new),
+            vpnOptionsProvider.overrideWith((_) => pendingOptions.future),
+          ],
+        );
+        addTearDown(scoped.dispose);
+        scoped.read(initProvider.notifier).value = true;
+
+        final starting = scoped
+            .read(setupActionProvider.notifier)
+            .setRunning(true, initialize: true);
+        await Future<void>.delayed(Duration.zero);
+        final stopping = scoped
+            .read(setupActionProvider.notifier)
+            .setRunning(false);
+
+        pendingOptions.complete(options);
+        await Future.wait([starting, stopping]);
+
+        expect(await starting, isFalse);
+        expect(scopedAction.coreRunningCalls, [false]);
+      },
+    );
+
     test('a superseded stop does not run the post-stop cleanup', () async {
       markInitialized();
       final notifier = container.read(setupActionProvider.notifier);
@@ -680,7 +779,7 @@ void main() {
           .update((state) => state.copyWith.tun(enable: true));
       action.authorizeResult = AuthorizeCode.error;
 
-      expect(await action.requestAdmin(true), isTrue);
+      expect(await action.requestAdmin(true), isFalse);
       expect(container.read(patchClashConfigProvider).tun.enable, isFalse);
       expect(
         container.read(authorizedTunEnableProvider),
@@ -979,6 +1078,49 @@ void main() {
       addedRules: [],
       script: null,
       overrides: ProfileOverrides(),
+    );
+
+    test(
+      'helper authorization failure stops initialization before config and listener',
+      () async {
+        final core = _MockCoreHandlerInterface();
+        when(() => core.setupConfig(any())).thenAnswer((_) async => '');
+        final action = _AuthorizationSetupAction();
+        final scoped = ProviderContainer(
+          overrides: [
+            profilesProvider.overrideWith(TestProfiles.new),
+            currentProfileProvider.overrideWithValue(null),
+            setupStateProvider.overrideWith((_, _) => nullProfileSetupState),
+            coreHandlerProvider.overrideWithValue(CoreController.scoped(core)),
+            setupActionProvider.overrideWith(() => action),
+          ],
+        );
+        addTearDown(scoped.dispose);
+        scoped.read(setupActionProvider.notifier);
+        scoped
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(tun: state.tun.copyWith(enable: true)),
+            );
+
+        final started = await action.setRunning(true, initialize: true);
+
+        expect(started, isFalse);
+        expect(action.coreRunningCalls, [false]);
+        verifyNever(() => core.setupConfig(any()));
+
+        action.authorizeResult = AuthorizeCode.none;
+        scoped
+            .read(patchClashConfigProvider.notifier)
+            .update(
+              (state) => state.copyWith(tun: state.tun.copyWith(enable: true)),
+            );
+        final retried = await action.setRunning(true, initialize: true);
+
+        expect(retried, isTrue);
+        expect(action.coreRunningCalls, [false, true]);
+        verify(() => core.setupConfig(any())).called(1);
+      },
     );
 
     test(
@@ -1503,9 +1645,12 @@ void main() {
             scoped.read(setupActionProvider.notifier)
                 as _ListenerHandoffFailureSetupAction;
 
-        await handoffAction.setRunning(true, initialize: true);
+        await expectLater(
+          handoffAction.setRunning(true, initialize: true),
+          throwsStateError,
+        );
 
-        expect(handoffAction.coreRunningCalls, [true, false]);
+        expect(handoffAction.coreRunningCalls, [true]);
         expect(scoped.read(runTimeProvider), isNull);
         verify(() => core.setupConfig(any())).called(1);
       },
@@ -1533,7 +1678,7 @@ void main() {
 
         await messageAction.setRunning(true, initialize: true);
 
-        expect(messageAction.coreRunningCalls, [true, false]);
+        expect(messageAction.coreRunningCalls, [false]);
         expect(scoped.read(runTimeProvider), isNull);
         verify(() => core.setupConfig(any())).called(1);
       },

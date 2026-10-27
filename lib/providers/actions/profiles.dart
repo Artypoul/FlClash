@@ -39,18 +39,33 @@ class ProfilesAction extends _$ProfilesAction {
     }
     final profiles = ref.read(profilesProvider.notifier);
     await profiles.settledWrites;
-    if ((await database.profilesDao.query().get()).any(
-      (profile) => profile.url == url,
-    )) {
-      await preferences.markBundledSubscriptionImported(url);
-      return;
-    }
     if (!ref.mounted ||
         _importSequence != previousSequence ||
         !identical(setup.runRequestToken, runRequestToken)) {
       return;
     }
     final sequence = ++_importSequence;
+    final savedProfile = (await database.profilesDao.query().get())
+        .where((profile) => profile.url == url)
+        .firstOrNull;
+    if (savedProfile != null) {
+      if (ref.read(currentProfileIdProvider) == savedProfile.id) {
+        final activated = await _activateImportedProfile(
+          savedProfile,
+          sequence,
+          runRequestToken,
+          initialize: true,
+        );
+        if (activated) {
+          await globalState.safeRun(
+            () => preferences.markBundledSubscriptionImported(url),
+          );
+        }
+      } else {
+        await preferences.markBundledSubscriptionImported(url);
+      }
+      return;
+    }
     final profile = await globalState.loadingRun(
       () => _withAgeSecretKey(
         Profile.normal(url: url),
@@ -60,17 +75,24 @@ class ProfilesAction extends _$ProfilesAction {
       silence: true,
     );
     if (profile == null || !ref.mounted) return;
-    putProfile(profile);
+    ref.read(profilesProvider.notifier).put(profile);
     await profiles.settledWrites;
     if (!(await database.profilesDao.query().get()).any(
       (saved) => saved.id == profile.id && saved.url == url,
     )) {
       return;
     }
-    await globalState.safeRun(
-      () => preferences.markBundledSubscriptionImported(url),
+    final activated = await _activateImportedProfile(
+      profile,
+      sequence,
+      runRequestToken,
+      initialize: true,
     );
-    await _activateImportedProfile(profile, sequence, runRequestToken);
+    if (activated) {
+      await globalState.safeRun(
+        () => preferences.markBundledSubscriptionImported(url),
+      );
+    }
   }
 
   void updateCurrentSelectedMap(String groupName, String proxyName) {
@@ -141,24 +163,29 @@ class ProfilesAction extends _$ProfilesAction {
     return profile.copyWith(selectedMap: selectedMap ?? profile.selectedMap);
   }
 
-  Future<void> _activateImportedProfile(
+  Future<bool> _activateImportedProfile(
     Profile profile,
     int sequence,
-    Object? runRequestToken,
-  ) async {
+    Object? runRequestToken, {
+    bool? initialize,
+  }) async {
     if (!await ref
         .read(profilesProvider.notifier)
         .hasSavedProfile(profile.id)) {
-      return;
+      return false;
     }
-    if (!ref.mounted || sequence != _importSequence) return;
-    if (ref.read(profilesProvider).getProfile(profile.id) == null) return;
+    if (!ref.mounted || sequence != _importSequence) return false;
+    if (ref.read(profilesProvider).getProfile(profile.id) == null) return false;
     final setup = ref.read(setupActionProvider.notifier);
-    if (!identical(setup.runRequestToken, runRequestToken)) return;
+    if (!identical(setup.runRequestToken, runRequestToken)) return false;
     ref.read(currentProfileIdProvider.notifier).value = profile.id;
-    await globalState.safeRun(
-      () => setup.setRunning(true, initialize: !ref.read(initProvider)),
-    );
+    return await globalState.safeRun(
+          () => setup.setRunning(
+            true,
+            initialize: initialize ?? !ref.read(initProvider),
+          ),
+        ) ??
+        false;
   }
 
   Future<List<Profile>> providerUsers(Profile profile) async {
