@@ -174,8 +174,20 @@ static FlMethodResponse* handle_show(TrayPlugin* self, FlValue* args) {
 
   const bool is_new = self->indicator == nullptr;
   if (is_new) {
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
     self->indicator =
         app_indicator_new(id, icon_path, APP_INDICATOR_CATEGORY_APPLICATION_STATUS);
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
   }
 
   attach_menu(self, fl_value_lookup_string(args, "menu"));
