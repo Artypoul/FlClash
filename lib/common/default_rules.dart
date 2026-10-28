@@ -65,6 +65,7 @@ const russianServiceDomains = <String, List<String>>{
 };
 
 List<String> get russianServiceDirectRules => [
+  'GEOIP,RU,DIRECT',
   'DOMAIN-SUFFIX,ru,DIRECT',
   for (final domains in russianServiceDomains.values)
     for (final domain in domains) 'DOMAIN-SUFFIX,$domain,DIRECT',

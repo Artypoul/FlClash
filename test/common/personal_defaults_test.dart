@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flashco/common/personal_defaults.dart';
 import 'package:flashco/common/preferences.dart';
+import 'package:flashco/enum/enum.dart';
 import 'package:flashco/models/models.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -11,8 +12,12 @@ const _url = 'https://example.invalid/subscription';
 const _existing = Config(
   currentProfileId: 42,
   excludeSSIDs: ['home'],
-  themeProps: ThemeProps(themeMode: ThemeMode.dark, primaryColor: 0xff123456),
-  appSettingProps: AppSettingProps(locale: 'ru', autoRun: false),
+  themeProps: ThemeProps(
+    themeMode: ThemeMode.dark,
+    primaryColor: 0xff123456,
+    fontFamily: 'Missing Font',
+  ),
+  appSettingProps: AppSettingProps(locale: 'en', autoRun: false),
 );
 
 void main() {
@@ -34,7 +39,18 @@ void main() {
       );
 
       expect(updated.themeProps.themeMode, ThemeMode.light);
+      expect(updated.themeProps.fontFamily, isNull);
       expect(updated.appSettingProps.autoRun, isTrue);
+      expect(updated.appSettingProps.locale, 'ru');
+      expect(updated.networkProps.systemProxy, isFalse);
+      expect(updated.networkProps.bypassPrivateRoute, isTrue);
+      expect(updated.vpnProps.systemProxy, isFalse);
+      expect(updated.vpnProps.allowBypass, isFalse);
+      expect(updated.patchClashConfig.mode, Mode.rule);
+      expect(updated.patchClashConfig.tun.enable, isTrue);
+      expect(updated.patchClashConfig.tun.autoRoute, isTrue);
+      expect(updated.patchClashConfig.tun.stack, TunStack.mips);
+      expect(updated.patchClashConfig.tun.strictRoute, isTrue);
       expect(updated.currentProfileId, 42);
       expect(updated.excludeSSIDs, ['home']);
       expect(updated.themeProps.primaryColor, 0xff123456);

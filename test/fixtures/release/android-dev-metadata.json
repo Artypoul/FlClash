@@ -1,0 +1,13 @@
+{
+  "packageName": "com.follow.flashco.dev",
+  "versionName": "0.9.0",
+  "versionCode": 2026101401,
+  "signerSha256": "4499bcc38d8453d6547bc22d6f192b69dc1b0818b2cb6a272169913567ab93d6",
+  "abis": [
+    "arm64-v8a",
+    "armeabi-v7a",
+    "x86_64"
+  ],
+  "debuggable": true,
+  "testOnly": false
+}

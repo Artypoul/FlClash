@@ -670,32 +670,38 @@ void main() {
         await action.setRunning(false);
       });
 
-      test('stale initialization cannot start after a newer stop', () async {
-        final container = ProviderContainer(
-          overrides: [
-            initProvider.overrideWithBuild((_, _) => true),
-            commonActionProvider.overrideWith(_RaceCommonAction.new),
-            setupActionProvider.overrideWith(_InitializingSetupAction.new),
-          ],
-        );
-        addTearDown(container.dispose);
-        final action =
-            container.read(setupActionProvider.notifier)
-                as _InitializingSetupAction;
+      test(
+        'stale initialization cannot start after a newer stop or start',
+        () async {
+          final container = ProviderContainer(
+            overrides: [
+              initProvider.overrideWithBuild((_, _) => true),
+              commonActionProvider.overrideWith(_RaceCommonAction.new),
+              setupActionProvider.overrideWith(_InitializingSetupAction.new),
+            ],
+          );
+          addTearDown(container.dispose);
+          final action =
+              container.read(setupActionProvider.notifier)
+                  as _InitializingSetupAction;
 
-        final start = action.setRunning(true, initialize: true);
-        final stop = action.setRunning(false);
-        await stop;
+          final start = action.setRunning(true, initialize: true);
+          final stop = action.setRunning(false);
+          await stop;
 
-        expect(action.transitions, [false]);
-        expect(container.read(isStartProvider), isFalse);
+          expect(action.transitions, [false]);
+          expect(container.read(isStartProvider), isFalse);
 
-        action.continueInitialization();
-        await start;
+          action.continueInitialization();
+          final latestStart = action.setRunning(true, initialize: true);
 
-        expect(action.transitions, [false]);
-        expect(container.read(isStartProvider), isFalse);
-      });
+          expect(await start, isFalse);
+          expect(await latestStart, isTrue);
+
+          expect(action.transitions, [false, true]);
+          expect(container.read(isStartProvider), isTrue);
+        },
+      );
 
       test(
         'keeps suspended startup local until the listener resumes',
@@ -866,7 +872,7 @@ void main() {
           .update((state) => state.copyWith.tun(enable: true));
       container.read(setupActionProvider);
 
-      expect(await setupAction.requestAdmin(true), isTrue);
+      expect(await setupAction.requestAdmin(true), isFalse);
 
       expect(container.read(patchClashConfigProvider).tun.enable, isFalse);
       expect(container.read(shouldPatchSystemDnsProvider), isFalse);

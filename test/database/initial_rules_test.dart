@@ -77,11 +77,18 @@ void main() {
     final database = await open(russianServiceDirectRules);
     final rules = await database.rulesDao.queryGlobalRules().get();
     expect(rules.map((rule) => rule.rawValue), russianServiceDirectRules);
-    expect(rules.first.rawValue, 'DOMAIN-SUFFIX,ru,DIRECT');
-    final edited = rules.first.copyWith(ruleTarget: 'REJECT');
+    final ruBypass = rules.singleWhere(
+      (rule) => rule.rawValue == 'DOMAIN-SUFFIX,ru,DIRECT',
+    );
+    final edited = ruBypass.copyWith(ruleTarget: 'REJECT');
     await database.rulesDao.putRule(edited);
 
-    expect((await database.rulesDao.queryGlobalRules().get()).first, edited);
+    expect(
+      (await database.rulesDao.queryGlobalRules().get()).singleWhere(
+        (rule) => rule.id == ruBypass.id,
+      ),
+      edited,
+    );
   });
 
   test('a failed initial insert rolls back and can be retried', () async {

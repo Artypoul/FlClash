@@ -1,0 +1,15 @@
+ed06fb1ccf73156dbea07cf906b0ab2f2bececca29a510b288a5621868ff2bcf  ./FlClash-0.9.0-android-arm64-v8a.apk
+ef9b57609a972ef7614fdc62003f733cc548b1679d29ac0ea6568d977f49b8d3  ./FlClash-0.9.0-android-armeabi-v7a.apk
+ff42d8250eabb1f82020b8600d2250b57e38b31094db87a4648b342c63ee3902  ./FlClash-0.9.0-android-x86_64.apk
+8b7014e8e9db3229658f7334cc135e45065a21097d244840e8adefae60151c9a  ./FlClash-0.9.0-linux-amd64.AppImage
+f0c2ca66a38c5facf0a23737323343e258ed90e67f03ccc270afc5faa156a0d6  ./FlClash-0.9.0-linux-amd64.deb
+fbf67478cbfba7ba018a20e756e8ceb43a152e96fc591bffacd6f03198992363  ./FlClash-0.9.0-linux-amd64.rpm
+a29a95b22cd2cbb1dbba08647ec62ffc2ff27fb9434cd8bb2c59309d2da09f31  ./FlClash-0.9.0-linux-arm64.AppImage
+c4b3add5d94931eec7c2e1d28014179de57a70a28a0b525e70c077f6eb0185cb  ./FlClash-0.9.0-linux-arm64.deb
+e29d0c4baf510662bdd0e826887129d97974a44423474edce8714bbe40ec4628  ./FlClash-0.9.0-linux-arm64.rpm
+a35fcdd74030f15695f34c72fe54f82f58126ba09658bbfe13313acceb438440  ./FlClash-0.9.0-macos-amd64.dmg
+9e5048a53b0b7a327847fb6c6dfc95c10fc39eb21c25879196a3a27fa5b02a80  ./FlClash-0.9.0-macos-arm64.dmg
+edf27cc9ce9a36f63ae94551006763209ebae89ea9811dced281ddbcd6f3395b  ./FlClash-0.9.0-windows-amd64-setup.exe
+655801d205fbf884981fd2645ac5115c28c2fe8818830820a2d05922f594547b  ./FlClash-0.9.0-windows-amd64.zip
+af606d42f9fa571de610e26988835a8a9c818c6b9c84c64652f71f1bc7cc5d39  ./FlClash-0.9.0-windows-arm64-setup.exe
+c64e01908a0d98e6f1ab8c382dddb8563871aeae2c8438235a681047bd23f299  ./FlClash-0.9.0-windows-arm64.zip

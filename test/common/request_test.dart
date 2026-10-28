@@ -6,7 +6,9 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flashco/common/constant.dart';
 import 'package:flashco/common/request.dart';
+import 'package:flashco/state.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class _StalledHttpClient extends Fake implements HttpClient {
   @override
@@ -24,6 +26,7 @@ class _HostAdapter implements HttpClientAdapter {
   _HostAdapter(this.byHost);
 
   final Map<String, ResponseBody Function()> byHost;
+  final requests = <RequestOptions>[];
 
   @override
   Future<ResponseBody> fetch(
@@ -31,6 +34,7 @@ class _HostAdapter implements HttpClientAdapter {
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
   ) async {
+    requests.add(options);
     return byHost[options.uri.host]!();
   }
 
@@ -118,6 +122,69 @@ void main() {
       });
 
       await expectLater(request.latestRelease(), throwsA(isA<DioException>()));
+    });
+  });
+
+  group('checkForUpdate', () {
+    setUpAll(() {
+      globalState.packageInfo = PackageInfo(
+        appName: 'Flashco',
+        packageName: 'com.follow.flashco',
+        version: '1.2.2',
+        buildNumber: '1',
+      );
+    });
+
+    test(
+      'returns a newer release with its changelog from this repository',
+      () async {
+        final adapter = _HostAdapter({
+          'api.github.com': () => ResponseBody.fromString(
+            '{"tag_name":"v1.2.3","body":"release notes"}',
+            200,
+            headers: {
+              Headers.contentTypeHeader: [Headers.jsonContentType],
+            },
+          ),
+        });
+        final request = Request()..dio.httpClientAdapter = adapter;
+
+        expect(await request.checkForUpdate(), {
+          'tag_name': 'v1.2.3',
+          'body': 'release notes',
+        });
+        expect(
+          adapter.requests.single.uri,
+          Uri.parse('https://api.github.com/repos/$repository/releases/latest'),
+        );
+      },
+    );
+
+    test('returns no update for the current or an older release', () async {
+      for (final tag in ['v1.2.2', 'v1.2.1']) {
+        final request = Request()
+          ..dio.httpClientAdapter = _HostAdapter({
+            'api.github.com': () => ResponseBody.fromString(
+              '{"tag_name":"$tag"}',
+              200,
+              headers: {
+                Headers.contentTypeHeader: [Headers.jsonContentType],
+              },
+            ),
+          });
+
+        expect(await request.checkForUpdate(), isNull, reason: tag);
+      }
+    });
+
+    test('throws when API and release-page fallback both fail', () async {
+      final request = Request()
+        ..dio.httpClientAdapter = _HostAdapter({
+          'api.github.com': () => ResponseBody.fromString('{}', 403),
+          'github.com': () => ResponseBody.fromString('', 503),
+        });
+
+      await expectLater(request.checkForUpdate(), throwsA(isA<DioException>()));
     });
   });
 

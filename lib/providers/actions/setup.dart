@@ -167,17 +167,24 @@ class SetupAction extends _$SetupAction {
     if (request.initialize) {
       var applied = false;
       try {
-        applied = await applyProfile(
-          force: true,
-          preloadInvoke: () => _setCoreRunning(request),
-        );
+        applied = await applyProfile(force: true);
       } catch (_) {
         applied = false;
       }
       if (!applied && _isCurrent(request)) {
         await globalState.safeRun(() => setRunning(false));
+        return false;
       }
-      return applied;
+      if (!applied || !_isCurrent(request)) {
+        return false;
+      }
+      try {
+        await _setCoreRunning(request);
+      } catch (_) {
+        _rollbackRunning(request);
+        rethrow;
+      }
+      return _isCurrent(request);
     }
 
     try {
@@ -219,12 +226,15 @@ class SetupAction extends _$SetupAction {
       if (ref.read(safeModeProvider)) {
         return;
       }
-      await _setListening(request.running);
+      await _setListening(request.running, request: request);
     });
   }
 
-  Future<void> _setListening(bool running) async {
+  Future<void> _setListening(bool running, {_RunRequest? request}) async {
     final vpnOptions = await ref.read(vpnOptionsProvider.future);
+    if (request != null && request.initialize && !_isCurrent(request)) {
+      return;
+    }
     await setCoreRunning(running);
     ref.read(runningVpnOptionsProvider.notifier).value = running
         ? vpnOptions
@@ -281,6 +291,10 @@ class SetupAction extends _$SetupAction {
       final patchConfig = ref.read(patchClashConfigProvider);
       final shouldContinueSetup = await requestAdmin(patchConfig.tun.enable);
       if (!shouldContinueSetup) {
+        if (ref.read(authorizedTunEnableProvider) ==
+            TunAuthorizationState.none) {
+          return;
+        }
         await _restartCoreAfterAuthorization();
         return;
       }
@@ -590,7 +604,7 @@ class SetupAction extends _$SetupAction {
           currentAppLocalizations.tunAuthorizationFailed,
           level: MessageLevel.error,
         );
-        return true;
+        return false;
     }
   }
 
@@ -632,6 +646,9 @@ class SetupAction extends _$SetupAction {
     final patchConfig = ref.read(patchClashConfigProvider);
     final shouldContinueSetup = await requestAdmin(patchConfig.tun.enable);
     if (!shouldContinueSetup) {
+      if (ref.read(authorizedTunEnableProvider) == TunAuthorizationState.none) {
+        return _SetupTaskResult.failed;
+      }
       return _SetupTaskResult.handoffToCoreRestart;
     }
     final realPatchConfig = _effectivePatchConfig(patchConfig);

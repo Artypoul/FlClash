@@ -1,0 +1,117 @@
+{
+  "total_count": 7,
+  "artifacts": [
+    {
+      "id": 11864686562,
+      "name": "artifact-windows-arm64",
+      "size_in_bytes": 102750989,
+      "digest": "sha256:2b9d73ba643a252e0a8ea39d5a5ce5ba45b43db49807d76c65922e8d3ce9ef87",
+      "created_at": "2026-10-14T01:46:37Z",
+      "expires_at": "2027-01-12T01:17:43Z",
+      "expired": false,
+      "workflow_run": {
+        "id": 38494931447,
+        "repository_id": 678716433,
+        "head_repository_id": 678716433,
+        "head_branch": "v0.9.0",
+        "head_sha": "03f955382409a4a7ac1f3f92e46d9fcc6d39f106"
+      }
+    },
+    {
+      "id": 11864442602,
+      "name": "artifact-android",
+      "size_in_bytes": 181261733,
+      "digest": "sha256:ae3e3fb16bdba7969d9b2f8f453fdffa97f212753903c3b9b5224c4263711447",
+      "created_at": "2026-10-14T01:44:40Z",
+      "expires_at": "2027-01-12T01:17:43Z",
+      "expired": false,
+      "workflow_run": {
+        "id": 38494931447,
+        "repository_id": 678716433,
+        "head_repository_id": 678716433,
+        "head_branch": "v0.9.0",
+        "head_sha": "03f955382409a4a7ac1f3f92e46d9fcc6d39f106"
+      }
+    },
+    {
+      "id": 11864222382,
+      "name": "artifact-macos-arm64",
+      "size_in_bytes": 57488463,
+      "digest": "sha256:f0981ee59644da379c7b2836147b9c2e7013722a42a012cc80f9c18d19682313",
+      "created_at": "2026-10-14T01:42:58Z",
+      "expires_at": "2027-01-12T01:17:43Z",
+      "expired": false,
+      "workflow_run": {
+        "id": 38494931447,
+        "repository_id": 678716433,
+        "head_repository_id": 678716433,
+        "head_branch": "v0.9.0",
+        "head_sha": "03f955382409a4a7ac1f3f92e46d9fcc6d39f106"
+      }
+    },
+    {
+      "id": 11864161417,
+      "name": "artifact-linux-amd64",
+      "size_in_bytes": 173280081,
+      "digest": "sha256:8d55ed69977b3953bcb5b0dd84f0781593eac68827ef975600c76a14e8e1944b",
+      "created_at": "2026-10-14T01:36:57Z",
+      "expires_at": "2027-01-12T01:17:43Z",
+      "expired": false,
+      "workflow_run": {
+        "id": 38494931447,
+        "repository_id": 678716433,
+        "head_repository_id": 678716433,
+        "head_branch": "v0.9.0",
+        "head_sha": "03f955382409a4a7ac1f3f92e46d9fcc6d39f106"
+      }
+    },
+    {
+      "id": 11863921198,
+      "name": "artifact-linux-arm64",
+      "size_in_bytes": 164722358,
+      "digest": "sha256:6529c017662e44976a9d2a89a97967fdadaf5e7855cff6d8296814aeb58b3778",
+      "created_at": "2026-10-14T01:38:29Z",
+      "expires_at": "2027-01-12T01:17:43Z",
+      "expired": false,
+      "workflow_run": {
+        "id": 38494931447,
+        "repository_id": 678716433,
+        "head_repository_id": 678716433,
+        "head_branch": "v0.9.0",
+        "head_sha": "03f955382409a4a7ac1f3f92e46d9fcc6d39f106"
+      }
+    },
+    {
+      "id": 11863879150,
+      "name": "artifact-macos-amd64",
+      "size_in_bytes": 61345902,
+      "digest": "sha256:6b458c0b78d3a99c3f06d099be758bb08d4f2576224ae1aad57da1107479c4c0",
+      "created_at": "2026-10-14T01:50:19Z",
+      "expires_at": "2027-01-12T01:17:43Z",
+      "expired": false,
+      "workflow_run": {
+        "id": 38494931447,
+        "repository_id": 678716433,
+        "head_repository_id": 678716433,
+        "head_branch": "v0.9.0",
+        "head_sha": "03f955382409a4a7ac1f3f92e46d9fcc6d39f106"
+      }
+    },
+    {
+      "id": 11863753036,
+      "name": "artifact-windows-amd64",
+      "size_in_bytes": 109928587,
+      "digest": "sha256:42170403556f509226b7c06c0080bb5fd4aeaa52d5beac3341ce9ad7716ab474",
+      "created_at": "2026-10-14T01:41:02Z",
+      "expires_at": "2027-01-12T01:17:43Z",
+      "expired": false,
+      "workflow_run": {
+        "id": 38494931447,
+        "repository_id": 678716433,
+        "head_repository_id": 678716433,
+        "head_branch": "v0.9.0",
+        "head_sha": "03f955382409a4a7ac1f3f92e46d9fcc6d39f106"
+      }
+    }
+  ]
+}

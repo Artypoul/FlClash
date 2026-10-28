@@ -1,0 +1,993 @@
+{
+  "databaseId": 38913914849,
+  "workflowName": "build",
+  "headSha": "83089903cc33bbfb720af5e7ec37ba58cef5474e",
+  "event": "push",
+  "status": "completed",
+  "conclusion": "success",
+  "createdAt": "2026-10-16T14:12:37Z",
+  "updatedAt": "2026-10-16T14:29:58Z",
+  "url": "https://github.com/Artypoul/Flashco/actions/runs/38913914849",
+  "jobs": [
+    {
+      "databaseId": 117016381176,
+      "name": "Windows helper test",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T14:12:41Z",
+      "completedAt": "2026-10-16T14:14:33Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:41Z",
+          "completedAt": "2026-10-16T14:12:42Z"
+        },
+        {
+          "name": "Checkout",
+          "number": 2,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:42Z",
+          "completedAt": "2026-10-16T14:12:49Z"
+        },
+        {
+          "name": "Setup Rust cache",
+          "number": 3,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:49Z",
+          "completedAt": "2026-10-16T14:13:05Z"
+        },
+        {
+          "name": "Check format",
+          "number": 4,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:05Z",
+          "completedAt": "2026-10-16T14:13:09Z"
+        },
+        {
+          "name": "Run Windows service tests",
+          "number": 5,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:09Z",
+          "completedAt": "2026-10-16T14:14:22Z"
+        },
+        {
+          "name": "Post Setup Rust cache",
+          "number": 9,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:22Z",
+          "completedAt": "2026-10-16T14:14:30Z"
+        },
+        {
+          "name": "Post Checkout",
+          "number": 10,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:30Z",
+          "completedAt": "2026-10-16T14:14:32Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 11,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:32Z",
+          "completedAt": "2026-10-16T14:14:32Z"
+        }
+      ]
+    },
+    {
+      "databaseId": 117016381194,
+      "name": "Rust",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T14:12:40Z",
+      "completedAt": "2026-10-16T14:14:33Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:41Z",
+          "completedAt": "2026-10-16T14:12:41Z"
+        },
+        {
+          "name": "Checkout",
+          "number": 2,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:41Z",
+          "completedAt": "2026-10-16T14:12:43Z"
+        },
+        {
+          "name": "Setup Rust cache",
+          "number": 3,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:43Z",
+          "completedAt": "2026-10-16T14:13:10Z"
+        },
+        {
+          "name": "Check format",
+          "number": 4,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:10Z",
+          "completedAt": "2026-10-16T14:13:14Z"
+        },
+        {
+          "name": "Run tests",
+          "number": 5,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:14Z",
+          "completedAt": "2026-10-16T14:14:25Z"
+        },
+        {
+          "name": "Post Setup Rust cache",
+          "number": 9,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:25Z",
+          "completedAt": "2026-10-16T14:14:31Z"
+        },
+        {
+          "name": "Post Checkout",
+          "number": 10,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:31Z",
+          "completedAt": "2026-10-16T14:14:31Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 11,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:31Z",
+          "completedAt": "2026-10-16T14:14:31Z"
+        }
+      ]
+    },
+    {
+      "databaseId": 117016381276,
+      "name": "Go core",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T14:12:40Z",
+      "completedAt": "2026-10-16T14:16:26Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:41Z",
+          "completedAt": "2026-10-16T14:12:41Z"
+        },
+        {
+          "name": "Checkout",
+          "number": 2,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:41Z",
+          "completedAt": "2026-10-16T14:12:44Z"
+        },
+        {
+          "name": "Setup Go",
+          "number": 3,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:44Z",
+          "completedAt": "2026-10-16T14:12:54Z"
+        },
+        {
+          "name": "Validate Go core wrapper",
+          "number": 4,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:54Z",
+          "completedAt": "2026-10-16T14:14:29Z"
+        },
+        {
+          "name": "Validate the Android core library",
+          "number": 5,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:29Z",
+          "completedAt": "2026-10-16T14:16:16Z"
+        },
+        {
+          "name": "Post Setup Go",
+          "number": 9,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:16:16Z",
+          "completedAt": "2026-10-16T14:16:24Z"
+        },
+        {
+          "name": "Post Checkout",
+          "number": 10,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:16:24Z",
+          "completedAt": "2026-10-16T14:16:24Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 11,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:16:24Z",
+          "completedAt": "2026-10-16T14:16:24Z"
+        }
+      ]
+    },
+    {
+      "databaseId": 117016381289,
+      "name": "Desktop windows",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T14:12:40Z",
+      "completedAt": "2026-10-16T14:24:08Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:41Z",
+          "completedAt": "2026-10-16T14:12:43Z"
+        },
+        {
+          "name": "Checkout",
+          "number": 2,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:43Z",
+          "completedAt": "2026-10-16T14:12:57Z"
+        },
+        {
+          "name": "Setup Go",
+          "number": 3,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:57Z",
+          "completedAt": "2026-10-16T14:13:21Z"
+        },
+        {
+          "name": "Setup Rust cache",
+          "number": 4,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:21Z",
+          "completedAt": "2026-10-16T14:14:01Z"
+        },
+        {
+          "name": "Setup Flutter",
+          "number": 5,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:01Z",
+          "completedAt": "2026-10-16T14:15:41Z"
+        },
+        {
+          "name": "Install Linux build dependencies",
+          "number": 6,
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T14:15:41Z",
+          "completedAt": "2026-10-16T14:15:41Z"
+        },
+        {
+          "name": "Setup Xcode",
+          "number": 7,
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T14:15:41Z",
+          "completedAt": "2026-10-16T14:15:41Z"
+        },
+        {
+          "name": "Enable git long paths (Windows)",
+          "number": 8,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:41Z",
+          "completedAt": "2026-10-16T14:15:41Z"
+        },
+        {
+          "name": "Install dependencies",
+          "number": 9,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:41Z",
+          "completedAt": "2026-10-16T14:16:48Z"
+        },
+        {
+          "name": "Build debug bundle",
+          "number": 10,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:16:48Z",
+          "completedAt": "2026-10-16T14:23:03Z"
+        },
+        {
+          "name": "Post Setup Flutter",
+          "number": 17,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:23:03Z",
+          "completedAt": "2026-10-16T14:23:39Z"
+        },
+        {
+          "name": "Post Setup Rust cache",
+          "number": 18,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:23:39Z",
+          "completedAt": "2026-10-16T14:23:51Z"
+        },
+        {
+          "name": "Post Setup Go",
+          "number": 19,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:23:51Z",
+          "completedAt": "2026-10-16T14:24:03Z"
+        },
+        {
+          "name": "Post Checkout",
+          "number": 20,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:24:03Z",
+          "completedAt": "2026-10-16T14:24:06Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 21,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:24:06Z",
+          "completedAt": "2026-10-16T14:24:06Z"
+        }
+      ]
+    },
+    {
+      "databaseId": 117016381335,
+      "name": "Plugins",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T14:12:40Z",
+      "completedAt": "2026-10-16T14:15:02Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:41Z",
+          "completedAt": "2026-10-16T14:12:42Z"
+        },
+        {
+          "name": "Checkout",
+          "number": 2,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:42Z",
+          "completedAt": "2026-10-16T14:12:43Z"
+        },
+        {
+          "name": "Setup Flutter",
+          "number": 3,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:43Z",
+          "completedAt": "2026-10-16T14:13:32Z"
+        },
+        {
+          "name": "Validate local Flutter packages",
+          "number": 4,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:32Z",
+          "completedAt": "2026-10-16T14:14:38Z"
+        },
+        {
+          "name": "Validate setup hooks package",
+          "number": 5,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:38Z",
+          "completedAt": "2026-10-16T14:14:45Z"
+        },
+        {
+          "name": "Post Setup Flutter",
+          "number": 9,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:45Z",
+          "completedAt": "2026-10-16T14:14:59Z"
+        },
+        {
+          "name": "Post Checkout",
+          "number": 10,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:59Z",
+          "completedAt": "2026-10-16T14:15:00Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 11,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:00Z",
+          "completedAt": "2026-10-16T14:15:00Z"
+        }
+      ]
+    },
+    {
+      "databaseId": 117016381375,
+      "name": "Dart",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T14:12:40Z",
+      "completedAt": "2026-10-16T14:29:57Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:41Z",
+          "completedAt": "2026-10-16T14:12:42Z"
+        },
+        {
+          "name": "Checkout",
+          "number": 2,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:42Z",
+          "completedAt": "2026-10-16T14:12:46Z"
+        },
+        {
+          "name": "Test commit message hook",
+          "number": 3,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:46Z",
+          "completedAt": "2026-10-16T14:12:46Z"
+        },
+        {
+          "name": "Test comment density hook",
+          "number": 4,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:46Z",
+          "completedAt": "2026-10-16T14:12:47Z"
+        },
+        {
+          "name": "Setup Rust cache",
+          "number": 5,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:47Z",
+          "completedAt": "2026-10-16T14:13:10Z"
+        },
+        {
+          "name": "Setup Flutter",
+          "number": 6,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:10Z",
+          "completedAt": "2026-10-16T14:14:09Z"
+        },
+        {
+          "name": "Install dependencies",
+          "number": 7,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:09Z",
+          "completedAt": "2026-10-16T14:14:25Z"
+        },
+        {
+          "name": "Check format",
+          "number": 8,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:25Z",
+          "completedAt": "2026-10-16T14:14:29Z"
+        },
+        {
+          "name": "Analyze",
+          "number": 9,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:29Z",
+          "completedAt": "2026-10-16T14:15:03Z"
+        },
+        {
+          "name": "Skip the Go core build hook",
+          "number": 10,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:03Z",
+          "completedAt": "2026-10-16T14:15:04Z"
+        },
+        {
+          "name": "Verify changelog",
+          "number": 11,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:04Z",
+          "completedAt": "2026-10-16T14:15:59Z"
+        },
+        {
+          "name": "Run tests",
+          "number": 12,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:59Z",
+          "completedAt": "2026-10-16T14:29:37Z"
+        },
+        {
+          "name": "Check coverage",
+          "number": 13,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:29:37Z",
+          "completedAt": "2026-10-16T14:29:38Z"
+        },
+        {
+          "name": "Post Setup Flutter",
+          "number": 24,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:29:38Z",
+          "completedAt": "2026-10-16T14:29:47Z"
+        },
+        {
+          "name": "Post Setup Rust cache",
+          "number": 25,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:29:47Z",
+          "completedAt": "2026-10-16T14:29:55Z"
+        },
+        {
+          "name": "Post Checkout",
+          "number": 26,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:29:55Z",
+          "completedAt": "2026-10-16T14:29:56Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 27,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:29:56Z",
+          "completedAt": "2026-10-16T14:29:56Z"
+        }
+      ]
+    },
+    {
+      "databaseId": 117016381398,
+      "name": "Android unit tests",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T14:12:41Z",
+      "completedAt": "2026-10-16T14:19:07Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:41Z",
+          "completedAt": "2026-10-16T14:12:46Z"
+        },
+        {
+          "name": "Checkout",
+          "number": 2,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:46Z",
+          "completedAt": "2026-10-16T14:12:50Z"
+        },
+        {
+          "name": "Setup Go",
+          "number": 3,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:50Z",
+          "completedAt": "2026-10-16T14:12:57Z"
+        },
+        {
+          "name": "Setup Flutter",
+          "number": 4,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:57Z",
+          "completedAt": "2026-10-16T14:13:42Z"
+        },
+        {
+          "name": "Install dependencies",
+          "number": 5,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:42Z",
+          "completedAt": "2026-10-16T14:13:53Z"
+        },
+        {
+          "name": "Setup NDK",
+          "number": 6,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:53Z",
+          "completedAt": "2026-10-16T14:14:43Z"
+        },
+        {
+          "name": "Setup Java",
+          "number": 7,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:43Z",
+          "completedAt": "2026-10-16T14:14:43Z"
+        },
+        {
+          "name": "Setup Gradle",
+          "number": 8,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:43Z",
+          "completedAt": "2026-10-16T14:15:08Z"
+        },
+        {
+          "name": "Run Android unit tests",
+          "number": 9,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:08Z",
+          "completedAt": "2026-10-16T14:18:20Z"
+        },
+        {
+          "name": "Post Setup Gradle",
+          "number": 14,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:18:20Z",
+          "completedAt": "2026-10-16T14:18:43Z"
+        },
+        {
+          "name": "Post Setup Java",
+          "number": 15,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:18:43Z",
+          "completedAt": "2026-10-16T14:18:43Z"
+        },
+        {
+          "name": "Post Setup Flutter",
+          "number": 16,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:18:43Z",
+          "completedAt": "2026-10-16T14:19:01Z"
+        },
+        {
+          "name": "Post Setup Go",
+          "number": 17,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:19:01Z",
+          "completedAt": "2026-10-16T14:19:04Z"
+        },
+        {
+          "name": "Post Checkout",
+          "number": 18,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:19:04Z",
+          "completedAt": "2026-10-16T14:19:04Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 19,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:19:04Z",
+          "completedAt": "2026-10-16T14:19:04Z"
+        }
+      ]
+    },
+    {
+      "databaseId": 117016381444,
+      "name": "Desktop macos",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T14:12:45Z",
+      "completedAt": "2026-10-16T14:24:39Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:46Z",
+          "completedAt": "2026-10-16T14:12:50Z"
+        },
+        {
+          "name": "Checkout",
+          "number": 2,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:50Z",
+          "completedAt": "2026-10-16T14:12:57Z"
+        },
+        {
+          "name": "Setup Go",
+          "number": 3,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:57Z",
+          "completedAt": "2026-10-16T14:13:16Z"
+        },
+        {
+          "name": "Setup Rust cache",
+          "number": 4,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:16Z",
+          "completedAt": "2026-10-16T14:13:40Z"
+        },
+        {
+          "name": "Setup Flutter",
+          "number": 5,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:40Z",
+          "completedAt": "2026-10-16T14:15:10Z"
+        },
+        {
+          "name": "Install Linux build dependencies",
+          "number": 6,
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T14:15:10Z",
+          "completedAt": "2026-10-16T14:15:10Z"
+        },
+        {
+          "name": "Setup Xcode",
+          "number": 7,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:10Z",
+          "completedAt": "2026-10-16T14:15:16Z"
+        },
+        {
+          "name": "Enable git long paths (Windows)",
+          "number": 8,
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T14:15:16Z",
+          "completedAt": "2026-10-16T14:15:16Z"
+        },
+        {
+          "name": "Install dependencies",
+          "number": 9,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:16Z",
+          "completedAt": "2026-10-16T14:15:38Z"
+        },
+        {
+          "name": "Build debug bundle",
+          "number": 10,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:38Z",
+          "completedAt": "2026-10-16T14:22:44Z"
+        },
+        {
+          "name": "Post Setup Flutter",
+          "number": 17,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:22:44Z",
+          "completedAt": "2026-10-16T14:23:51Z"
+        },
+        {
+          "name": "Post Setup Rust cache",
+          "number": 18,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:23:51Z",
+          "completedAt": "2026-10-16T14:24:06Z"
+        },
+        {
+          "name": "Post Setup Go",
+          "number": 19,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:24:06Z",
+          "completedAt": "2026-10-16T14:24:30Z"
+        },
+        {
+          "name": "Post Checkout",
+          "number": 20,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:24:30Z",
+          "completedAt": "2026-10-16T14:24:31Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 21,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:24:31Z",
+          "completedAt": "2026-10-16T14:24:36Z"
+        }
+      ]
+    },
+    {
+      "databaseId": 117016381612,
+      "name": "Desktop linux",
+      "status": "completed",
+      "conclusion": "success",
+      "startedAt": "2026-10-16T14:12:41Z",
+      "completedAt": "2026-10-16T14:18:50Z",
+      "steps": [
+        {
+          "name": "Set up job",
+          "number": 1,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:42Z",
+          "completedAt": "2026-10-16T14:12:45Z"
+        },
+        {
+          "name": "Checkout",
+          "number": 2,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:45Z",
+          "completedAt": "2026-10-16T14:12:50Z"
+        },
+        {
+          "name": "Setup Go",
+          "number": 3,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:50Z",
+          "completedAt": "2026-10-16T14:12:58Z"
+        },
+        {
+          "name": "Setup Rust cache",
+          "number": 4,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:12:58Z",
+          "completedAt": "2026-10-16T14:13:24Z"
+        },
+        {
+          "name": "Setup Flutter",
+          "number": 5,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:13:24Z",
+          "completedAt": "2026-10-16T14:14:27Z"
+        },
+        {
+          "name": "Install Linux build dependencies",
+          "number": 6,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:27Z",
+          "completedAt": "2026-10-16T14:14:48Z"
+        },
+        {
+          "name": "Setup Xcode",
+          "number": 7,
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T14:14:48Z",
+          "completedAt": "2026-10-16T14:14:48Z"
+        },
+        {
+          "name": "Enable git long paths (Windows)",
+          "number": 8,
+          "status": "completed",
+          "conclusion": "skipped",
+          "startedAt": "2026-10-16T14:14:48Z",
+          "completedAt": "2026-10-16T14:14:48Z"
+        },
+        {
+          "name": "Install dependencies",
+          "number": 9,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:14:48Z",
+          "completedAt": "2026-10-16T14:15:02Z"
+        },
+        {
+          "name": "Build debug bundle",
+          "number": 10,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:15:02Z",
+          "completedAt": "2026-10-16T14:18:30Z"
+        },
+        {
+          "name": "Post Setup Flutter",
+          "number": 17,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:18:30Z",
+          "completedAt": "2026-10-16T14:18:38Z"
+        },
+        {
+          "name": "Post Setup Rust cache",
+          "number": 18,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:18:38Z",
+          "completedAt": "2026-10-16T14:18:43Z"
+        },
+        {
+          "name": "Post Setup Go",
+          "number": 19,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:18:43Z",
+          "completedAt": "2026-10-16T14:18:47Z"
+        },
+        {
+          "name": "Post Checkout",
+          "number": 20,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:18:47Z",
+          "completedAt": "2026-10-16T14:18:47Z"
+        },
+        {
+          "name": "Complete job",
+          "number": 21,
+          "status": "completed",
+          "conclusion": "success",
+          "startedAt": "2026-10-16T14:18:47Z",
+          "completedAt": "2026-10-16T14:18:47Z"
+        }
+      ]
+    },
+    {
+      "databaseId": 117024328556,
+      "name": "build",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-10-16T14:29:58Z",
+      "completedAt": "2026-10-16T14:29:57Z",
+      "steps": []
+    },
+    {
+      "databaseId": 117024330168,
+      "name": "upload",
+      "status": "completed",
+      "conclusion": "skipped",
+      "startedAt": "2026-10-16T14:29:58Z",
+      "completedAt": "2026-10-16T14:29:58Z",
+      "steps": []
+    }
+  ]
+}

@@ -52,6 +52,19 @@ Future<void> main(List<String> args) async {
     exit(1);
   }
 
+  final androidArch = results['arch'] as String?;
+  final universalApk = results['universal-apk'] as bool;
+  final optionError = validateUniversalApkOptions(
+    platform: platform,
+    androidArch: androidArch,
+    universalApk: universalApk,
+  );
+  if (optionError != null) {
+    stderr.writeln(optionError);
+    _showHelp(parser);
+    exit(1);
+  }
+
   final env = results['env'] as String;
   final rootDir = Directory.current.path;
   final skipped = packagesNotBuildingAssets(
@@ -68,7 +81,6 @@ Future<void> main(List<String> args) async {
   }
   final arch = _detectArch();
   final targets = createPackageTargets(platform, results['targets']);
-  final androidArch = results['arch'] as String?;
   final verbose = results['verbose'] as bool;
 
   final exitCode = await _package(
@@ -78,6 +90,7 @@ Future<void> main(List<String> args) async {
     rootDir,
     arch,
     androidArch: androidArch,
+    universalApk: universalApk,
     verbose: verbose,
   );
   exit(exitCode);
@@ -103,6 +116,11 @@ ArgParser createSetupArgParser() {
       help: 'Target architecture (Android only)',
     )
     ..addFlag(
+      'universal-apk',
+      negatable: false,
+      help: 'Build one Android APK containing all supported ABIs',
+    )
+    ..addFlag(
       'verbose',
       abbr: 'v',
       negatable: false,
@@ -113,15 +131,31 @@ ArgParser createSetupArgParser() {
 List<String> createFlutterBuildArgs({
   required String platform,
   required bool verbose,
+  bool universalApk = false,
 }) {
   final flutterBuildArgs = <String>[
     if (verbose) 'verbose',
     'dart-define-from-file=env.json',
   ];
-  if (platform == 'android') {
+  if (platform == 'android' && !universalApk) {
     flutterBuildArgs.add('split-per-abi');
   }
   return flutterBuildArgs;
+}
+
+String? validateUniversalApkOptions({
+  required String platform,
+  String? androidArch,
+  bool universalApk = false,
+}) {
+  if (!universalApk) return null;
+  if (platform != 'android') {
+    return '--universal-apk can only be used for Android.';
+  }
+  if (androidArch != null) {
+    return '--universal-apk cannot be combined with --arch.';
+  }
+  return null;
 }
 
 Map<String, String> createBuildEnvironment(String env) {
@@ -161,6 +195,7 @@ Future<int> _package(
   String rootDir,
   String arch, {
   String? androidArch,
+  required bool universalApk,
   required bool verbose,
 }) async {
   final file = File(p.join(rootDir, 'env.json'));
@@ -169,6 +204,7 @@ Future<int> _package(
   final flutterBuildArgs = createFlutterBuildArgs(
     platform: platform,
     verbose: verbose,
+    universalApk: universalApk,
   );
   final artifactArgs = createPackageArtifactArgs(
     File(p.join(rootDir, 'distribute_options.yaml')).readAsStringSync(),

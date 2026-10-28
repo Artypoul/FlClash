@@ -26,16 +26,54 @@ class _RealHttp extends HttpOverrides {}
 
 class _Setup extends SetupAction {
   final started = <int?>[];
+  final events = <String>[];
+  AuthorizeCode authorizeResult = AuthorizeCode.none;
   Object? _token;
+  var _hasRunningState = false;
   @override
   Object? get runRequestToken => _token;
   @override
   void build() {}
+
+  @override
+  Future<AuthorizeCode> authorizeCore() async {
+    events.add('authorization');
+    return authorizeResult;
+  }
+
+  @override
+  Future<bool> applyProfile({
+    bool silence = false,
+    bool force = false,
+    Future<void> Function()? preloadInvoke,
+  }) async {
+    final shouldContinue = await requestAdmin(true);
+    if (!shouldContinue || authorizeResult == AuthorizeCode.error) return false;
+    events.add('config applied');
+    return true;
+  }
+
+  @override
+  void applyProfileDebounce({bool silence = false, bool force = false}) {
+    unawaited(applyProfile(silence: silence, force: force));
+  }
+
+  @override
+  Future<bool> setCoreRunning(bool running) async {
+    if (running) {
+      events.add('listener started');
+      started.add(ref.read(currentProfileIdProvider));
+    }
+    return true;
+  }
+
   @override
   Future<bool> setRunning(bool running, {bool initialize = false}) async {
     _token = Object();
-    if (running) started.add(ref.read(currentProfileIdProvider));
-    return true;
+    if (!running && !_hasRunningState) return true;
+    final result = await super.setRunning(running, initialize: initialize);
+    if (result) _hasRunningState = running;
+    return result;
   }
 }
 
@@ -107,13 +145,17 @@ void main() {
     globalState.container = container;
     container.listen(initProvider, (_, _) {});
     container.listen(coreStatusProvider, (_, _) {});
-    container.listen(currentProfileIdProvider, (_, _) {});
-    container.listen(profilesProvider, (_, _) {});
+    container.listen(currentProfileIdProvider, (previous, next) {
+      if (next != null && next != previous) {
+        setup.events.add('profile selected');
+      }
+    });
     container.read(initProvider.notifier).value = true;
     container.read(coreStatusProvider.notifier).value = CoreStatus.connected;
     await pumpEventQueue();
   });
   tearDown(() async {
+    await setup.setRunning(false);
     container.dispose();
     await server.close(force: true);
     await database.close();
@@ -134,6 +176,104 @@ void main() {
       expect(container.read(currentProfileIdProvider), profile.id);
       expect(setup.started, [profile.id]);
       expect(container.read(currentPageLabelProvider), page);
+      expect(await preferences.wasBundledSubscriptionImported(url), isTrue);
+    },
+  );
+
+  test(
+    'first launch applies authorization and config before starting the listener',
+    () async {
+      final previousPreferences = preferences.sharedPreferencesCompleter;
+      final store = _Preferences();
+      var markerBeforeProfileSave = false;
+      var markerBeforeListenerStart = false;
+      var markerWritten = false;
+      var markerReadback = false;
+      var markerInvocationCount = 0;
+      var markerInvokedBeforeDurableSave = false;
+      final durableProfileSaved = Completer<void>();
+      final durableProfileSubscription = database.profilesDao
+          .query()
+          .watch()
+          .listen((rows) {
+            if (rows.isNotEmpty && !durableProfileSaved.isCompleted) {
+              setup.events.add('profile saved');
+              durableProfileSaved.complete();
+            }
+          });
+      when(() => store.getBool(any())).thenAnswer((_) => markerWritten);
+      when(() => store.setBool(any(), true)).thenAnswer((_) async {
+        markerInvocationCount++;
+        markerInvokedBeforeDurableSave = !durableProfileSaved.isCompleted;
+        await durableProfileSaved.future;
+        await container.read(profilesProvider.notifier).settledWrites;
+        final savedRows = await database.profilesDao.query().get();
+        expect(savedRows, hasLength(1));
+        markerBeforeProfileSave = savedRows.isEmpty;
+        markerBeforeListenerStart = !setup.events.contains('listener started');
+        markerWritten = true;
+        setup.events.add('marker written');
+        return true;
+      });
+      preferences.sharedPreferencesCompleter = Completer()..complete(store);
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) => state.copyWith(tun: state.tun.copyWith(enable: true)),
+          );
+
+      try {
+        await action().importBundledSubscription(url);
+        await pumpEventQueue();
+        markerReadback = await preferences.wasBundledSubscriptionImported(url);
+      } finally {
+        await durableProfileSubscription.cancel();
+        preferences.sharedPreferencesCompleter = previousPreferences;
+      }
+
+      expect(setup.events, [
+        'profile saved',
+        'profile selected',
+        'authorization',
+        'config applied',
+        'listener started',
+        'marker written',
+      ]);
+      expect(markerInvocationCount, 1);
+      expect(markerInvokedBeforeDurableSave, isFalse);
+      expect(markerBeforeProfileSave, isFalse);
+      expect(markerBeforeListenerStart, isFalse);
+      expect(markerReadback, isTrue);
+      final profile = (await database.profilesDao.query().get()).single;
+      expect(container.read(currentProfileIdProvider), profile.id);
+    },
+  );
+
+  test(
+    'authorization denial keeps the saved profile retryable and a retry starts it once',
+    () async {
+      container
+          .read(patchClashConfigProvider.notifier)
+          .update(
+            (state) => state.copyWith(tun: state.tun.copyWith(enable: true)),
+          );
+      setup.authorizeResult = AuthorizeCode.error;
+
+      await action().importBundledSubscription(url);
+      await pumpEventQueue();
+
+      final firstProfile = (await database.profilesDao.query().get()).single;
+      expect(setup.events, isNot(contains('listener started')));
+      expect(await preferences.wasBundledSubscriptionImported(url), isFalse);
+
+      setup.authorizeResult = AuthorizeCode.none;
+      await action().importBundledSubscription(url);
+      await pumpEventQueue();
+
+      final retryProfile = (await database.profilesDao.query().get()).single;
+      expect(retryProfile.id, firstProfile.id);
+      expect(container.read(currentProfileIdProvider), firstProfile.id);
+      expect(setup.started, [firstProfile.id]);
       expect(await preferences.wasBundledSubscriptionImported(url), isTrue);
     },
   );
@@ -252,7 +392,7 @@ void main() {
       held!.complete();
       await importing;
       expect(await database.profilesDao.query().get(), hasLength(1));
-      expect(await preferences.wasBundledSubscriptionImported(url), isTrue);
+      expect(await preferences.wasBundledSubscriptionImported(url), isFalse);
       expect(setup.started, isEmpty);
     },
   );
@@ -287,36 +427,39 @@ void main() {
     expect(setup.started, isEmpty);
   });
 
-  test('deletion during the marker save prevents activation', () async {
-    final existing = Profile.normal(url: 'https://example.invalid/existing');
-    action().putProfile(existing);
-    await container.read(profilesProvider.notifier).settledWrites;
-    final store = _Preferences();
-    final saving = Completer<void>();
-    final release = Completer<void>();
-    when(() => store.getBool(any())).thenReturn(false);
-    when(() => store.setBool(any(), true)).thenAnswer((_) async {
-      saving.complete();
-      await release.future;
-      return true;
-    });
-    final previous = preferences.sharedPreferencesCompleter;
-    preferences.sharedPreferencesCompleter = Completer()..complete(store);
-    try {
-      final importing = action().importBundledSubscription(url);
-      await saving.future;
-      final imported = container
-          .read(profilesProvider)
-          .singleWhere((profile) => profile.url == url);
-      await action().deleteProfile(imported.id);
-      release.complete();
-      await importing;
-      expect(container.read(currentProfileIdProvider), existing.id);
-      expect(setup.started, isEmpty);
-    } finally {
-      preferences.sharedPreferencesCompleter = previous;
-    }
-  });
+  test(
+    'deletion after activation leaves the marker save independent',
+    () async {
+      final existing = Profile.normal(url: 'https://example.invalid/existing');
+      action().putProfile(existing);
+      await container.read(profilesProvider.notifier).settledWrites;
+      final store = _Preferences();
+      final saving = Completer<void>();
+      final release = Completer<void>();
+      when(() => store.getBool(any())).thenReturn(false);
+      when(() => store.setBool(any(), true)).thenAnswer((_) async {
+        saving.complete();
+        await release.future;
+        return true;
+      });
+      final previous = preferences.sharedPreferencesCompleter;
+      preferences.sharedPreferencesCompleter = Completer()..complete(store);
+      try {
+        final importing = action().importBundledSubscription(url);
+        await saving.future;
+        final imported = container
+            .read(profilesProvider)
+            .singleWhere((profile) => profile.url == url);
+        await action().deleteProfile(imported.id);
+        release.complete();
+        await importing;
+        expect(container.read(currentProfileIdProvider), existing.id);
+        expect(setup.started, [imported.id]);
+      } finally {
+        preferences.sharedPreferencesCompleter = previous;
+      }
+    },
+  );
 
   test(
     'other profiles keep their data when the bundled subscription is added',
