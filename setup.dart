@@ -158,8 +158,16 @@ String? validateUniversalApkOptions({
   return null;
 }
 
-Map<String, String> createBuildEnvironment(String env) {
-  return {'APP_ENV': env};
+Map<String, String> createBuildEnvironment(
+  String env, {
+  String? subscriptionUrl,
+}) {
+  final environment = {'APP_ENV': env};
+  final url = subscriptionUrl?.trim();
+  if (url != null && url.isNotEmpty) {
+    environment['BOOTSTRAP_SUBSCRIPTION_URL'] = url;
+  }
+  return environment;
 }
 
 /// Packages whose build hook `pubspec.yaml` turns into a no-op.
@@ -199,7 +207,14 @@ Future<int> _package(
   required bool verbose,
 }) async {
   final file = File(p.join(rootDir, 'env.json'));
-  await file.writeAsString(jsonEncode(createBuildEnvironment(env)));
+  await file.writeAsString(
+    jsonEncode(
+      createBuildEnvironment(
+        env,
+        subscriptionUrl: Platform.environment['BOOTSTRAP_SUBSCRIPTION_URL'],
+      ),
+    ),
+  );
 
   final flutterBuildArgs = createFlutterBuildArgs(
     platform: platform,
