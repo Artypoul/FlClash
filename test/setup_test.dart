@@ -46,6 +46,22 @@ void main() {
       expect(setup.createBuildEnvironment('stable'), {'APP_ENV': 'stable'});
     });
 
+    test('adds a personal subscription only when configured', () {
+      expect(
+        setup.createBuildEnvironment(
+          'pre',
+          subscriptionUrl: '  https://example.invalid/subscription  ',
+        ),
+        {
+          'APP_ENV': 'pre',
+          'BOOTSTRAP_SUBSCRIPTION_URL': 'https://example.invalid/subscription',
+        },
+      );
+      expect(setup.createBuildEnvironment('pre', subscriptionUrl: '  '), {
+        'APP_ENV': 'pre',
+      });
+    });
+
     test('omits verbose from flutter build args by default', () {
       final args = setup.createFlutterBuildArgs(
         platform: 'android',

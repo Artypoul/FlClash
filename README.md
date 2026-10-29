@@ -119,6 +119,13 @@ dart setup.dart android   # or windows, macos, linux
 
 Packages land in `dist/`. The Go core and the Rust libraries are compiled as part of the Flutter build.
 
+### Personal Android build
+
+The manual `personal Android` workflow builds a universal APK with a bundled subscription URL. Add the URL as the
+repository secret `FLASHCO_SUBSCRIPTION_URL`, then run the workflow from the **Actions** tab. The URL is passed only
+through the workflow environment and is not committed to the repository. The resulting APK is available as a workflow
+artifact for seven days.
+
 | Platform | Also needed |
 | --- | --- |
 | Android | Android SDK with the NDK. Add `--arch arm64` to build a single ABI. |
