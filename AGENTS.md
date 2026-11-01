@@ -10,6 +10,7 @@ Read these files before making changes:
 - [.agents/project.md](.agents/project.md): project overview, versions, and build dependencies.
 - [.agents/commands.md](.agents/commands.md): build, development, code generation, and test commands.
 - [.agents/rules.md](.agents/rules.md): lint, testing, generated-code, and workflow rules.
+- [PRODUCT.md](PRODUCT.md): confirmed product requirements, build behavior, routing, and operational conventions.
 
 Read these only when the task touches their area:
 
