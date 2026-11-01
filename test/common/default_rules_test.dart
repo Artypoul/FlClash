@@ -31,19 +31,18 @@ void main() {
     }
   });
 
-  test('direct rules include exactly one Russian GEOIP rule', () {
-    final russianGeoIpRules = russianServiceDirectRules
-        .where((raw) => raw == 'GEOIP,RU,DIRECT')
-        .toList();
-
-    expect(russianGeoIpRules, hasLength(1));
-    final rule = Rule.parse(russianGeoIpRules.single);
-    expect(rule.ruleAction, RuleAction.GEOIP);
-    expect(rule.content, 'RU');
-    expect(rule.ruleTarget, 'DIRECT');
-    expect(rule.rawValue, 'GEOIP,RU,DIRECT');
-    expect(rule.noResolve, isFalse);
-    expect(rule.src, isFalse);
+  test('direct rules route Russian IPs and domains outside the tunnel', () {
+    expect(russianServiceDirectRules, contains('GEOIP,RU,DIRECT'));
+    expect(russianServiceDirectRules, contains('DOMAIN-SUFFIX,ru,DIRECT'));
+    expect(russianServiceDirectRules, hasLength(76));
+    final geoIpRule = Rule.parse('GEOIP,RU,DIRECT');
+    expect(geoIpRule.ruleAction, RuleAction.GEOIP);
+    expect(geoIpRule.content, 'RU');
+    expect(geoIpRule.ruleTarget, 'DIRECT');
+    final domainRule = Rule.parse('DOMAIN-SUFFIX,ru,DIRECT');
+    expect(domainRule.ruleAction, RuleAction.DOMAIN_SUFFIX);
+    expect(domainRule.content, 'ru');
+    expect(domainRule.ruleTarget, 'DIRECT');
   });
 
   test('the catalogue avoids broad country exclusions', () {

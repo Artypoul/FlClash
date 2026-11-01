@@ -73,7 +73,7 @@ void main() {
     expect(database.schemaVersion, 20);
   });
 
-  test('new installations include the editable ru bypass rule', () async {
+  test('new installations include editable Russian direct rules', () async {
     final database = await open(russianServiceDirectRules);
     final rules = await database.rulesDao.queryGlobalRules().get();
     expect(rules.map((rule) => rule.rawValue), russianServiceDirectRules);
