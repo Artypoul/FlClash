@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flashco/common/common.dart';
+import 'package:flashco/common/default_rules.dart';
 import 'package:flashco/enum/enum.dart';
 import 'package:flashco/models/models.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -57,7 +58,7 @@ class Database extends _$Database {
   }
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -132,9 +133,47 @@ class Database extends _$Database {
             customProxies.emptyOptions,
           );
         }
+        if (from < 21) {
+          await _backfillRussianDirectRules();
+        }
       }),
       beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON'),
     );
+  }
+
+  Future<void> _backfillRussianDirectRules() async {
+    final existing =
+        await (select(rules)
+              ..where((t) => t.profileId.isNull())
+              ..orderBy([
+                (t) =>
+                    OrderingTerm(expression: t.order, nulls: NullsOrder.last),
+              ]))
+            .get();
+    final identities = {
+      for (final row in existing) _ruleIdentity(row.toRule()),
+    };
+    final missing = <Rule>[];
+    for (final raw in russianServiceDirectRules) {
+      final rule = Rule.parse(raw);
+      if (identities.add(_ruleIdentity(rule))) {
+        missing.add(rule);
+      }
+    }
+    if (missing.isEmpty) {
+      return;
+    }
+    final keys = indexing.generateNKeysBetween(
+      existing.lastOrNull?.order,
+      null,
+      missing.length,
+    );
+    await batch((b) {
+      b.insertAll(rules, [
+        for (final (index, rule) in missing.indexed)
+          rule.copyWith(order: keys[index]).toCompanion(),
+      ]);
+    });
   }
 
   Future<Set<String>> _columnsOf(String table) async {
@@ -494,6 +533,14 @@ class Database extends _$Database {
     );
   }
 }
+
+String _ruleIdentity(Rule rule) => [
+  rule.ruleAction.value,
+  rule.realContent ?? '',
+  rule.subRule ?? '',
+  rule.noResolve,
+  rule.src,
+].join('\u0000');
 
 const _v17GroupOptions = [
   ('url', 'url'),
