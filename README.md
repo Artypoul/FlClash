@@ -125,6 +125,13 @@ The manual `personal Android` workflow builds a universal APK with a bundled sub
 tab, paste the URL into the `subscription_url` field, and start the workflow. The URL is passed to the build through the
 workflow environment and is not committed to the repository. The resulting APK is available as a workflow artifact for seven days.
 
+### Personal Windows build
+
+The manual `personal Windows` workflow builds a Windows installer and portable ZIP with a bundled subscription URL. Open it
+in the **Actions** tab, paste the URL into the `subscription_url` field, and start the workflow. On the first personal
+launch, Windows applies the bundled defaults: TUN and automatic routing are enabled, private routes stay excluded, and
+auto-run is enabled. The resulting EXE and ZIP are available as workflow artifacts for seven days.
+
 | Platform | Also needed |
 | --- | --- |
 | Android | Android SDK with the NDK. Add `--arch arm64` to build a single ABI. |
