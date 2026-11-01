@@ -2,6 +2,11 @@ name: personal Android
 
 on:
   workflow_dispatch:
+    inputs:
+      subscription_url:
+        description: Subscription URL to bundle into the APK
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -55,25 +60,26 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Validate subscription secret
+      - name: Validate subscription URL
         shell: bash
         env:
-          BOOTSTRAP_SUBSCRIPTION_URL: ${{ secrets.FLASHCO_SUBSCRIPTION_URL }}
+          BOOTSTRAP_SUBSCRIPTION_URL: ${{ inputs.subscription_url }}
         run: |
           set -euo pipefail
           if [[ -z "${BOOTSTRAP_SUBSCRIPTION_URL:-}" ]]; then
-            echo 'Missing repository secret FLASHCO_SUBSCRIPTION_URL.' >&2
+            echo 'Missing subscription URL input.' >&2
             exit 1
           fi
           if [[ ! "$BOOTSTRAP_SUBSCRIPTION_URL" =~ ^https?://[^[:space:]]+$ ]]; then
-            echo 'FLASHCO_SUBSCRIPTION_URL must be an HTTP(S) URL.' >&2
+            echo 'Subscription URL must be an HTTP(S) URL.' >&2
             exit 1
           fi
+          printf '::add-mask::%s\n' "$BOOTSTRAP_SUBSCRIPTION_URL"
 
       - name: Build universal APK
         env:
           ANDROID_NDK_HOME: ${{ steps.ndk.outputs.ndk-path }}
-          BOOTSTRAP_SUBSCRIPTION_URL: ${{ secrets.FLASHCO_SUBSCRIPTION_URL }}
+          BOOTSTRAP_SUBSCRIPTION_URL: ${{ inputs.subscription_url }}
         run: |
           flutter pub get
           dart setup.dart android --env pre --targets apk --universal-apk

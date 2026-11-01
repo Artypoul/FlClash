@@ -121,10 +121,9 @@ Packages land in `dist/`. The Go core and the Rust libraries are compiled as par
 
 ### Personal Android build
 
-The manual `personal Android` workflow builds a universal APK with a bundled subscription URL. Add the URL as the
-repository secret `FLASHCO_SUBSCRIPTION_URL`, then run the workflow from the **Actions** tab. The URL is passed only
-through the workflow environment and is not committed to the repository. The resulting APK is available as a workflow
-artifact for seven days.
+The manual `personal Android` workflow builds a universal APK with a bundled subscription URL. Open it in the **Actions**
+tab, paste the URL into the `subscription_url` field, and start the workflow. The URL is passed to the build through the
+workflow environment and is not committed to the repository. The resulting APK is available as a workflow artifact for seven days.
 
 | Platform | Also needed |
 | --- | --- |
