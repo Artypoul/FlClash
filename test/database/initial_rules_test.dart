@@ -70,7 +70,7 @@ void main() {
       await database.customSelect('PRAGMA foreign_key_check').get(),
       isEmpty,
     );
-    expect(database.schemaVersion, 20);
+    expect(database.schemaVersion, 21);
   });
 
   test('new installations include editable Russian direct rules', () async {
@@ -90,6 +90,47 @@ void main() {
       edited,
     );
   });
+
+  test(
+    'schema upgrade backfills missing Russian direct rules without rewriting edits',
+    () async {
+      var database = await open();
+      const customRule = Rule(
+        id: 10,
+        content: 'custom.example',
+        ruleTarget: 'REJECT',
+      );
+      final editedRussianRule = Rule.parse('DOMAIN-SUFFIX,ru,REJECT', id: 11);
+      await database.rulesDao.putRule(customRule);
+      await database.rulesDao.putRule(editedRussianRule);
+      await close(database);
+
+      raw.execute('PRAGMA user_version = 20');
+      database = await open();
+      final rules = await database.rulesDao.queryGlobalRules().get();
+
+      expect(rules, contains(customRule));
+      expect(rules, contains(editedRussianRule));
+      expect(rules.map((rule) => rule.rawValue), contains('GEOIP,RU,DIRECT'));
+      expect(
+        rules.map((rule) => rule.rawValue),
+        isNot(contains('DOMAIN-SUFFIX,ru,DIRECT')),
+      );
+      expect(
+        rules.where((rule) => rule.content == 'custom.example'),
+        hasLength(1),
+      );
+
+      await close(database);
+      database = await open();
+      expect(
+        (await database.rulesDao.queryGlobalRules().get()).where(
+          (rule) => rule.content == 'custom.example',
+        ),
+        hasLength(1),
+      );
+    },
+  );
 
   test('a failed initial insert rolls back and can be retried', () async {
     final failing = _FailingInitialDatabase(
@@ -144,16 +185,24 @@ void main() {
     expect(await database.rulesDao.queryGlobalRules().get(), isEmpty);
   });
 
-  test('an upgrade does not insert initial rules', () async {
-    var database = await open();
-    await database.customSelect('SELECT 1').get();
-    await close(database);
-    raw.execute('PRAGMA user_version = 19');
+  test(
+    'an upgrade backfills the Russian catalogue, not caller-provided rules',
+    () async {
+      var database = await open();
+      await database.customSelect('SELECT 1').get();
+      await close(database);
+      raw.execute('PRAGMA user_version = 19');
 
-    database = await open(initialRules);
-    expect(await database.rulesDao.queryGlobalRules().get(), isEmpty);
-    expect(raw.select('PRAGMA user_version').single['user_version'], 20);
-  });
+      database = await open(initialRules);
+      expect(
+        (await database.rulesDao.queryGlobalRules().get()).map(
+          (rule) => rule.rawValue,
+        ),
+        russianServiceDirectRules,
+      );
+      expect(raw.select('PRAGMA user_version').single['user_version'], 21);
+    },
+  );
 
   test(
     'initial rules use the existing per-profile disable mechanism',

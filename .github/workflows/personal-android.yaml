@@ -79,8 +79,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify personal Android defaults and TUN settings
-        run: flutter test test/common/personal_defaults_test.dart test/models/tun_test.dart
+      - name: Verify personal Android defaults, TUN, and routing
+        run: >-
+          flutter test test/common/personal_defaults_test.dart
+          test/models/tun_test.dart
+          test/database/initial_rules_test.dart
+          test/common/final_routing_yaml_test.dart
 
       - name: Build universal APK
         env:
