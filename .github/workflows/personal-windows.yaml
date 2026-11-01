@@ -1,0 +1,106 @@
+name: personal Windows
+
+on:
+  workflow_dispatch:
+    inputs:
+      subscription_url:
+        description: Subscription URL to bundle into the Windows build
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: personal-windows
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.6'
+  GO_VERSION: '1.27.1'
+
+jobs:
+  build:
+    name: build personal Windows
+    runs-on: windows-2022
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Enable Git long paths
+        shell: pwsh
+        run: git config --global core.longpaths true
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: core/go.sum
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: personal-windows
+          workspaces: |
+            services/helper
+            plugins/rust_api/rust
+          cache-directories: .dart_tool/hooks_runner
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Verify Windows packaging tools
+        shell: pwsh
+        run: |
+          gcc --version
+          $iscc = 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+          if (-not (Test-Path -LiteralPath $iscc)) {
+            $iscc = (Get-Command iscc -ErrorAction Stop).Source
+          }
+          & $iscc /?
+          rustc --version
+          cargo --version
+
+      - name: Validate subscription URL
+        shell: pwsh
+        env:
+          BOOTSTRAP_SUBSCRIPTION_URL: ${{ inputs.subscription_url }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $url = $env:BOOTSTRAP_SUBSCRIPTION_URL
+          if ([string]::IsNullOrWhiteSpace($url)) {
+            throw 'Missing subscription URL input.'
+          }
+          if ($url -notmatch '^https?://[^\s]+$') {
+            throw 'Subscription URL must be an HTTP(S) URL.'
+          }
+          Write-Output "::add-mask::$url"
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify personal Windows defaults and TUN settings
+        run: flutter test test/common/personal_defaults_test.dart test/models/tun_test.dart
+
+      - name: Build personal Windows EXE and ZIP
+        env:
+          BOOTSTRAP_SUBSCRIPTION_URL: ${{ inputs.subscription_url }}
+        run: dart setup.dart windows --env pre --targets exe,zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flashco-personal-windows-${{ github.run_number }}
+          path: |
+            dist/*-windows-amd64-setup.exe
+            dist/*-windows-amd64.zip
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Remove generated build inputs
+        if: always()
+        shell: pwsh
+        run: Remove-Item -Force -ErrorAction SilentlyContinue env.json
